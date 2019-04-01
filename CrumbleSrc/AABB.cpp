@@ -23,10 +23,29 @@ AABB AABB::operator+(const vec3 & vec) {
 	return AABB(min + vec, max + vec);
 }
 
+bool AABB::intersectsX(const AABB & other) {
+	return other.max.x > min.x && other.min.x < max.x;
+}
+
+bool AABB::intersectsY(const AABB & other) {
+	return other.max.y > min.y && other.min.y < max.y;
+}
+
+bool AABB::intersectsZ(const AABB & other) {
+	return other.max.z > min.z && other.min.z < max.z;
+}
+
 void AABB::clipY(const AABB & other, float & move) {
-	if (move < 0.0f && FMath::greaterThan(other.min.y, this->max.y)) {	//If falling and above AABB
-		if (other.min.y + move < max.y) {		//Would it move bellow or inside?
-			move = max.y - other.min.y;			//If so limit how far it moves
+	if (intersectsX(other) && intersectsZ(other)) {
+		if (move > 0.0f && FMath::greaterTorE(min.y, other.max.y)) {		//Is other rising and bellow AABB?
+			if(other.max.y + move > min.y) {								//Would it rise above or inside?
+				move = min.y - other.max.y;									//If so limit how far it moves
+			}
+		}
+		else if (move < 0.0f && FMath::greaterTorE(other.min.y, max.y)) {	//Is other decending and above AABB?
+			if (other.min.y + move < max.y) {								//Would it move bellow or inside?
+				move = max.y - other.min.y;									//If so limit how far it moves
+			}
 		}
 	}
 }
