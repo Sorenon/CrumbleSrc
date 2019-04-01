@@ -160,6 +160,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h" />
+    <ClInclude Include="FMath.h" />
     <ClInclude Include="FileUtil.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ShaderConstructor.h" />
@@ -167,6 +168,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AABB.cpp" />
+    <ClCompile Include="FMath.cpp" />
     <ClCompile Include="CrumbleSrc.cpp" />
     <ClCompile Include="FileUtil.cpp" />
     <ClCompile Include="glad.c" />
