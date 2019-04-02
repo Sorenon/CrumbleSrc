@@ -162,9 +162,12 @@
     <ClInclude Include="AABB.h" />
     <ClInclude Include="FMath.h" />
     <ClInclude Include="FileUtil.h" />
+    <ClInclude Include="globals.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ShaderConstructor.h" />
     <ClInclude Include="ShaderProgram.h" />
+    <ClInclude Include="Transform.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AABB.cpp" />
@@ -172,8 +175,10 @@
     <ClCompile Include="CrumbleSrc.cpp" />
     <ClCompile Include="FileUtil.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="ShaderConstructor.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
+    <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
