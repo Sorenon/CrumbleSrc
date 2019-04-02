@@ -23,8 +23,8 @@ public:
 	void Update(GLFWwindow* window);
 	
 	void ApplyFriction(float friction);
-	void WalkGround(vec3 wishDir);
-	void WalkAir(vec3 wishDir);
+	void WalkGround(vec3 wishVel);
+	void WalkAir(vec3 wishVel);
 	void Accelerate(vec3 wishDir, float wishSpeed, float acceleration);
 
 	void Move();
