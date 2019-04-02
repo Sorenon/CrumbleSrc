@@ -49,34 +49,46 @@ void Player::Move() {
 	glm::vec3 move = velocity * FIXED_TIMESTEP;	//How far the player expects to move 
 	AABB playerCol = collider + transform.position;
 
-	const float y = move.y;
+	{//Collide along y axis
+		const float y = move.y;
 
-	world.clipY(playerCol, move.y);
-	celing.clipY(playerCol, move.y);
+		world.clipY(playerCol, move.y);
+		celing.clipY(playerCol, move.y);
 
-	if (y != move.y) {
-		velocity.y = 0;
+		if (y != move.y) {
+			velocity.y = 0;
 
-		if (y < 0.0f) {
-			onGround = true;
+			if (y < 0.0f) {
+				onGround = true;
+			} else {
+				onGround = false;
+			}
 		} else {
 			onGround = false;
 		}
-	} else {
-		onGround = false;
+
+		transform.position.y += move.y;
+		playerCol = collider + transform.position;
 	}
 
-	const float x = move.x;
-	world.clipX(playerCol, move.x);
-	if (x != move.x) {
-		velocity.x = 0;
+	{//Collide along x axis
+		const float x = move.x;
+		world.clipX(playerCol, move.x);
+		if (x != move.x) {
+			velocity.x = 0;
+		}
+
+		transform.position.x += move.x;
+		playerCol = collider + transform.position;
 	}
 
-	const float z = move.z;
-	world.clipZ(playerCol, move.z);
-	if (z != move.z) {
-		velocity.z = 0;
-	}
+	{//Collide along z axis
+		const float z = move.z;
+		world.clipZ(playerCol, move.z);
+		if (z != move.z) {
+			velocity.z = 0;
+		}
 
-	transform.position += move;
+		transform.position.z += move.z;
+	}
 }
