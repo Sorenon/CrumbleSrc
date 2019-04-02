@@ -2,22 +2,34 @@
 #include <iostream>
 
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 #include "globals.h"
+
+using namespace glm;
 
 Player::Player() {
 	transform.position = vec3(0, 1, 0);
 	transform.step();
+
+	for (int x = 0; x < 5; x++) {
+		for (int z = 0; z < 5; z++) {
+			if (blocks[x * 5 + z] != 0) {
+				AABB aabb(vec3(0, 0, 0), vec3(1, 1, 1));
+				world.push_back(aabb + vec3(x, 0, z));
+			}
+		}
+	}
 }
 
 void Player::Update(GLFWwindow* window) {
 	transform.step();
 
-	velocity.y -= 18 * CrumbleGlobals::FIXED_TIMESTEP;			//Apply gravity
+	velocity.y -= 12 * CrumbleGlobals::FIXED_TIMESTEP;			//Apply gravity
 
 	//Do movementy input
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && onGround) {//TODO replace onGround with a collision check for bhopping
-		velocity.y += 7.1f;
+		velocity.y += 5.3;
 	}
 
 	vec3 forward = transform.getForward();
@@ -86,7 +98,7 @@ void Player::WalkAir(vec3 wishVel) {
 	vec3 wishDir = glm::normalize(wishVel);
 
 	const float wishSpeed = glm::length(wishVel);
-	const float accel = 5.0f;
+	const float accel = 4.0f;
 
 	Accelerate(wishDir, wishSpeed, accel);
 }
@@ -114,7 +126,10 @@ void Player::Move() {
 	{//Collide along y axis
 		const float y = move.y;
 
-		world.clipY(playerCol, move.y);
+		for (AABB aabb : world) {
+			aabb.clipY(playerCol, move.y);
+		}
+
 		celing.clipY(playerCol, move.y);
 
 		if (y != move.y) {
@@ -135,7 +150,11 @@ void Player::Move() {
 
 	{//Collide along x axis
 		const float x = move.x;
-		world.clipX(playerCol, move.x);
+
+		for (AABB aabb : world) {
+			aabb.clipX(playerCol, move.x);
+		}
+
 		if (x != move.x) {
 			velocity.x = 0;
 		}
@@ -146,7 +165,11 @@ void Player::Move() {
 
 	{//Collide along z axis
 		const float z = move.z;
-		world.clipZ(playerCol, move.z);
+
+		for (AABB aabb : world) {
+			aabb.clipZ(playerCol, move.z);
+		}
+
 		if (z != move.z) {
 			velocity.z = 0;
 		}
