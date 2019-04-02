@@ -5,6 +5,11 @@
 
 #include "globals.h"
 
+Player::Player() {
+	transform.position = vec3(0, 1, 0);
+	transform.step();
+}
+
 void Player::Update(GLFWwindow* window) {
 	transform.step();
 
@@ -68,8 +73,6 @@ void Player::WalkGround(vec3 wishVel) {
 
 	const float wishSpeed = glm::length(wishVel);
 	const float accel = 15.0f;
-
-	std::cout << wishSpeed << std::endl;
 
 	Accelerate(wishDir, wishSpeed, accel);
 }

@@ -15,11 +15,13 @@ public:
 
 	bool onGround = false;
 
-	AABB world = AABB(vec3(-5, -1, -5), vec3(0, 0, 0));
-	AABB celing = AABB(vec3(-7, -2, -7), vec3(2, -1, 2));
+	AABB world = AABB(vec3(0, 0, 0), vec3(5, 1, 5));
+	AABB celing = AABB(vec3(-2, -1, -2), vec3(7, 0, 7));
 
 	AABB collider = AABB(vec3(-0.4, 0, -0.4), vec3(0.4, 1.8, 0.4));
 public:
+	Player();
+
 	void Update(GLFWwindow* window);
 	
 	void ApplyFriction(float friction);
