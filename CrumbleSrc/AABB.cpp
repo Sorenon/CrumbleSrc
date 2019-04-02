@@ -24,21 +24,21 @@ AABB AABB::operator+(const vec3 & vec) {
 }
 
 bool AABB::intersectsX(const AABB & other) {
-	//return other.max.x > min.x && other.min.x < max.x;
+	return other.max.x > min.x && other.min.x < max.x;
 
-	return FMath::greaterTorE(other.max.x, min.x) && FMath::lessThan(other.min.x, max.x);
+	//return FMath::greaterTorE(other.max.x, min.x) && FMath::lessThan(other.min.x, max.x);
 }
 
 bool AABB::intersectsY(const AABB & other) {
-	//return other.max.y > min.y && other.min.y < max.y;
+	return other.max.y > min.y && other.min.y < max.y;
 
-	return FMath::greaterTorE(other.max.y, min.y) && FMath::lessThan(other.min.y, max.y);
+	//return FMath::greaterTorE(other.max.y, min.y) && FMath::lessThan(other.min.y, max.y);
 }
 
 bool AABB::intersectsZ(const AABB & other) {
-	//return other.max.z > min.z && other.min.z < max.z;
+	return other.max.z > min.z && other.min.z < max.z;
 
-	return FMath::greaterTorE(other.max.z, min.z) && FMath::lessThan(other.min.z, max.z);
+	//return FMath::greaterTorE(other.max.z, min.z) && FMath::lessThan(other.min.z, max.z);
 }
 
 void AABB::clipY(const AABB & other, float & move) {
@@ -57,51 +57,48 @@ void AABB::clipY(const AABB & other, float & move) {
 
 void AABB::clipX(const AABB & other, float & move) {
 	if (intersectsY(other) && intersectsZ(other)) {
-		std::cout << "Test for X" << std::endl;
-		//if (move > 0.0f && FMath::greaterTorE(min.x, other.max.x)) {
-		//	if (other.max.x + move > min.x) {
-		//		move = min.x - other.max.x;
-		//	}
-		//} else if (move < 0.0f && FMath::greaterTorE(other.min.x, max.x)) {
-		//	if (other.min.x + move < max.x) {
-		//		move = max.x - other.min.x;
-		//	}
-		//}
-
 		if (move > 0.0f && FMath::greaterTorE(min.x, other.max.x)) {
-			if (FMath::greaterTorE(other.max.x + move, min.x)) {
+			if (other.max.x + move > min.x) {
 				move = min.x - other.max.x;
 			}
 		} else if (move < 0.0f && FMath::greaterTorE(other.min.x, max.x)) {
-			if (FMath::lessThan(other.min.x + move, max.x)) {
+			if (other.min.x + move < max.x) {
 				move = max.x - other.min.x;
 			}
 		}
+
+		//if (move > 0.0f && FMath::greaterTorE(min.x, other.max.x)) {
+		//	if (FMath::greaterTorE(other.max.x + move, min.x)) {
+		//		move = min.x - other.max.x;
+		//	}
+		//} else if (move < 0.0f && FMath::greaterTorE(other.min.x, max.x)) {
+		//	if (FMath::lessThan(other.min.x + move, max.x)) {
+		//		move = max.x - other.min.x;
+		//	}
+		//}
 	}
 }
 
 void AABB::clipZ(const AABB & other, float & move) {
 	if (intersectsY(other) && intersectsX(other)) {
-		std::cout << "Test for Z" << std::endl;
-
-		//if (move > 0.0f && FMath::greaterTorE(min.z, other.max.z)) {
-		//	if (other.max.z + move > min.z) {
-		//		move = min.z - other.max.z;
-		//	}
-		//} else if (move < 0.0f && FMath::greaterTorE(other.min.z, max.z)) {
-		//	if (other.min.z + move < max.z) {
-		//		move = max.z - other.min.z;
-		//	}
-		//}
-
 		if (move > 0.0f && FMath::greaterTorE(min.z, other.max.z)) {
-			if (FMath::greaterTorE(other.max.z + move, min.z)) {
+			if (other.max.z + move > min.z) {
 				move = min.z - other.max.z;
 			}
 		} else if (move < 0.0f && FMath::greaterTorE(other.min.z, max.z)) {
-			if (FMath::lessThan(other.min.z + move, max.z)) {
+			if (other.min.z + move < max.z) {
 				move = max.z - other.min.z;
 			}
 		}
+
+		//if (move > 0.0f && FMath::greaterTorE(min.z, other.max.z)) {
+		//	if (FMath::greaterTorE(other.max.z + move, min.z)) {
+		//		move = min.z - other.max.z;
+		//	}
+		//} else if (move < 0.0f && FMath::greaterTorE(other.min.z, max.z)) {
+		//	if (FMath::lessThan(other.min.z + move, max.z)) {
+		//		move = max.z - other.min.z;
+		//	}
+		//}
 	}
 }
