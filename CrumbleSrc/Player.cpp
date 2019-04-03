@@ -12,26 +12,26 @@ Player::Player() {
 	transform.position = vec3(0, 90, 0);
 	transform.step();
 
-	for (int x = 0; x < 16; x++) {
-		for (int y = 0; y < 256; y++) {
-			for (int z = 0; z < 16; z++) {
-				if (chunk.getBlock(x, y, z) != 0) {
-					AABB aabb(vec3(0, 0, 0), vec3(1, 1, 1));
-					world.push_back(aabb + vec3(x, y, z));
-				}
-			}
-		}
-	}
+	//for (int x = 0; x < 16; x++) {
+	//	for (int y = 0; y < 256; y++) {
+	//		for (int z = 0; z < 16; z++) {
+	//			if (chunk.getBlock(x, y, z) != 0) {
+	//				AABB aabb(vec3(0, 0, 0), vec3(1, 1, 1));
+	//				world.push_back(aabb + vec3(x, y, z));
+	//			}
+	//		}
+	//	}
+	//}
 }
 
 void Player::Update(GLFWwindow* window) {
 	transform.step();
 
-	velocity.y -= 12 * CrumbleGlobals::FIXED_TIMESTEP;			//Apply gravity
+	velocity.y -= 20 * CrumbleGlobals::FIXED_TIMESTEP;			//Apply gravity
 
 	//Do movementy input
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && onGround) {//TODO replace onGround with a collision check for bhopping
-		velocity.y += 5.5;
+		velocity.y += 7;
 	}
 
 	vec3 forward = transform.getForward();
@@ -107,7 +107,7 @@ void Player::WalkAir(vec3 wishVel) {
 	vec3 wishDir = glm::normalize(wishVel);
 
 	const float wishSpeed = glm::length(wishVel);
-	const float accel = 4.0f;
+	const float accel = 3.0f;
 
 	Accelerate(wishDir, wishSpeed, accel);
 }
@@ -131,6 +131,46 @@ void Player::Accelerate(vec3 wishDir, float wishSpeed, float acceleration) {
 void Player::Move() {
 	glm::vec3 move = velocity * CrumbleGlobals::FIXED_TIMESTEP;	//How far the player expects to move 
 	AABB playerCol = collider + transform.position;
+
+	std::vector<AABB> world;
+	{
+		vec3 fMax = playerCol.max;
+		vec3 fMin = playerCol.min;
+		if (velocity.x < 0) {
+			fMin.x += velocity.x;
+		}
+		else {
+			fMax.x += velocity.x;
+		}
+
+		if (velocity.y < 0) {
+			fMin.y += velocity.y;
+		} else {
+			fMax.y += velocity.y;
+		}
+
+		if (velocity.z < 0) {
+			fMin.z += velocity.z;
+		} else {
+			fMax.z += velocity.z;
+		}
+
+		ivec3 max(glm::ceil(fMax));
+		ivec3 min(glm::floor(fMin));
+
+		for (int x = min.x; x <= max.x; x++) {
+			for (int y = min.y; y <= max.y; y++) {
+				for (int z = min.z; z <= max.z; z++) {
+					if (x < 16 && x >= 0 && y < 256 && y >= 0 && z < 16 && z >= 0) {
+						if (chunk.getBlock(x, y, z) != 0) {
+							AABB aabb(vec3(0, 0, 0), vec3(1, 1, 1));
+							world.push_back(aabb + vec3(x, y, z));
+						}
+					}
+				}
+			}
+		}
+	}
 
 	{//Collide along y axis
 		const float y = move.y;

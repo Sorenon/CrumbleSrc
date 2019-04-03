@@ -17,7 +17,7 @@ public:
 	bool noClip = false;
 	bool onGround = false;
 
-	std::vector<AABB> world;
+	//std::vector<AABB> world;
 	AABB celing = AABB(vec3(-2, -1, -2), vec3(7, 0, 7));
 
 	AABB collider = AABB(vec3(-0.4, 0, -0.4), vec3(0.4, 1.8, 0.4));

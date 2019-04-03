@@ -15,12 +15,4 @@ namespace CrumbleGlobals {
 	const float FIXED_TIMESTEP = 1.0f / 30.0f;
 };
 
-const int blocks[5][2][5]{
-	{{1, 1, 1, 1, 1}, {0, 1, 1, 1, 1}},
-	{{1, 1, 1, 1, 1}, {1, 0, 0, 0, 1}},
-	{{1, 1, 0, 1, 1}, {1, 0, 0, 0, 1}},
-	{{1, 1, 1, 1, 1}, {1, 0, 0, 0, 1}},
-	{{1, 1, 1, 1, 1}, {1, 1, 1, 1, 0}},
-};
-
 extern Chunk chunk;
