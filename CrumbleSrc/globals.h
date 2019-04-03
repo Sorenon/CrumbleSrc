@@ -2,6 +2,8 @@
 
 #include <glm/glm.hpp>
 
+#include "Chunk.h"
+
 namespace Vectors {
 	const glm::vec3 UP = glm::vec3(0, 1, 0);
 	const glm::vec3 FORWARD = glm::vec3(0, 0, -1);
@@ -20,3 +22,5 @@ const int blocks[5][2][5]{
 	{{1, 1, 1, 1, 1}, {1, 0, 0, 0, 1}},
 	{{1, 1, 1, 1, 1}, {1, 1, 1, 1, 0}},
 };
+
+extern Chunk chunk;

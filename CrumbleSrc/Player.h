@@ -14,10 +14,9 @@ public:
 	Transform transform;
 	vec3 velocity;
 
+	bool noClip = false;
 	bool onGround = false;
 
-
-	//AABB world = AABB(vec3(0, 0, 0), vec3(5, 1, 5));
 	std::vector<AABB> world;
 	AABB celing = AABB(vec3(-2, -1, -2), vec3(7, 0, 7));
 

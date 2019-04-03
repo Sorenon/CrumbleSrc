@@ -9,13 +9,13 @@
 using namespace glm;
 
 Player::Player() {
-	transform.position = vec3(0, 1, 0);
+	transform.position = vec3(0, 90, 0);
 	transform.step();
 
-	for (int x = 0; x < 5; x++) {
-		for (int y = 0; y < 2; y++) {
-			for (int z = 0; z < 5; z++) {
-				if (blocks[x][y][z] != 0) {
+	for (int x = 0; x < 16; x++) {
+		for (int y = 0; y < 256; y++) {
+			for (int z = 0; z < 16; z++) {
+				if (chunk.getBlock(x, y, z) != 0) {
 					AABB aabb(vec3(0, 0, 0), vec3(1, 1, 1));
 					world.push_back(aabb + vec3(x, y, z));
 				}
@@ -45,18 +45,25 @@ void Player::Update(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) wishVel -= forward;
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) wishVel -= right;
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) wishVel += right;
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) wishVel += Vectors::UP;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) wishVel -= Vectors::UP;
 
+	if (noClip) {
+		velocity = wishVel;
+		transform.position += velocity;
+	} else {
+		wishVel.y = 0;
 
-	if (onGround) {
-		ApplyFriction(10.0f);
-		WalkGround(wishVel);
+		if (onGround) {
+			ApplyFriction(10.0f);
+			WalkGround(wishVel);
+		} else {
+			ApplyFriction(1.5f);
+			WalkAir(wishVel);
+		}
+
+		Move();
 	}
-	else {
-		ApplyFriction(1.5f);
-		WalkAir(wishVel);
-	}
-
-	Move();
 }
 
 void Player::ApplyFriction(float friction) {
