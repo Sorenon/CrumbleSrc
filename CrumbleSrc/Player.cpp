@@ -13,10 +13,12 @@ Player::Player() {
 	transform.step();
 
 	for (int x = 0; x < 5; x++) {
-		for (int z = 0; z < 5; z++) {
-			if (blocks[x * 5 + z] != 0) {
-				AABB aabb(vec3(0, 0, 0), vec3(1, 1, 1));
-				world.push_back(aabb + vec3(x, 0, z));
+		for (int y = 0; y < 2; y++) {
+			for (int z = 0; z < 5; z++) {
+				if (blocks[x][y][z] != 0) {
+					AABB aabb(vec3(0, 0, 0), vec3(1, 1, 1));
+					world.push_back(aabb + vec3(x, y, z));
+				}
 			}
 		}
 	}
@@ -29,7 +31,7 @@ void Player::Update(GLFWwindow* window) {
 
 	//Do movementy input
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && onGround) {//TODO replace onGround with a collision check for bhopping
-		velocity.y += 5.3;
+		velocity.y += 5.5;
 	}
 
 	vec3 forward = transform.getForward();
