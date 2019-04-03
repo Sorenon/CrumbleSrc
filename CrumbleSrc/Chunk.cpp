@@ -29,8 +29,7 @@ int Chunk::getBlock(collumLoc x, collumLoc y, collumLoc z) {
 }
 
 SubChunk::SubChunk() {
-	//std::fill(std::begin(blocks[0][0]), std::end(blocks[15][15]), 1);
-	std::fill(&blocks[0][0][0], &blocks[15][15][15], 1);
+	std::fill(std::begin(blocks[0][0]), std::end(blocks[15][15]), 1);
 }
 
 int SubChunk::getBlock(relitiveLoc x, relitiveLoc y, relitiveLoc z) {
