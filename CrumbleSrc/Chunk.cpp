@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <iterator>
 
+SubChunk Chunk::EMPTY;
+
 Chunk::Chunk() {
 	for (int i = 0; i < 4; i++) {
 		subChunks[i] = new SubChunk();
@@ -31,7 +33,7 @@ int Chunk::getBlock(collumLoc x, collumLoc y, collumLoc z) {
 	}
 }
 
-void Chunk::setBlock(collumLoc x, collumLoc y, collumLoc z, int block) {
+bool Chunk::setBlock(collumLoc x, collumLoc y, collumLoc z, int block) {
 	SubChunk *subChunk = subChunks[y >> 4];
 
 	if (subChunk == nullptr) {
@@ -39,13 +41,46 @@ void Chunk::setBlock(collumLoc x, collumLoc y, collumLoc z, int block) {
 		subChunks[y >> 4] = subChunk;
 	}
 
-	subChunk->setBlock(x, y % 16, z, block);
+	cubeLoc relY = y % 16;
+	if (subChunk->setBlock(x, relY, z, block)) {
+		needsUpdate = true;
+
+		if (relY == 15) {
+			if (subChunks[(y >> 4) + 1] != nullptr) {
+				SubChunk &above = *subChunks[(y >> 4) + 1];
+
+				if (above.getBlock(x, 0, z) != 0) {
+					needsUpdate = true;
+				}
+			}
+		} 
+		else if (relY == 0) {
+			if (subChunks[(y >> 4) - 1] != nullptr) {
+				SubChunk &below = *subChunks[(y >> 4) - 1];
+
+				if (below.getBlock(x, 15, z) != 0) {
+					below.needsUpdate = true;
+				}
+			}	
+		}
+
+		return true;
+	}
+
+	return false;
 }
 
-inline int SubChunk::getBlock(relitiveLoc x, relitiveLoc y, relitiveLoc z) {
+inline int SubChunk::getBlock(cubeLoc x, cubeLoc y, cubeLoc z) {
 	return blocks[x][y][z];
 }
 
-inline void SubChunk::setBlock(relitiveLoc x, relitiveLoc y, relitiveLoc z, int block) {
-	blocks[x][y][z] = block;
+inline bool SubChunk::setBlock(cubeLoc x, cubeLoc y, cubeLoc z, int block) {
+	if (blocks[x][y][z] == block) {
+		return false;
+	}
+	else {
+		blocks[x][y][z] = block;
+		needsUpdate = true;
+		return true;
+	}
 }
