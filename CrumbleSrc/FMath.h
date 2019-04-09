@@ -9,6 +9,6 @@ namespace FMath {
 	*/
 	bool greaterTorE(float larger, float smaller, float epsilon = FLT_EPSILON);
 
-	bool lessThan(float smaller, float larger, float epsilon = FLT_EPSILON);
+	bool lessThanOrE(float smaller, float larger, float epsilon = FLT_EPSILON);
 };
 

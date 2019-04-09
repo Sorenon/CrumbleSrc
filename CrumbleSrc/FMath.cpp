@@ -9,6 +9,6 @@ bool FMath::greaterTorE(float larger, float smaller, float epsilon) {
 	return larger >= smaller || equal(smaller, larger, epsilon);
 }
 
-bool FMath::lessThan(float smaller, float larger, float epsilon) {
+bool FMath::lessThanOrE(float smaller, float larger, float epsilon) {
 	return larger >= smaller || equal(smaller, larger, epsilon);
 }
