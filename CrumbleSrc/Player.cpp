@@ -162,7 +162,7 @@ void Player::Move() {
 			for (int y = min.y; y <= max.y; y++) {
 				for (int z = min.z; z <= max.z; z++) {
 					if (x < 16 && x >= 0 && y < 256 && y >= 0 && z < 16 && z >= 0) {
-						if (chunk.getBlock(x, y, z) != 0) {
+						if (middleChunk.getBlock(x, y, z) != 0) {
 							AABB aabb(vec3(0, 0, 0), vec3(1, 1, 1));
 							world.push_back(aabb + vec3(x, y, z));
 						}

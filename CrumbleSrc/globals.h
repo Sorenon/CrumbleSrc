@@ -15,4 +15,4 @@ namespace CrumbleGlobals {
 	const float FIXED_TIMESTEP = 1.0f / 30.0f;
 };
 
-extern Chunk chunk;
+extern Chunk middleChunk;

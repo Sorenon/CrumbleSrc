@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <iterator>
 
-SubChunk Chunk::EMPTY;
+SubChunk SubChunk::EMPTY;
 
 Chunk::Chunk() {
 	for (int i = 0; i < 4; i++) {
@@ -20,6 +20,10 @@ Chunk::~Chunk() {
 			delete subChunk;
 		}
 	}
+}
+
+SubChunk& Chunk::getSubChunk(int i) {
+	return subChunks[i] == nullptr ? SubChunk::EMPTY : *subChunks[i];
 }
 
 int Chunk::getBlock(collumLoc x, collumLoc y, collumLoc z) {

@@ -5,6 +5,9 @@ typedef int cubeLoc;
 
 class SubChunk {
 public:
+	static SubChunk EMPTY;
+
+public:
 	int blocks[16][16][16] = {0};
 	bool needsUpdate = true;
 public:
@@ -14,15 +17,14 @@ public:
 
 class Chunk {
 public:
-	static SubChunk EMPTY;
-
-public:
 	SubChunk *subChunks[16] = {};
 	bool needsUpdate = true;
 
 public:
 	Chunk();
 	~Chunk();
+
+	SubChunk &getSubChunk(int i);
 
 	int getBlock(collumLoc x, collumLoc y, collumLoc z);
 	bool setBlock(collumLoc x, collumLoc y, collumLoc z, int block);
