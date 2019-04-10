@@ -3,9 +3,14 @@
 #include <iterator>
 
 SubChunk SubChunk::EMPTY;
+Chunk Chunk::EMPTY;
 
 Chunk::Chunk() {
-	for (int i = 0; i < 4; i++) {
+
+}
+
+Chunk::Chunk(int layers) {
+	for (int i = 0; i < layers; i++) {
 		subChunks[i] = new SubChunk();
 
 		int(*blocks)[16][16][16] = &subChunks[i]->blocks;
@@ -22,7 +27,7 @@ Chunk::~Chunk() {
 	}
 }
 
-SubChunk& Chunk::getSubChunk(int i) {
+SubChunk& Chunk::getSubChunkSafe(int i) {
 	return subChunks[i] == nullptr ? SubChunk::EMPTY : *subChunks[i];
 }
 

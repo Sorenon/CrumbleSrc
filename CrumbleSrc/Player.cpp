@@ -1,10 +1,13 @@
 #include "Player.h"
 #include <iostream>
 
-#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
 #include "globals.h"
+#include "Chunk.h"
+
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 using namespace glm;
 
@@ -132,8 +135,8 @@ void Player::Move() {
 	glm::vec3 move = velocity * CrumbleGlobals::FIXED_TIMESTEP;	//How far the player expects to move 
 	AABB playerCol = collider + transform.position;
 
-	std::vector<AABB> world;
-	{
+	std::vector<AABB> worldColliders;
+	{//Find all blocks (as AABBs) the player may collide with
 		vec3 fMax = playerCol.max;
 		vec3 fMin = playerCol.min;
 		if (velocity.x < 0) {
@@ -155,27 +158,13 @@ void Player::Move() {
 			fMax.z += velocity.z;
 		}
 
-		ivec3 max(glm::ceil(fMax));
-		ivec3 min(glm::floor(fMin));
-
-		for (int x = min.x; x <= max.x; x++) {
-			for (int y = min.y; y <= max.y; y++) {
-				for (int z = min.z; z <= max.z; z++) {
-					if (x < 16 && x >= 0 && y < 256 && y >= 0 && z < 16 && z >= 0) {
-						if (middleChunk.getBlock(x, y, z) != 0) {
-							AABB aabb(vec3(0, 0, 0), vec3(1, 1, 1));
-							world.push_back(aabb + vec3(x, y, z));
-						}
-					}
-				}
-			}
-		}
+		worldColliders = world.getOverlappingBlocks({ fMin, fMax });
 	}
 
 	{//Collide along y axis
 		const float y = move.y;
 
-		for (AABB aabb : world) {
+		for (AABB aabb : worldColliders) {
 			aabb.clipY(playerCol, move.y);
 		}
 
@@ -200,7 +189,7 @@ void Player::Move() {
 	{//Collide along x axis
 		const float x = move.x;
 
-		for (AABB aabb : world) {
+		for (AABB aabb : worldColliders) {
 			aabb.clipX(playerCol, move.x);
 		}
 
@@ -215,7 +204,7 @@ void Player::Move() {
 	{//Collide along z axis
 		const float z = move.z;
 
-		for (AABB aabb : world) {
+		for (AABB aabb : worldColliders) {
 			aabb.clipZ(playerCol, move.z);
 		}
 

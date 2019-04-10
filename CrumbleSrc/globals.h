@@ -2,7 +2,7 @@
 
 #include <glm/glm.hpp>
 
-#include "Chunk.h"
+#include "World.h"
 
 namespace Vectors {
 	const glm::vec3 UP = glm::vec3(0, 1, 0);
@@ -15,4 +15,4 @@ namespace CrumbleGlobals {
 	const float FIXED_TIMESTEP = 1.0f / 30.0f;
 };
 
-extern Chunk middleChunk;
+extern World world;

@@ -1,11 +1,13 @@
 #pragma once
 #include <vector>
 
-#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
 #include "Transform.h"
 #include "AABB.h"
+
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 using namespace glm;
 
