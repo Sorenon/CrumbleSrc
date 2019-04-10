@@ -41,8 +41,8 @@ void Player::Update(GLFWwindow* window) {
 	vec3 right = glm::cross(forward, Vectors::UP);
 	vec3 wishVel;
 
-	forward *= 5.0f;
-	right *= 4.5f;
+	forward *= noClip ? 1.0f : 6.0f;
+	right *= noClip ? 1.0f : 5.5f;
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) wishVel += forward;
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) wishVel -= forward;

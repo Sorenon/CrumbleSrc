@@ -12,3 +12,5 @@ bool FMath::greaterTorE(float larger, float smaller, float epsilon) {
 bool FMath::lessThanOrE(float smaller, float larger, float epsilon) {
 	return larger >= smaller || equal(smaller, larger, epsilon);
 }
+
+

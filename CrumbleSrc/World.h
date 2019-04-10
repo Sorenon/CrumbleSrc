@@ -2,11 +2,22 @@
 #include <unordered_map>
 #include <vector>
 
+#include <glm/glm.hpp>
+
 #include "AABB.h"
 #include "Chunk.h"
 
 typedef long long chunkID;
 typedef int chunkPos;
+
+typedef struct {
+	bool hit = false;
+	glm::ivec3 hitPos;
+	std::vector<glm::ivec3> all;
+
+	operator bool() const { return hit; };
+
+}RayTraceResult;
 
 class World {
 public:
@@ -22,7 +33,11 @@ public:
 	void createChunk(chunkPos x, chunkPos z);
 	Chunk *getChunk(chunkPos x, chunkPos z);
 	Chunk &getChunkSafe(chunkPos x, chunkPos z);
+
 	int getBlock(int x, int y, int z);
-	std::vector<AABB> getOverlappingBlocks(AABB collider);
+	bool setBlock(int x, int y, int z, int block);
+	std::vector<AABB> getOverlappingBlocks(const AABB &collider);
+
+	RayTraceResult rayTrace(const glm::vec3 &start, const glm::vec3 &dir);
 };
 

@@ -54,7 +54,7 @@ bool Chunk::setBlock(collumLoc x, collumLoc y, collumLoc z, int block) {
 	if (subChunk->setBlock(x, relY, z, block)) {
 		needsUpdate = true;
 
-		if (relY == 15) {
+		if (relY == 15 && y != 255) {
 			if (subChunks[(y >> 4) + 1] != nullptr) {
 				SubChunk &above = *subChunks[(y >> 4) + 1];
 
@@ -63,7 +63,7 @@ bool Chunk::setBlock(collumLoc x, collumLoc y, collumLoc z, int block) {
 				}
 			}
 		} 
-		else if (relY == 0) {
+		else if (relY == 0 && y != 0) {
 			if (subChunks[(y >> 4) - 1] != nullptr) {
 				SubChunk &below = *subChunks[(y >> 4) - 1];
 
