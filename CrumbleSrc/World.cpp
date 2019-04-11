@@ -19,8 +19,8 @@ World::~World() {
 	}
 }
 
-void World::createChunk(chunkPos x, chunkPos z) {
-	chunks[toLong(x, z)] = new Chunk(4);
+void World::createChunk(chunkPos x, chunkPos z, Chunk * chunk) {
+	chunks[toLong(x, z)] = chunk;
 }
 
 Chunk * World::getChunk(chunkPos x, chunkPos z) {
@@ -47,9 +47,44 @@ bool World::setBlock(int x, int y, int z, int block) {
 		return false;
 	}
 
+	chunkPos chunkX = x >> 4;
+	chunkPos chunkZ = z >> 4;
 
-	auto chunk = chunks.find(toLong(x >> 4, z >> 4));
-	return chunk == chunks.end() ? false : (*chunk).second->setBlock(x & 15, y, z & 15, block);
+	auto chunk = chunks.find(toLong(chunkX, chunkZ));
+
+	if (chunk == chunks.end()) {
+		createChunk(chunkX, chunkZ);
+		chunk = chunks.find(toLong(chunkX, chunkZ));
+	}
+
+	collumLoc collumX = x & 15;
+	collumLoc collumZ = z & 15;
+
+	(*chunk).second->setBlock(collumX, y, collumZ, block);
+
+	if (collumX == 15) {
+		auto chunkItr = chunks.find(toLong(chunkX + 1, chunkZ));
+		if (chunkItr != chunks.end()) {
+			(*chunkItr).second->updateVAOTest(0, y, collumZ);
+		}
+	} else if (collumX == 0) {
+		auto chunkItr = chunks.find(toLong(chunkX - 1, chunkZ));
+		if (chunkItr != chunks.end()) {
+			(*chunkItr).second->updateVAOTest(15, y, collumZ);
+		}
+	}
+
+	if (collumZ == 15) {
+		auto chunkItr = chunks.find(toLong(chunkX, chunkZ + 1));
+		if (chunkItr != chunks.end()) {
+			(*chunkItr).second->updateVAOTest(collumX, y, 0);
+		}
+	} else if (collumZ == 0) {
+		auto chunkItr = chunks.find(toLong(chunkX, chunkZ - 1));
+		if (chunkItr != chunks.end()) {
+			(*chunkItr).second->updateVAOTest(collumX, y, 15);
+		}
+	}
 }
 
 std::vector<AABB> World::getOverlappingBlocks(const AABB &collider) {

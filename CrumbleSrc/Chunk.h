@@ -19,8 +19,8 @@ public:
 	int blocks[16][16][16] = {0};
 	bool needsUpdate = true;
 public:
-	inline int getBlock(cubeLoc x, cubeLoc y, cubeLoc z);
-	inline bool setBlock(cubeLoc x, cubeLoc y, cubeLoc z, int block);
+	inline int getBlock(collumLoc x, cubeLoc y, collumLoc z);
+	inline bool setBlock(collumLoc x, cubeLoc y, collumLoc z, int block);
 };
 
 class Chunk {
@@ -41,5 +41,7 @@ public:
 
 	int getBlock(collumLoc x, collumLoc y, collumLoc z);
 	bool setBlock(collumLoc x, collumLoc y, collumLoc z, int block);
+
+	void updateVAOTest(collumLoc x, collumLoc y, collumLoc z);
 };
 

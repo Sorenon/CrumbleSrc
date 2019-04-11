@@ -30,7 +30,8 @@ public:
 	World();
 	~World();
 
-	void createChunk(chunkPos x, chunkPos z);
+	void createChunk(chunkPos x, chunkPos z, Chunk *chunk = new Chunk());
+
 	Chunk *getChunk(chunkPos x, chunkPos z);
 	Chunk &getChunkSafe(chunkPos x, chunkPos z);
 

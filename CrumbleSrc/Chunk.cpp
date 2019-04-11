@@ -36,18 +36,19 @@ int Chunk::getBlock(collumLoc x, collumLoc y, collumLoc z) {
 
 	if (subChunk == nullptr) {
 		return 0;
-	}
-	else {
+	} else {
 		return subChunk->getBlock(x, y % 16, z);
 	}
 }
 
 bool Chunk::setBlock(collumLoc x, collumLoc y, collumLoc z, int block) {
-	SubChunk *subChunk = subChunks[y >> 4];
+	int subChunkY = y >> 4;
+
+	SubChunk *subChunk = subChunks[subChunkY];
 
 	if (subChunk == nullptr) {
 		subChunk = new SubChunk;
-		subChunks[y >> 4] = subChunk;
+		subChunks[subChunkY] = subChunk;
 	}
 
 	cubeLoc relY = y % 16;
@@ -55,22 +56,21 @@ bool Chunk::setBlock(collumLoc x, collumLoc y, collumLoc z, int block) {
 		needsUpdate = true;
 
 		if (relY == 15 && y != 255) {
-			if (subChunks[(y >> 4) + 1] != nullptr) {
-				SubChunk &above = *subChunks[(y >> 4) + 1];
+			if (subChunks[subChunkY + 1] != nullptr) {
+				SubChunk &above = *subChunks[(subChunkY) + 1];
 
 				if (above.getBlock(x, 0, z) != 0) {
 					needsUpdate = true;
 				}
 			}
-		} 
-		else if (relY == 0 && y != 0) {
-			if (subChunks[(y >> 4) - 1] != nullptr) {
-				SubChunk &below = *subChunks[(y >> 4) - 1];
+		} else if (relY == 0 && y != 0) {
+			if (subChunks[subChunkY - 1] != nullptr) {
+				SubChunk &below = *subChunks[(subChunkY) - 1];
 
 				if (below.getBlock(x, 15, z) != 0) {
 					below.needsUpdate = true;
 				}
-			}	
+			}
 		}
 
 		return true;
@@ -79,15 +79,23 @@ bool Chunk::setBlock(collumLoc x, collumLoc y, collumLoc z, int block) {
 	return false;
 }
 
-inline int SubChunk::getBlock(cubeLoc x, cubeLoc y, cubeLoc z) {
+void Chunk::updateVAOTest(collumLoc x, collumLoc y, collumLoc z) {
+	SubChunk *subChunk = subChunks[y >> 4];
+
+	if (subChunk != nullptr && subChunk->getBlock(x, y % 16, z) != 0) {
+		needsUpdate = true;
+		subChunk->needsUpdate = true;
+	}
+}
+
+inline int SubChunk::getBlock(collumLoc x, cubeLoc y, collumLoc z) {
 	return blocks[x][y][z];
 }
 
-inline bool SubChunk::setBlock(cubeLoc x, cubeLoc y, cubeLoc z, int block) {
+inline bool SubChunk::setBlock(collumLoc x, cubeLoc y, collumLoc z, int block) {
 	if (blocks[x][y][z] == block) {
 		return false;
-	}
-	else {
+	} else {
 		blocks[x][y][z] = block;
 		needsUpdate = true;
 		return true;
