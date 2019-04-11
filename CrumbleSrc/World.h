@@ -38,7 +38,7 @@ public:
 	bool setBlock(int x, int y, int z, int block);
 	std::vector<AABB> getOverlappingBlocks(const AABB &collider);
 
-	RayTraceResult rayTrace(const glm::vec3 &start, const glm::vec3 &dir);
+	RayTraceResult rayTrace(const glm::vec3 &start, const glm::vec3 &dir, float radius = 10.0f);
 
 private:
 	float intbound(float s, float ds);

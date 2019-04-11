@@ -77,7 +77,7 @@ std::vector<AABB> World::getOverlappingBlocks(const AABB &collider) {
 
 //To do: make this non plagiarizing
 //From https://gist.github.com/dogfuntom/cc881c8fc86ad43d55d8
-RayTraceResult World::rayTrace(const glm::vec3 &ray_start, const glm::vec3 &dir) {
+RayTraceResult World::rayTrace(const glm::vec3 &ray_start, const glm::vec3 &dir, float radius) {
 	if (dir.x == 0 && dir.y == 0 && dir.z == 0)
 		throw "Ray-cast in zero direction!";
 
@@ -87,7 +87,7 @@ RayTraceResult World::rayTrace(const glm::vec3 &ray_start, const glm::vec3 &dir)
 	glm::vec3 tMax(intbound(ray_start.x, dir.x), intbound(ray_start.y, dir.y), intbound(ray_start.z, dir.z));
 	glm::vec3 tDelta(step.x / dir.x, step.y / dir.y, step.z / dir.z);
 
-	float radius = 10.0f / glm::length(dir);
+	radius /= glm::length(dir);
 
 	RayTraceResult result;
 	glm::ivec3 face;
@@ -96,6 +96,7 @@ RayTraceResult World::rayTrace(const glm::vec3 &ray_start, const glm::vec3 &dir)
 		if (getBlock(scan.x, scan.y, scan.z) == 1) {
 			result.hit = true;
 			result.hitPos = scan;
+			result.face = face;
 			break;
 		}
 
@@ -151,6 +152,5 @@ float World::intbound(float s, float ds) {
 	if (ds < 0 && sIsInt)
 		return 0;
 
-	//return (ds > 0 ? ceilf(s) - s : s - floorf(s)) / fabs(ds);
 	return (ds > 0 ? s == 0.0f ? 1.0f : ceilf(s) - s : s - floorf(s)) / fabs(ds);
 }
