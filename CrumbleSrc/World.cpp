@@ -75,61 +75,82 @@ std::vector<AABB> World::getOverlappingBlocks(const AABB &collider) {
 	return worldColliders;
 }
 
-RayTraceResult World::rayTrace(const glm::vec3 &startPos, const glm::vec3 &endPos) {
-	std::vector<glm::ivec3> blocks;
+//To do: make this non plagiarizing
+//From https://gist.github.com/dogfuntom/cc881c8fc86ad43d55d8
+RayTraceResult World::rayTrace(const glm::vec3 &ray_start, const glm::vec3 &dir) {
+	if (dir.x == 0 && dir.y == 0 && dir.z == 0)
+		throw "Ray-cast in zero direction!";
 
-	glm::ivec3 scan = glm::floor(startPos);
-	glm::ivec3 end = glm::floor(endPos);
-	glm::vec3 ray = endPos - startPos;
+	glm::vec3 scan = glm::floor(ray_start);
+	glm::ivec3 step = glm::sign(dir);
 
-	glm::ivec3 step(glm::sign(ray));
-	glm::vec3 nextBoundary(scan.x + step.x, scan.y + step.y, scan.z + step.z);
+	glm::vec3 tMax(intbound(ray_start.x, dir.x), intbound(ray_start.y, dir.y), intbound(ray_start.z, dir.z));
+	glm::vec3 tDelta(step.x / dir.x, step.y / dir.y, step.z / dir.z);
 
-	float fMax = std::numeric_limits<float>::max();
+	float radius = 10.0f / glm::length(dir);
 
-	glm::vec3 tMax(ray.x != 0 ? (nextBoundary.x - startPos.x) / ray.x : fMax, ray.y != 0 ? (nextBoundary.y - startPos.y) / ray.y : fMax, ray.z != 0 ? (nextBoundary.z - startPos.z) / ray.z : fMax);
-	glm::vec3 tDelta(ray.x != 0 ? 1 / (ray.x * step.x) : fMax, ray.y != 0 ? 1 / (ray.y * step.y) : fMax, ray.z != 0 ? 1 / (ray.z * step.z) : fMax);
-
-	glm::ivec3 diff;
-	bool negRay = false;
-	if (scan.x != end.x && ray.x < 0) { diff.x--; negRay = true; };
-	if (scan.y != end.y && ray.y < 0) { diff.y--; negRay = true; };
-	if (scan.z != end.z && ray.z < 0) { diff.z--; negRay = true; };
-
-	//blocks.push_back(scan);
-	if (negRay) {
-		scan += diff;
-	//	blocks.push_back(scan);
-	}
-
-	glm::ivec3 old = scan;
 	RayTraceResult result;
+	glm::ivec3 face;
 
-	while (scan != end) {
+	while (true) {
+		if (getBlock(scan.x, scan.y, scan.z) == 1) {
+			result.hit = true;
+			result.hitPos = scan;
+			break;
+		}
+
 		if (tMax.x < tMax.y) {
 			if (tMax.x < tMax.z) {
+				if (tMax.x > radius)
+					break;
+				// Update which cube we are now in.
 				scan.x += step.x;
+				// Adjust tMax.x to the next X-oriented boundary crossing.
 				tMax.x += tDelta.x;
+				// Record the normal vector of the cube face we entered.
+				face.x = -step.x;
+				face.y = 0;
+				face.z = 0;
 			} else {
+				if (tMax.z > radius)
+					break;
 				scan.z += step.z;
 				tMax.z += tDelta.z;
+				face.x = 0;
+				face.y = 0;
+				face.z = -step.z;
 			}
 		} else {
 			if (tMax.y < tMax.z) {
+				if (tMax.y > radius)
+					break;
 				scan.y += step.y;
 				tMax.y += tDelta.y;
+				face.x = 0;
+				face.y = -step.y;
+				face.z = 0;
 			} else {
+				// Identical to the second case, repeated for simplicity in
+				// the conditionals.
+				if (tMax.z > radius)
+					break;
 				scan.z += step.z;
 				tMax.z += tDelta.z;
+				face.x = 0;
+				face.y = 0;
+				face.z = -step.z;
 			}
 		}
-
-		if (result.hit == false && getBlock(scan.x, scan.y, scan.z) != 0) {
-			result.hitPos = scan;
-			result.hit = true;
-		}
-		blocks.push_back(scan);
 	}
-	result.all = blocks;
+
 	return result;
+}
+
+float World::intbound(float s, float ds) {
+	bool sIsInt = floorf(s) == s;
+	if (ds < 0 && sIsInt)
+		return 0;
+
+	//return (ds > 0 ? ceilf(s) - s : s - floorf(s)) / fabs(ds);
+	return (ds > 0 ? s == 0.0f ? 1.0f : ceilf(s) - s : s - floorf(s)) / fabs(ds);
 }

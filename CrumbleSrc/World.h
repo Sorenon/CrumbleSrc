@@ -13,7 +13,7 @@ typedef int chunkPos;
 typedef struct {
 	bool hit = false;
 	glm::ivec3 hitPos;
-	std::vector<glm::ivec3> all;
+	glm::ivec3 face;
 
 	operator bool() const { return hit; };
 
@@ -39,5 +39,8 @@ public:
 	std::vector<AABB> getOverlappingBlocks(const AABB &collider);
 
 	RayTraceResult rayTrace(const glm::vec3 &start, const glm::vec3 &dir);
+
+private:
+	float intbound(float s, float ds);
 };
 
