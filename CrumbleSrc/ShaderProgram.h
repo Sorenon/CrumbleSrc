@@ -9,6 +9,7 @@ public:
 
 public:
 	ShaderProgram(ShaderConstructor &vertex, ShaderConstructor &fragment);
+	ShaderProgram(ShaderConstructor vertex, ShaderConstructor fragment);
 	~ShaderProgram();
 
 	void activate();

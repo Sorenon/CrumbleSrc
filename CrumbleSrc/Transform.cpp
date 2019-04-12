@@ -7,17 +7,6 @@
 
 using namespace glm;
 
-vec3 Transform::getLook() {
-	vec3 front;
-	float pitch = rotation.x;
-	float yaw = rotation.y;
-
-	front.x = sin(yaw) * cos(pitch);
-	front.y = -sin(pitch);
-	front.z = -(cos(yaw) * cos(pitch));
-	return glm::normalize(front);
-}
-
 vec3 Transform::getForward() {
 	vec3 forward;
 	float yaw = rotation.y;
@@ -26,6 +15,21 @@ vec3 Transform::getForward() {
 	forward.z = (float)-(cos(yaw));
 
 	return glm::normalize(forward);
+}
+
+vec3 Transform::getLook(vec3 mixedRotation) {
+	vec3 front;
+	float pitch = mixedRotation.x;
+	float yaw = mixedRotation.y;
+
+	front.x = sin(yaw) * cos(pitch);
+	front.y = -sin(pitch);
+	front.z = -(cos(yaw) * cos(pitch));
+	return glm::normalize(front);
+}
+
+vec3 Transform::getLook(float t) {
+	return getLook(getInterpRot(t));
 }
 
 void Transform::step() {

@@ -16,12 +16,13 @@ public:
 
 public:
 	vec3 getForward();
-	vec3 getLook();
+
+	vec3 getLook(vec3 mixedRotation);
+	vec3 getLook(float t = 1.0f);
 
 	void step();
 
 	vec3 getInterpPos(float t);
-
 	vec3 getInterpRot(float t);
 };
 

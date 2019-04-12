@@ -30,19 +30,14 @@ Player::Player() {
 void Player::Update(GLFWwindow* window) {
 	transform.step();
 
-	velocity.y -= 20 * CrumbleGlobals::FIXED_TIMESTEP;			//Apply gravity
-
-	//Do movementy input
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && onGround) {//TODO replace onGround with a collision check for bhopping
-		velocity.y += 7;
-	}
+	velocity.y -= 28 * CrumbleGlobals::FIXED_TIMESTEP;			//Apply gravity
 
 	vec3 forward = transform.getForward();
 	vec3 right = glm::cross(forward, Vectors::UP);
 	vec3 wishVel;
 
-	forward *= noClip ? 1.0f : 6.0f;
-	right *= noClip ? 1.0f : 5.5f;
+	forward *= noClip ? 1.0f : sprinting ? 6.0f : 4.0f;
+	right *= noClip ? 1.0f : 4.0f;
 
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) wishVel += forward;
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) wishVel -= forward;
@@ -62,6 +57,7 @@ void Player::Update(GLFWwindow* window) {
 			WalkGround(wishVel);
 		} else {
 			ApplyFriction(1.5f);
+			velocity.y *= 0.98f;
 			WalkAir(wishVel);
 		}
 
@@ -129,6 +125,14 @@ void Player::Accelerate(vec3 wishDir, float wishSpeed, float acceleration) {
 	}
 
 	velocity += (wishDir * accelSpeed);
+}
+
+vec3 Player::getEyePos(float t) {
+	return transform.getInterpPos(t) + eyeHeight;
+}
+
+vec3 Player::getEyePos() {
+	return transform.position + eyeHeight;
 }
 
 void Player::Move() {

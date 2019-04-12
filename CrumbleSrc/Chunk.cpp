@@ -60,7 +60,7 @@ bool Chunk::setBlock(collumLoc x, collumLoc y, collumLoc z, int block) {
 				SubChunk &above = *subChunks[(subChunkY) + 1];
 
 				if (above.getBlock(x, 0, z) != 0) {
-					needsUpdate = true;
+					above.needsUpdate = true;
 				}
 			}
 		} else if (relY == 0 && y != 0) {
