@@ -2,6 +2,7 @@
 #define GLFW_INCLUDE_NONE
 
 #include <GLFW/glfw3.h>
+#include <vector>
 
 enum InputType {
 	Key,
@@ -18,7 +19,7 @@ public:
 	int timesPressed = 0;
 
 public:
-	KeyBinding(int keyID);
+	KeyBinding(InputType inputType, int keyID);
 
 	bool execute();
 	bool isDown();
@@ -37,17 +38,31 @@ public:
 
 class Input {
 public:
+	bool firstMouse = true;
+	float lastX = 0.0f;
+	float lastY = 0.0f;
+	float deltaX = 0.0f;
+	float deltaY = 0.0f;
+
 	static Input INSTANCE;
 	GLFWwindow* window;
 
 public:
-	KeyBinding kbForaward = KeyBinding(GLFW_KEY_W);
-	KeyBinding kbBackward = KeyBinding(GLFW_KEY_S);
-	KeyBinding kbLeft  = KeyBinding(GLFW_KEY_A);
-	KeyBinding kbRight = KeyBinding(GLFW_KEY_D);
+	KeyBinding kbForward = KeyBinding(InputType::Key, GLFW_KEY_W);
+	KeyBinding kbBackward = KeyBinding(InputType::Key, GLFW_KEY_S);
+	KeyBinding kbLeft  = KeyBinding(InputType::Key, GLFW_KEY_A);
+	KeyBinding kbRight = KeyBinding(InputType::Key, GLFW_KEY_D);
+	KeyBinding kbJump = KeyBinding(InputType::Key, GLFW_KEY_SPACE);
+	KeyBinding kbCrouch = KeyBinding(InputType::Key, GLFW_KEY_LEFT_SHIFT);
 
-	InputAxis axForward = InputAxis(&kbForaward, &kbBackward);
+	KeyBinding kbAttack = KeyBinding(InputType::Mouse, GLFW_MOUSE_BUTTON_LEFT);
+	KeyBinding kbPlace = KeyBinding(InputType::Mouse, GLFW_MOUSE_BUTTON_RIGHT);
+
+	std::vector<KeyBinding*> keybinds = {&kbForward, &kbBackward, &kbLeft, &kbRight, &kbJump, &kbCrouch, &kbAttack, &kbPlace};
+
+	InputAxis axForward = InputAxis(&kbForward, &kbBackward);
 	InputAxis axRight = InputAxis(&kbRight, &kbLeft);
+	InputAxis axUp = InputAxis(&kbJump, &kbCrouch);
 
 public:
 	void init(GLFWwindow* window);

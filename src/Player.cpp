@@ -38,11 +38,17 @@ void Player::Update(GLFWwindow* window) {
 
 	Input &input = Input::INSTANCE;
 
-	forward *= input.axForward.getModifier() * (noClip ? 1.0f : sprinting ? 6.0f : 4.0f);
-	right *= input.axRight.getModifier() * (noClip ? 1.0f : 4.0f);
+	wishVel += forward * (input.axForward.getModifier() * (noClip ? 1.0f : sprinting ? 6.0f : 4.0f));
+	wishVel += right * (input.axRight.getModifier() * (noClip ? 1.0f : 4.0f));
+	wishVel += glm::vec3(0.0f, input.axUp.getModifier(), 0.0f);
 
-	wishVel += forward;
-	wishVel += right;
+	if (input.kbJump.execute()) {
+		if (onGround) {
+			velocity.y += 9.0f;
+		}
+
+		input.kbJump.timesPressed = 0;
+	}
 
 	if (noClip) {
 		velocity = wishVel;
@@ -147,8 +153,7 @@ void Player::Move() {
 		vec3 fMin = playerCol.min;
 		if (velocity.x < 0) {
 			fMin.x += velocity.x;
-		}
-		else {
+		} else {
 			fMax.x += velocity.x;
 		}
 
