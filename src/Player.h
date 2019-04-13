@@ -37,6 +37,8 @@ public:
 	vec3 getEyePos(float t);
 	vec3 getEyePos();
 
+	AABB getLocalBoundingBox();
+
 	void Move();
 };
 

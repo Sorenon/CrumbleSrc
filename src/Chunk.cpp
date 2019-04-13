@@ -88,7 +88,7 @@ void Chunk::updateVAOTest(collumLoc x, collumLoc y, collumLoc z) {
 	}
 }
 
-inline int SubChunk::getBlock(collumLoc x, cubeLoc y, collumLoc z) {
+int SubChunk::getBlock(collumLoc x, cubeLoc y, collumLoc z) {
 	return blocks[x][y][z];
 }
 

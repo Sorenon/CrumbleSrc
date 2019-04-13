@@ -5,6 +5,9 @@ using namespace glm;
 
 class AABB {
 public:
+	static AABB blockAABB;
+
+public:
 	vec3 min;
 	vec3 max;
 
@@ -20,4 +23,6 @@ public:
 	void clipX(const AABB &other, float &move);
 	void clipY(const AABB &other, float &move);
 	void clipZ(const AABB &other, float &move);
+
+	bool overlaps(const AABB &other);
 };

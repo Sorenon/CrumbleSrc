@@ -135,6 +135,10 @@ vec3 Player::getEyePos() {
 	return transform.position + eyeHeight;
 }
 
+AABB Player::getLocalBoundingBox() {
+	return collider + transform.position;
+}
+
 void Player::Move() {
 	glm::vec3 move = velocity * CrumbleGlobals::FIXED_TIMESTEP;	//How far the player expects to move 
 	AABB playerCol = collider + transform.position;

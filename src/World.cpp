@@ -93,14 +93,12 @@ std::vector<AABB> World::getOverlappingBlocks(const AABB &collider) {
 	ivec3 max(glm::ceil(collider.max));
 	ivec3 min(glm::floor(collider.min));
 
-	AABB blockAABB(vec3(0, 0, 0), vec3(1, 1, 1));
-
 	for (int x = min.x; x <= max.x; x++) {
 		for (int y = min.y; y <= max.y; y++) {
 			for (int z = min.z; z <= max.z; z++) {
 				if (y < 256 && y >= 0) {
 					if (getBlock(x, y, z) != 0) {
-						worldColliders.push_back(blockAABB + vec3(x, y, z));
+						worldColliders.push_back(AABB::blockAABB + vec3(x, y, z));
 					}
 				}
 			}

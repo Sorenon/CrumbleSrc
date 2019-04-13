@@ -4,6 +4,8 @@
 
 #include "FMath.h"
 
+AABB AABB::blockAABB = AABB(vec3(0, 0, 0), vec3(1, 1, 1));
+
 AABB::AABB(float x1, float y1, float z1, float x2, float y2, float z2) {
 	min.x = std::fmin(x1, x2);
 	min.y = std::fmin(y1, y2);
@@ -101,4 +103,10 @@ void AABB::clipZ(const AABB & other, float & move) {
 		//	}
 		//}
 	}
+}
+
+bool AABB::overlaps(const AABB &other) {
+	return (min.x < other.max.x && max.x > other.min.x) &&
+		(min.y < other.max.y && max.y > other.min.y) &&
+		(min.z < other.max.z && max.z > other.min.z);
 }

@@ -19,7 +19,7 @@ public:
 	int blocks[16][16][16] = {0};
 	bool needsUpdate = true;
 public:
-	inline int getBlock(collumLoc x, cubeLoc y, collumLoc z);
+	int getBlock(collumLoc x, cubeLoc y, collumLoc z);
 	inline bool setBlock(collumLoc x, cubeLoc y, collumLoc z, int block);
 };
 
