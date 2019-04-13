@@ -1,13 +1,13 @@
 #include "Player.h"
 #include <iostream>
 
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
 #include "globals.h"
 #include "Chunk.h"
-
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+#include "Input.h"
 
 using namespace glm;
 
@@ -36,15 +36,13 @@ void Player::Update(GLFWwindow* window) {
 	vec3 right = glm::cross(forward, Vectors::UP);
 	vec3 wishVel;
 
-	forward *= noClip ? 1.0f : sprinting ? 6.0f : 4.0f;
-	right *= noClip ? 1.0f : 4.0f;
+	Input &input = Input::INSTANCE;
 
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) wishVel += forward;
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) wishVel -= forward;
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) wishVel -= right;
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) wishVel += right;
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) wishVel += Vectors::UP;
-	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) wishVel -= Vectors::UP;
+	forward *= input.axForward.getModifier() * (noClip ? 1.0f : sprinting ? 6.0f : 4.0f);
+	right *= input.axRight.getModifier() * (noClip ? 1.0f : 4.0f);
+
+	wishVel += forward;
+	wishVel += right;
 
 	if (noClip) {
 		velocity = wishVel;
