@@ -149,27 +149,7 @@ void Player::Move() {
 
 	std::vector<AABB> worldColliders;
 	{//Find all blocks (as AABBs) the player may collide with
-		vec3 fMax = playerCol.max;
-		vec3 fMin = playerCol.min;
-		if (velocity.x < 0) {
-			fMin.x += velocity.x;
-		} else {
-			fMax.x += velocity.x;
-		}
-
-		if (velocity.y < 0) {
-			fMin.y += velocity.y;
-		} else {
-			fMax.y += velocity.y;
-		}
-
-		if (velocity.z < 0) {
-			fMin.z += velocity.z;
-		} else {
-			fMax.z += velocity.z;
-		}
-
-		worldColliders = world.getOverlappingBlocks({ fMin, fMax });
+		worldColliders = world.getOverlappingBlocks(playerCol.expandByVelocity(velocity));
 	}
 
 	{//Collide along y axis

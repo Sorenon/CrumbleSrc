@@ -16,6 +16,7 @@ public:
 	Transform transform;
 	vec3 velocity;
 	vec3 eyeHeight = vec3(0.0f, 1.8f, 0.0f);
+	//vec3 eyeHeight = vec3(0.0f, 1.8f * 2, 0.0f);
 
 	bool noClip = false;
 	bool onGround = false;
@@ -24,6 +25,7 @@ public:
 	AABB celing = AABB(vec3(-2, -1, -2), vec3(7, 0, 7));
 
 	AABB collider = AABB(vec3(-0.4, 0, -0.4), vec3(0.4, 1.9, 0.4));
+	//AABB collider = AABB(vec3(-0.7f, 0.0f, -0.7f), vec3(0.7f, 1.9f * 2, 0.7f));
 public:
 	Player();
 

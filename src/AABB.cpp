@@ -110,3 +110,27 @@ bool AABB::overlaps(const AABB &other) {
 		(min.y < other.max.y && max.y > other.min.y) &&
 		(min.z < other.max.z && max.z > other.min.z);
 }
+
+AABB AABB::expandByVelocity(vec3 velocity) {
+	vec3 fMax = max;
+	vec3 fMin = min;
+	if (velocity.x < 0) {
+		fMin.x += velocity.x;
+	} else {
+		fMax.x += velocity.x;
+	}
+
+	if (velocity.y < 0) {
+		fMin.y += velocity.y;
+	} else {
+		fMax.y += velocity.y;
+	}
+
+	if (velocity.z < 0) {
+		fMin.z += velocity.z;
+	} else {
+		fMax.z += velocity.z;
+	}
+
+	return AABB(fMin, fMax);
+}

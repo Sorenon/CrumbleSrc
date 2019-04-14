@@ -25,4 +25,6 @@ public:
 	void clipZ(const AABB &other, float &move);
 
 	bool overlaps(const AABB &other);
+
+	AABB expandByVelocity(vec3 velocity);
 };

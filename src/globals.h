@@ -13,6 +13,7 @@ namespace Vectors {
 
 namespace CrumbleGlobals {
 	const float FIXED_TIMESTEP = 1.0f / 30.0f;
+	const float PHYSICS_TIMESTEP = 1.0f / 120.0f;
 };
 
 extern World world;
