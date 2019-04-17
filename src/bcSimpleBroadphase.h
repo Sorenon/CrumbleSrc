@@ -35,7 +35,7 @@ public:
 	//std::unordered_map<glm::ivec3, btCollisionObject*, HashFunc_ivec3, HashFunc_ivec3> storage;
 	btCollisionObject *chunk[16][256][16] = { 0 };
 	
-	btCollisionObject *block = nullptr;
+	//btCollisionObject *block = nullptr;
 public:
 	bcSimpleBroadphase();
 

@@ -20,18 +20,22 @@ void bcSimpleBroadphase::calculateOverlappingPairs(btDispatcher * dispatcher) {
 	//	const btBroadphasePair& pair = *it;
 	//}
 
-	if (block == nullptr) {
-		block = makeBlock({5, 65, 5});
+	//if (block == nullptr) {
+	//	block = makeBlock({5, 65, 5});
+	//	for (int i = collisionWorld->getNumCollisionObjects() - 1; i >= 0; i--) {
+	//		btCollisionObject* obj = collisionWorld->getCollisionObjectArray()[i];
 
+	//		if (!obj->isStaticObject() && obj->isActive()) {
+	//			bcPairCache.worldCollisions.push_back(btBroadphasePair(*obj->getBroadphaseHandle(), *block->getBroadphaseHandle()));
+	//		}
+	//	}
+	//}
 
-		for (int i = collisionWorld->getNumCollisionObjects() - 1; i >= 0; i--) {
-			btCollisionObject* obj = collisionWorld->getCollisionObjectArray()[i];
+	for (int i = collisionWorld->getNumCollisionObjects() - 1; i >= 0; i--) {
+		btCollisionObject* obj = collisionWorld->getCollisionObjectArray()[i];
 
-			if (!obj->isStaticObject() && obj->isActive()) {
-				//	doWorldCollisions(obj);
-
-				bcPairCache.worldCollisions.push_back(btBroadphasePair(*obj->getBroadphaseHandle(), *block->getBroadphaseHandle()));
-			}
+		if (!obj->isStaticObject() && obj->isActive()) {
+			doWorldCollisions(obj);
 		}
 	}
 }
@@ -63,8 +67,16 @@ void bcSimpleBroadphase::doWorldCollisions(btCollisionObject* obj) {
 				block = makeBlock(pos);
 				chunk[pos.x][pos.y][pos.z] = block;
 			}
+			else {
+				ColBlockData* cBD = (ColBlockData*)block->getUserPointer();
+				if (cBD->colliding.find(obj) != cBD->colliding.end()) {//Allready colliding with this block
+					continue;
+				}
+			}
+			ColBlockData* cBD = (ColBlockData*)block->getUserPointer();
+			cBD->colliding.insert(obj);
 
-			m_pairCache->addOverlappingPair(obj->getBroadphaseHandle(), block->getBroadphaseHandle());
+			bcPairCache.worldCollisions.push_back(btBroadphasePair(*obj->getBroadphaseHandle(), *block->getBroadphaseHandle()));
 		}
 	}
 }
@@ -79,7 +91,7 @@ btCollisionObject* bcSimpleBroadphase::makeBlock(glm::ivec3 pos) {
 	rbInfo.m_restitution = 0.1f;
 	rbInfo.m_friction = 0.91f;
 	btRigidBody* obj = new btRigidBody(rbInfo);
-
+	obj->setUserPointer(new ColBlockData);
 
 	//btCollisionObject* obj = new btCollisionObject;
 	//btTransform trans;
