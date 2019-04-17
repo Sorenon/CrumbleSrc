@@ -69,11 +69,13 @@ void bcSimpleBroadphase::doWorldCollisions(btCollisionObject* obj) {
 		for (AABB &aabb : world.getOverlappingBlocks(colAABB)) {
 			glm::ivec3 pos = aabb.min;
 
-			btCollisionObject* blockCollider = chunk[pos.x][pos.y][pos.z];
-			if (blockCollider == nullptr) {
+			auto it = storage.find(pos);
+			btCollisionObject* blockCollider;
+			if (it == storage.end()) {//BlockCollider doesn't exist yet 
 				blockCollider = makeBlock(pos);
-				chunk[pos.x][pos.y][pos.z] = blockCollider;
+				storage[pos] = blockCollider;
 			} else {
+				blockCollider = (*it).second;
 				ColBlockData* cBD = (ColBlockData*)blockCollider->getUserPointer();
 				if (cBD->colliding.find(obj) != cBD->colliding.end()) {//Already colliding with this block
 					continue;

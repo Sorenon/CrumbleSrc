@@ -31,11 +31,7 @@ public:
 
 	btBoxShape* blockShape = new btBoxShape(btVector3(btScalar(0.5f), btScalar(0.5f), btScalar(0.5f)));
 
-
-	//std::unordered_map<glm::ivec3, btCollisionObject*, HashFunc_ivec3, HashFunc_ivec3> storage;
-	btCollisionObject *chunk[16][256][16] = { 0 };
-	
-	//btCollisionObject *block = nullptr;
+	std::unordered_map<glm::ivec3, btCollisionObject*, HashFunc_ivec3, HashFunc_ivec3> storage;
 public:
 	bcSimpleBroadphase();
 
