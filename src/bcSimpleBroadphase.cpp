@@ -12,11 +12,13 @@
 
 bcSimpleBroadphase::bcSimpleBroadphase() : btSimpleBroadphaseCopy() {
 	bcPairCache.defaultCache = m_pairCache;
+	world.bcPairCache = &bcPairCache;
 }
 
 void bcSimpleBroadphase::calculateOverlappingPairs(btDispatcher * dispatcher) {
 	btSimpleBroadphaseCopy::calculateOverlappingPairs(dispatcher);
 
+	std::cout << "beg" << bcPairCache.worldCollisions.size();
 	{//Remove all uncolliding pairs
 		std::list<btBroadphasePair>::iterator it = bcPairCache.worldCollisions.begin();
 		auto end = bcPairCache.worldCollisions.end();
@@ -30,7 +32,9 @@ void bcSimpleBroadphase::calculateOverlappingPairs(btDispatcher * dispatcher) {
 			//	continue;
 			//}
 
-			if (!aabbOverlap((btSimpleBroadphaseCopyProxy*)pair.m_pProxy0, (btSimpleBroadphaseCopyProxy*)pair.m_pProxy1)) { //TODO: check if this comparison is too different to the doWorldCollisions one
+			AABB aabb1((btCollisionObject*)pair.m_pProxy0->m_clientObject);
+			AABB aabb2((btCollisionObject*)pair.m_pProxy1->m_clientObject);
+			if (!aabb1.overlaps(aabb2)) { //TODO: check if this comparison is too different to the doWorldCollisions one
 				deletePair(pair, dispatcher);
 				it = bcPairCache.worldCollisions.erase(it);
 				continue;
@@ -40,6 +44,8 @@ void bcSimpleBroadphase::calculateOverlappingPairs(btDispatcher * dispatcher) {
 			++it;
 		}
 	}
+	bcPairCache.toRemove.clear();
+	std::cout << " end" << bcPairCache.worldCollisions.size() << std::endl;
 
 	////Delete all removed blockColliders
 	//for (btCollisionObject* obj : bcPairCache.toRemove) {
@@ -87,18 +93,12 @@ const btOverlappingPairCache* bcSimpleBroadphase::getOverlappingPairCache() cons
 
 void bcSimpleBroadphase::doWorldCollisions(btCollisionObject* obj) {
 	if ((obj->getBroadphaseHandle()->m_collisionFilterMask & btBroadphaseProxy::CollisionFilterGroups::StaticFilter) != 0) {
-		btVector3 min;
-		btVector3 max;
 
-		obj->getCollisionShape()->getAabb(obj->getWorldTransform(), min, max);
-
-		AABB colAABB(FMath::convertVector(min), FMath::convertVector(max));
-
-		for (AABB &aabb : world.getOverlappingBlocks(colAABB)) {
+		for (AABB &aabb : world.getOverlappingBlocks(AABB(obj))) {
 			glm::ivec3 pos = aabb.min;
 
 			Chunk &chunk = world.getChunkSafeBlockPos(pos.x, pos.z);
-			auto it = chunk.storage.find(pos);
+			auto it = chunk.storage.find(glm::ivec3(pos.x % 16, pos.y, pos.z % 16));
 			btCollisionObject* blockCollider;
 			if (it == chunk.storage.end()) {//BlockCollider doesn't exist yet 
 				blockCollider = makeBlock(pos);

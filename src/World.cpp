@@ -20,6 +20,7 @@ World::~World() {
 }
 
 void World::createChunk(chunkPos x, chunkPos z, Chunk * chunk) {
+	chunk->bcPairCache = bcPairCache;
 	chunks[toLong(x, z)] = chunk;
 }
 
@@ -103,7 +104,11 @@ std::vector<AABB> World::getOverlappingBlocks(const AABB &collider) {
 			for (int z = min.z; z <= max.z; z++) {
 				if (y < 256 && y >= 0) {
 					if (getBlock(x, y, z) != 0) {
-						worldColliders.push_back(AABB::blockAABB + vec3(x, y, z));
+						AABB aabb = AABB::blockAABB + vec3(x, y, z);//WHY!!!! TODO: FIX THE NEED FOR THIS
+
+						if (aabb.overlaps(collider)) {
+							worldColliders.push_back(aabb);
+						}
 					}
 				}
 			}

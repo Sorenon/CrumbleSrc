@@ -7,6 +7,8 @@
 #include "AABB.h"
 #include "Chunk.h"
 
+class bcOverlappingPairCache;
+
 typedef long long chunkID;
 typedef int chunkPos;
 
@@ -25,6 +27,7 @@ public:
 
 public:
 	std::unordered_map<chunkID, Chunk*> chunks;
+	bcOverlappingPairCache* bcPairCache;
 
 public:
 	World();

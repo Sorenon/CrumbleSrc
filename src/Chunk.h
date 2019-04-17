@@ -5,6 +5,7 @@
 #include "glad/glad.h"
 
 class btCollisionObject;//Faster than including the bullet headers
+class bcOverlappingPairCache;
 
 typedef int collumLoc;
 typedef int cubeLoc;
@@ -46,6 +47,7 @@ public:
 	bool needsUpdate = true;
 	t_VAO subChunkVAOs[16];
 	std::unordered_map<glm::ivec3, btCollisionObject*, HashFunc_ivec3, HashFunc_ivec3> storage;
+	bcOverlappingPairCache* bcPairCache;
 
 public:
 	Chunk();

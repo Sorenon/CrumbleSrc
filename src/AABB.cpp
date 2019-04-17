@@ -1,6 +1,7 @@
 #include "AABB.h"
 #include <math.h>
 #include <iostream>
+#include <btBulletCollisionCommon.h>
 
 #include "FMath.h"
 
@@ -19,6 +20,15 @@ AABB::AABB(float x1, float y1, float z1, float x2, float y2, float z2) {
 AABB::AABB(vec3 min, vec3 max) {
 	this->min = min;
 	this->max = max;
+}
+
+AABB::AABB(btCollisionObject * collObj) {
+	btVector3 min;
+	btVector3 max;
+	collObj->getCollisionShape()->getAabb(collObj->getWorldTransform(), min, max);
+
+	this->min = FMath::convertVector(min);
+	this->max = FMath::convertVector(max);
 }
 
 AABB AABB::operator+(const vec3 & vec) {

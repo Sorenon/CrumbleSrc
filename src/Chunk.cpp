@@ -2,6 +2,10 @@
 #include <algorithm>
 #include <iterator>
 
+#include <glm/glm.hpp>
+
+#include "bcOverlappingPairCache.h"
+
 SubChunk SubChunk::EMPTY;
 Chunk Chunk::EMPTY;
 
@@ -71,6 +75,11 @@ bool Chunk::setBlock(collumLoc x, collumLoc y, collumLoc z, int block) {
 					below.needsUpdate = true;
 				}
 			}
+		} 
+
+		if (block == 0) {
+			//btCollisionObject *obj = storage[glm::ivec3(x, y, z)];
+			//bcPairCache->toRemove.insert(obj);
 		}
 
 		return true;

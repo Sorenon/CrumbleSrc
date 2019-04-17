@@ -70,8 +70,5 @@ public:
 	virtual void removeOverlappingPairsContainingProxy(btBroadphaseProxy* proxy0, btDispatcher* dispatcher);
 
 	virtual void processAllOverlappingPairs(btOverlapCallback* overlapCallback, btDispatcher* dispatcher);
-
-	//Custom functions
-	void removeBlockCollider(btCollisionObject* blockCollider);
 };
 
