@@ -16,22 +16,31 @@ bcSimpleBroadphase::bcSimpleBroadphase() : btSimpleBroadphaseCopy() {
 void bcSimpleBroadphase::calculateOverlappingPairs(btDispatcher * dispatcher) {
 	btSimpleBroadphaseCopy::calculateOverlappingPairs(dispatcher);
 
-	//for (std::list<btBroadphasePair>::const_iterator it = bcPairCache.worldCollisions.begin(), end = bcPairCache.worldCollisions.end(); it != end; ++it) {
-	//	const btBroadphasePair& pair = *it;
-	//}
+	{//Remove all uncolliding pairs
+		std::list<btBroadphasePair>::iterator it = bcPairCache.worldCollisions.begin();
+		auto end = bcPairCache.worldCollisions.end();
+		while (it != end) {
+			btBroadphasePair& pair = *it;
 
-	//if (block == nullptr) {
-	//	block = makeBlock({5, 65, 5});
-	//	for (int i = collisionWorld->getNumCollisionObjects() - 1; i >= 0; i--) {
-	//		btCollisionObject* obj = collisionWorld->getCollisionObjectArray()[i];
+			if (!aabbOverlap((btSimpleBroadphaseCopyProxy*)pair.m_pProxy0, (btSimpleBroadphaseCopyProxy*)pair.m_pProxy1)) { //TODO: check if this comparison is too different to the doWorldCollisions one
+				ColBlockData* cBD = (ColBlockData*)((btCollisionObject*)pair.m_pProxy0->m_clientObject)->getUserPointer(); //proxy0 will allways be the blockCollider so no need to check which is which
+				cBD->colliding.erase(cBD->colliding.find((btCollisionObject*)pair.m_pProxy1->m_clientObject));
 
-	//		if (!obj->isStaticObject() && obj->isActive()) {
-	//			bcPairCache.worldCollisions.push_back(btBroadphasePair(*obj->getBroadphaseHandle(), *block->getBroadphaseHandle()));
-	//		}
-	//	}
-	//}
+				if (pair.m_algorithm != nullptr) {
+					pair.m_algorithm->~btCollisionAlgorithm();
+					dispatcher->freeCollisionAlgorithm(pair.m_algorithm);
+					pair.m_algorithm = nullptr;
+				}
 
-	for (int i = collisionWorld->getNumCollisionObjects() - 1; i >= 0; i--) {
+				it = bcPairCache.worldCollisions.erase(it);
+			} else {
+				++it;
+			}
+		}
+	}
+
+	//Colide rigedbodies with the world
+	for (int i = collisionWorld->getNumCollisionObjects() - 1; i >= 0; i--) { 
 		btCollisionObject* obj = collisionWorld->getCollisionObjectArray()[i];
 
 		if (!obj->isStaticObject() && obj->isActive()) {
@@ -49,9 +58,7 @@ const btOverlappingPairCache* bcSimpleBroadphase::getOverlappingPairCache() cons
 }
 
 void bcSimpleBroadphase::doWorldCollisions(btCollisionObject* obj) {
-	btBroadphaseProxy* proxy = obj->getBroadphaseHandle();
-
-	if ((proxy->m_collisionFilterMask & btBroadphaseProxy::CollisionFilterGroups::StaticFilter) != 0) {
+	if ((obj->getBroadphaseHandle()->m_collisionFilterMask & btBroadphaseProxy::CollisionFilterGroups::StaticFilter) != 0) {
 		btVector3 min;
 		btVector3 max;
 
@@ -62,21 +69,20 @@ void bcSimpleBroadphase::doWorldCollisions(btCollisionObject* obj) {
 		for (AABB &aabb : world.getOverlappingBlocks(colAABB)) {
 			glm::ivec3 pos = aabb.min;
 
-			btCollisionObject* block = chunk[pos.x][pos.y][pos.z];
-			if (block == nullptr) {
-				block = makeBlock(pos);
-				chunk[pos.x][pos.y][pos.z] = block;
-			}
-			else {
-				ColBlockData* cBD = (ColBlockData*)block->getUserPointer();
-				if (cBD->colliding.find(obj) != cBD->colliding.end()) {//Allready colliding with this block
+			btCollisionObject* blockCollider = chunk[pos.x][pos.y][pos.z];
+			if (blockCollider == nullptr) {
+				blockCollider = makeBlock(pos);
+				chunk[pos.x][pos.y][pos.z] = blockCollider;
+			} else {
+				ColBlockData* cBD = (ColBlockData*)blockCollider->getUserPointer();
+				if (cBD->colliding.find(obj) != cBD->colliding.end()) {//Already colliding with this block
 					continue;
 				}
 			}
-			ColBlockData* cBD = (ColBlockData*)block->getUserPointer();
+			ColBlockData* cBD = (ColBlockData*)blockCollider->getUserPointer();
 			cBD->colliding.insert(obj);
 
-			bcPairCache.worldCollisions.push_back(btBroadphasePair(*obj->getBroadphaseHandle(), *block->getBroadphaseHandle()));
+			bcPairCache.worldCollisions.push_back(btBroadphasePair(*blockCollider->getBroadphaseHandle(), *obj->getBroadphaseHandle()));
 		}
 	}
 }
@@ -93,14 +99,6 @@ btCollisionObject* bcSimpleBroadphase::makeBlock(glm::ivec3 pos) {
 	btRigidBody* obj = new btRigidBody(rbInfo);
 	obj->setUserPointer(new ColBlockData);
 
-	//btCollisionObject* obj = new btCollisionObject;
-	//btTransform trans;
-	//trans.setOrigin(FMath::convertVector(glm::vec3(pos) + glm::vec3(0.5f, 0.5f, 0.5f)));
-	//obj->setWorldTransform(trans);
-	//obj->setCollisionShape(blockShape);
-	//obj->setRestitution(0.1f);
-	//obj->setUserPointer(new ColBlockData);
-
 	short collisionFilterGroup = btBroadphaseProxy::CollisionFilterGroups::StaticFilter;
 	short collisionFilterMask = (short)(btBroadphaseProxy::CollisionFilterGroups::AllFilter ^ btBroadphaseProxy::CollisionFilterGroups::StaticFilter);
 
@@ -109,6 +107,7 @@ btCollisionObject* bcSimpleBroadphase::makeBlock(glm::ivec3 pos) {
 	blockShape->getAabb(trans, max, min);
 
 	btSimpleBroadphaseCopyProxy* proxy = new btSimpleBroadphaseCopyProxy(min, max, 1337, obj, collisionFilterGroup, collisionFilterMask);
+	proxy->m_uniqueId = INT_MIN;//Do this to prevent btBroadphasePair reordering itself
 
 	obj->setBroadphaseHandle(proxy);
 	return obj;
