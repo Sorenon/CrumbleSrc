@@ -33,6 +33,11 @@ Chunk & World::getChunkSafe(chunkPos x, chunkPos z) {
 	return chunk == chunks.end() ? Chunk::EMPTY : (*(*chunk).second);
 }
 
+Chunk & World::getChunkSafeBlockPos(int x, int z) {
+	auto chunk = chunks.find(toLong(x >> 4, z >> 4));
+	return chunk == chunks.end() ? Chunk::EMPTY : (*(*chunk).second);
+}
+
 int World::getBlock(int x, int y, int z) {
 	if (y < 0 || y >= 256) {
 		return 0;
@@ -108,7 +113,7 @@ std::vector<AABB> World::getOverlappingBlocks(const AABB &collider) {
 	return worldColliders;
 }
 
-//To do: make this non plagiarizing
+//To do: make this fit the crumble format
 //From https://gist.github.com/dogfuntom/cc881c8fc86ad43d55d8
 RayTraceResult World::rayTrace(const glm::vec3 &ray_start, const glm::vec3 &dir, float radius) {
 	if (dir.x == 0 && dir.y == 0 && dir.z == 0)

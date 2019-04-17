@@ -1,9 +1,23 @@
 #pragma once
+#include <unordered_map>
 
+#include <glm/glm.hpp>
 #include "glad/glad.h"
+
+class btCollisionObject;//Faster than including the bullet headers
 
 typedef int collumLoc;
 typedef int cubeLoc;
+
+struct HashFunc_ivec3 {
+	size_t operator()(const glm::ivec3& k)const {
+		return (k.y + k.z * 31) * 31 + k.x;
+	}
+
+	bool operator()(const glm::ivec3& a, const glm::ivec3& b)const {
+		return a == b;
+	}
+};
 
 typedef struct {
 	GLuint id = 0;
@@ -31,6 +45,7 @@ public:
 	SubChunk *subChunks[16] = {};
 	bool needsUpdate = true;
 	t_VAO subChunkVAOs[16];
+	std::unordered_map<glm::ivec3, btCollisionObject*, HashFunc_ivec3, HashFunc_ivec3> storage;
 
 public:
 	Chunk();

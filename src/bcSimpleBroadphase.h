@@ -9,16 +9,6 @@
 #include "btSimpleBroadphaseCopy.h"
 #include "bcOverlappingPairCache.h"
 
-struct HashFunc_ivec3 {
-	size_t operator()(const glm::ivec3& k)const {
-		return (k.y + k.z * 31) * 31 + k.x;
-	}
-
-	bool operator()(const glm::ivec3& a, const glm::ivec3& b)const {
-		return a == b;
-	}
-};
-
 struct ColBlockData {
 	std::unordered_set<btCollisionObject*> colliding;
 };
@@ -30,8 +20,6 @@ public:
 	bcOverlappingPairCache bcPairCache;
 
 	btBoxShape* blockShape = new btBoxShape(btVector3(btScalar(0.5f), btScalar(0.5f), btScalar(0.5f)));
-
-	std::unordered_map<glm::ivec3, btCollisionObject*, HashFunc_ivec3, HashFunc_ivec3> storage;
 public:
 	bcSimpleBroadphase();
 
@@ -40,6 +28,9 @@ public:
 	virtual const btOverlappingPairCache* getOverlappingPairCache() const;
 
 	btCollisionObject* makeBlock(glm::ivec3 pos);
+	void deleteBlock(btCollisionObject* blockCollider);
+
 	void doWorldCollisions(btCollisionObject* obj);
+	void deletePair(btBroadphasePair& pair, btDispatcher * dispatcher);
 };
 

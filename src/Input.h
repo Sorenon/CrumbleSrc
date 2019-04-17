@@ -23,6 +23,7 @@ public:
 
 	bool execute();
 	bool isDown();
+	bool executeOnce();
 };
 
 class InputAxis {
@@ -57,8 +58,10 @@ public:
 
 	KeyBinding kbAttack = KeyBinding(InputType::Mouse, GLFW_MOUSE_BUTTON_LEFT);
 	KeyBinding kbPlace = KeyBinding(InputType::Mouse, GLFW_MOUSE_BUTTON_RIGHT);
+	
+	KeyBinding kbNoClip = KeyBinding(InputType::Key, GLFW_KEY_F3);
 
-	std::vector<KeyBinding*> keybinds = {&kbForward, &kbBackward, &kbLeft, &kbRight, &kbJump, &kbCrouch, &kbAttack, &kbPlace};
+	std::vector<KeyBinding*> keybinds = {&kbForward, &kbBackward, &kbLeft, &kbRight, &kbJump, &kbCrouch, &kbAttack, &kbPlace, &kbNoClip};
 
 	InputAxis axForward = InputAxis(&kbForward, &kbBackward);
 	InputAxis axRight = InputAxis(&kbRight, &kbLeft);

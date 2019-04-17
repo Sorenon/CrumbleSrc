@@ -8,6 +8,7 @@
 #include "globals.h"
 #include "FMath.h"
 #include "AABB.h"
+#include "Chunk.h"
 
 bcSimpleBroadphase::bcSimpleBroadphase() : btSimpleBroadphaseCopy() {
 	bcPairCache.defaultCache = m_pairCache;
@@ -22,29 +23,56 @@ void bcSimpleBroadphase::calculateOverlappingPairs(btDispatcher * dispatcher) {
 		while (it != end) {
 			btBroadphasePair& pair = *it;
 
+			//std::unordered_set<btCollisionObject*> &toRemove = bcPairCache.toRemove;
+			//if (toRemove.find((btCollisionObject*)pair.m_pProxy0->m_clientObject) != toRemove.end()) { //proxy0 will allways be the blockCollider so no need to check which is which
+			//	deletePair(pair, dispatcher);
+			//	it = bcPairCache.worldCollisions.erase(it);
+			//	continue;
+			//}
+
 			if (!aabbOverlap((btSimpleBroadphaseCopyProxy*)pair.m_pProxy0, (btSimpleBroadphaseCopyProxy*)pair.m_pProxy1)) { //TODO: check if this comparison is too different to the doWorldCollisions one
-				ColBlockData* cBD = (ColBlockData*)((btCollisionObject*)pair.m_pProxy0->m_clientObject)->getUserPointer(); //proxy0 will allways be the blockCollider so no need to check which is which
-				cBD->colliding.erase(cBD->colliding.find((btCollisionObject*)pair.m_pProxy1->m_clientObject));
-
-				if (pair.m_algorithm != nullptr) {
-					pair.m_algorithm->~btCollisionAlgorithm();
-					dispatcher->freeCollisionAlgorithm(pair.m_algorithm);
-					pair.m_algorithm = nullptr;
-				}
-
+				deletePair(pair, dispatcher);
 				it = bcPairCache.worldCollisions.erase(it);
-			} else {
-				++it;
+				continue;
+
 			}
+
+			++it;
 		}
 	}
 
-	//Colide rigedbodies with the world
-	for (int i = collisionWorld->getNumCollisionObjects() - 1; i >= 0; i--) { 
+	////Delete all removed blockColliders
+	//for (btCollisionObject* obj : bcPairCache.toRemove) {
+	//	deleteBlock(obj);
+	//}
+
+	//Collide rigedbodies with the world
+	for (int i = collisionWorld->getNumCollisionObjects() - 1; i >= 0; i--) {
 		btCollisionObject* obj = collisionWorld->getCollisionObjectArray()[i];
 
 		if (!obj->isStaticObject() && obj->isActive()) {
 			doWorldCollisions(obj);
+		}
+	}
+
+	//Delete all unused blocks
+	for (auto &it : world.chunks) {
+		Chunk *chunk = it.second;
+
+		std::unordered_map<glm::ivec3, btCollisionObject*, HashFunc_ivec3, HashFunc_ivec3>::iterator it2 = chunk->storage.begin();
+		auto end = chunk->storage.end();
+
+		while (it2 != end) {
+			auto pair = *it2;
+
+			ColBlockData* cBD = (ColBlockData*)pair.second->getUserPointer();
+			if (cBD->colliding.empty()) {
+				deleteBlock(pair.second);
+				it2 = chunk->storage.erase(it2);
+			}
+			else {
+				++it2;
+			}
 		}
 	}
 }
@@ -69,11 +97,12 @@ void bcSimpleBroadphase::doWorldCollisions(btCollisionObject* obj) {
 		for (AABB &aabb : world.getOverlappingBlocks(colAABB)) {
 			glm::ivec3 pos = aabb.min;
 
-			auto it = storage.find(pos);
+			Chunk &chunk = world.getChunkSafeBlockPos(pos.x, pos.z);
+			auto it = chunk.storage.find(pos);
 			btCollisionObject* blockCollider;
-			if (it == storage.end()) {//BlockCollider doesn't exist yet 
+			if (it == chunk.storage.end()) {//BlockCollider doesn't exist yet 
 				blockCollider = makeBlock(pos);
-				storage[pos] = blockCollider;
+				chunk.storage[pos] = blockCollider;
 			} else {
 				blockCollider = (*it).second;
 				ColBlockData* cBD = (ColBlockData*)blockCollider->getUserPointer();
@@ -86,6 +115,17 @@ void bcSimpleBroadphase::doWorldCollisions(btCollisionObject* obj) {
 
 			bcPairCache.worldCollisions.push_back(btBroadphasePair(*blockCollider->getBroadphaseHandle(), *obj->getBroadphaseHandle()));
 		}
+	}
+}
+
+void bcSimpleBroadphase::deletePair(btBroadphasePair & pair, btDispatcher * dispatcher) {
+	ColBlockData* cBD = (ColBlockData*)((btCollisionObject*)pair.m_pProxy0->m_clientObject)->getUserPointer(); //proxy0 will allways be the blockCollider so no need to check which is which
+	cBD->colliding.erase(cBD->colliding.find((btCollisionObject*)pair.m_pProxy1->m_clientObject));
+
+	if (pair.m_algorithm != nullptr) {
+		pair.m_algorithm->~btCollisionAlgorithm();
+		dispatcher->freeCollisionAlgorithm(pair.m_algorithm);
+		pair.m_algorithm = nullptr;
 	}
 }
 
@@ -113,4 +153,11 @@ btCollisionObject* bcSimpleBroadphase::makeBlock(glm::ivec3 pos) {
 
 	obj->setBroadphaseHandle(proxy);
 	return obj;
+}
+
+void bcSimpleBroadphase::deleteBlock(btCollisionObject * blockCollider) {
+	delete blockCollider->getUserPointer();
+	delete blockCollider->getBroadphaseHandle();
+	delete ((btRigidBody*)blockCollider)->getMotionState();
+	delete blockCollider;
 }

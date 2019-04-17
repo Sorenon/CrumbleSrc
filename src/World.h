@@ -35,6 +35,8 @@ public:
 	Chunk *getChunk(chunkPos x, chunkPos z);
 	Chunk &getChunkSafe(chunkPos x, chunkPos z);
 
+	Chunk &getChunkSafeBlockPos(int x, int z);
+
 	int getBlock(int x, int y, int z);
 	bool setBlock(int x, int y, int z, int block);
 	std::vector<AABB> getOverlappingBlocks(const AABB &collider);

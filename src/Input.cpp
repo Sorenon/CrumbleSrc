@@ -163,6 +163,14 @@ bool KeyBinding::isDown() {
 	}
 }
 
+bool KeyBinding::executeOnce() {
+	if (timesPressed > 0) {
+		timesPressed = 0;
+		return true;
+	}
+	return false;
+}
+
 InputAxis::InputAxis(KeyBinding * positiveIn, KeyBinding * negativeIn) {
 	positive = positiveIn;
 	negative = negativeIn;

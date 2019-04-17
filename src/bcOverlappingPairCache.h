@@ -1,12 +1,15 @@
 #pragma once
 #include <list>
+#include <vector>
+#include <unordered_set>
 
 #include <btBulletCollisionCommon.h>
 
 class bcOverlappingPairCache : public btOverlappingPairCache {
 public:
 	btOverlappingPairCache* defaultCache;
-	std::list<btBroadphasePair> worldCollisions;
+	std::list<btBroadphasePair> worldCollisions;//I chose list over vector because: Lots of iterating and sudden removal+addition
+	std::unordered_set<btCollisionObject*> toRemove;//BlockColliders to delete before the next collision step
 
 public:
 	//Most of these functions just pass the method to the default btOverlappingPairCache 
@@ -67,5 +70,8 @@ public:
 	virtual void removeOverlappingPairsContainingProxy(btBroadphaseProxy* proxy0, btDispatcher* dispatcher);
 
 	virtual void processAllOverlappingPairs(btOverlapCallback* overlapCallback, btDispatcher* dispatcher);
+
+	//Custom functions
+	void removeBlockCollider(btCollisionObject* blockCollider);
 };
 
