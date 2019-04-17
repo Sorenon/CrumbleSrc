@@ -1,7 +1,7 @@
 #include "bcSimpleBroadphase.h"
 #include <iostream>
 
-#include <btBulletCollisionCommon.h>
+#include "btBulletDynamicsCommon.h"
 #include <glm/glm.hpp>
 
 #include "btSimpleBroadphaseCopy.h"
@@ -20,13 +20,20 @@ void bcSimpleBroadphase::calculateOverlappingPairs(btDispatcher * dispatcher) {
 	//	const btBroadphasePair& pair = *it;
 	//}
 
-	//for (int i = collisionWorld->getNumCollisionObjects() - 1; i >= 0; i--) {
-	//	btCollisionObject* obj = collisionWorld->getCollisionObjectArray()[i];
+	if (block == nullptr) {
+		block = makeBlock({5, 65, 5});
 
-	//	if (!obj->isStaticObject() && obj->isActive()) {
-	//		doWorldCollisions(obj);
-	//	}
-	//}
+
+		for (int i = collisionWorld->getNumCollisionObjects() - 1; i >= 0; i--) {
+			btCollisionObject* obj = collisionWorld->getCollisionObjectArray()[i];
+
+			if (!obj->isStaticObject() && obj->isActive()) {
+				//	doWorldCollisions(obj);
+
+				bcPairCache.worldCollisions.push_back(btBroadphasePair(*obj->getBroadphaseHandle(), *block->getBroadphaseHandle()));
+			}
+		}
+	}
 }
 
 btOverlappingPairCache* bcSimpleBroadphase::getOverlappingPairCache() {
@@ -63,13 +70,24 @@ void bcSimpleBroadphase::doWorldCollisions(btCollisionObject* obj) {
 }
 
 btCollisionObject* bcSimpleBroadphase::makeBlock(glm::ivec3 pos) {
-	btCollisionObject* obj = new btCollisionObject;
 	btTransform trans;
-	trans.setOrigin(FMath::convertVector(pos));
-	obj->setWorldTransform(trans);
-	obj->setCollisionShape(blockShape);
-	obj->setRestitution(0.1f);
-	obj->setUserPointer(new ColBlockData);
+	trans.setIdentity();
+	trans.setOrigin(FMath::convertVector(glm::vec3(pos) + glm::vec3(0.5f, 0.5f, 0.5f)));
+	btDefaultMotionState* motionstate = new btDefaultMotionState(trans);
+
+	btRigidBody::btRigidBodyConstructionInfo rbInfo(0, motionstate, blockShape, btVector3(0, 0, 0));
+	rbInfo.m_restitution = 0.1f;
+	rbInfo.m_friction = 0.91f;
+	btRigidBody* obj = new btRigidBody(rbInfo);
+
+
+	//btCollisionObject* obj = new btCollisionObject;
+	//btTransform trans;
+	//trans.setOrigin(FMath::convertVector(glm::vec3(pos) + glm::vec3(0.5f, 0.5f, 0.5f)));
+	//obj->setWorldTransform(trans);
+	//obj->setCollisionShape(blockShape);
+	//obj->setRestitution(0.1f);
+	//obj->setUserPointer(new ColBlockData);
 
 	short collisionFilterGroup = btBroadphaseProxy::CollisionFilterGroups::StaticFilter;
 	short collisionFilterMask = (short)(btBroadphaseProxy::CollisionFilterGroups::AllFilter ^ btBroadphaseProxy::CollisionFilterGroups::StaticFilter);
@@ -79,7 +97,6 @@ btCollisionObject* bcSimpleBroadphase::makeBlock(glm::ivec3 pos) {
 	blockShape->getAabb(trans, max, min);
 
 	btSimpleBroadphaseCopyProxy* proxy = new btSimpleBroadphaseCopyProxy(min, max, 1337, obj, collisionFilterGroup, collisionFilterMask);
-	proxy->m_uniqueId = ++m_numHandles;
 
 	obj->setBroadphaseHandle(proxy);
 	return obj;

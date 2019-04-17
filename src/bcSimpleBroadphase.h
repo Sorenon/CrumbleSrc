@@ -28,14 +28,14 @@ public:
 	btCollisionWorld* collisionWorld;
 
 	bcOverlappingPairCache bcPairCache;
-	//btSphereShape blockShape = btSphereShape(btScalar(0.5f));
-	//btBoxShape blockShape = btBoxShape(btVector3(1.f, 1.f, 1.f));
+
 	btBoxShape* blockShape = new btBoxShape(btVector3(btScalar(0.5f), btScalar(0.5f), btScalar(0.5f)));
 
 
 	//std::unordered_map<glm::ivec3, btCollisionObject*, HashFunc_ivec3, HashFunc_ivec3> storage;
 	btCollisionObject *chunk[16][256][16] = { 0 };
-
+	
+	btCollisionObject *block = nullptr;
 public:
 	bcSimpleBroadphase();
 
