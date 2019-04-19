@@ -48,9 +48,9 @@ void bcSimpleBroadphase::calculateOverlappingPairs(btDispatcher * dispatcher) {
 		}
 	}
 
-	//for (btCollisionObject* collBlock : bcPairCache.toRemove) {
-	//	deleteBlock(collBlock);
-	//}
+	for (btCollisionObject* collBlock : bcPairCache.toRemove) {
+		deleteBlock(collBlock);
+	}
 	bcPairCache.toRemove.clear();
 
 	//Collide rigedbodies with the world

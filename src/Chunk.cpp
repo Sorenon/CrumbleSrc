@@ -83,7 +83,7 @@ bool Chunk::setBlock(collumLoc x, collumLoc y, collumLoc z, int block) {
 
 			if (it != storage.end()) {
 				bcPairCache->toRemove.insert((*it).second);
-				//storage.erase(it);
+				storage.erase(it);
 			}
 		}
 
