@@ -21,25 +21,25 @@ PhysicsWorld::PhysicsWorld() {
 		((bcSimpleBroadphase*)overlappingPairCache)->collisionWorld = dynamicsWorld;
 	}
 
-	{
-		//btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 1);
-		btCollisionShape* groundShape = new btBoxShape(btVector3(20, 1, 20));
+	//{
+	//	//btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 1);
+	//	btCollisionShape* groundShape = new btBoxShape(btVector3(20, 1, 20));
 
-		btTransform startTransform;
-		startTransform.setIdentity();
+	//	btTransform startTransform;
+	//	startTransform.setIdentity();
 
-		btScalar mass(0.f);
+	//	btScalar mass(0.f);
 
-		//startTransform.setOrigin(btVector3(0, 63.5f, 0));
-		startTransform.setOrigin(btVector3(0, 0, 0));
+	//	//startTransform.setOrigin(btVector3(0, 63.5f, 0));
+	//	startTransform.setOrigin(btVector3(0, 63, 0));
 
-		btDefaultMotionState* motionState = new btDefaultMotionState(startTransform);
+	//	btDefaultMotionState* motionState = new btDefaultMotionState(startTransform);
 
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motionState, groundShape, btVector3(0, 0, 0));
-		btRigidBody* rb = new btRigidBody(rbInfo);
+	//	btRigidBody::btRigidBodyConstructionInfo rbInfo(mass, motionState, groundShape, btVector3(0, 0, 0));
+	//	btRigidBody* rb = new btRigidBody(rbInfo);
 
-		dynamicsWorld->addRigidBody(rb);
-	}
+	//	dynamicsWorld->addRigidBody(rb);
+	//}
 
 	{
 		btCollisionShape* boxCollisionShape = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
@@ -54,7 +54,7 @@ PhysicsWorld::PhysicsWorld() {
 		boxCollisionShape->calculateLocalInertia(mass, localInertia);
 
 		btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(mass, motionstate, boxCollisionShape, localInertia);
-		rigidBodyCI.m_restitution = 0.1f;
+		rigidBodyCI.m_restitution = 0.2f;
 		rigidBodyCI.m_friction = 0.91f;
 		rbCube = new btRigidBody(rigidBodyCI);
 		//rbCube->setActivationState(DISABLE_DEACTIVATION);
@@ -75,7 +75,6 @@ PhysicsWorld::~PhysicsWorld() {
 		delete obj;
 	}
 
-	//delete collision shapes
 	for (int j = 0; j < collisionShapes.size(); j++) {
 		btCollisionShape* shape = collisionShapes[j];
 		collisionShapes[j] = 0;

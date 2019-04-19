@@ -21,6 +21,7 @@ GamerRenderer::GamerRenderer() {
 
 
 GamerRenderer::~GamerRenderer() {
+	//TODO clean up
 }
 
 void GamerRenderer::doRender(float t) {

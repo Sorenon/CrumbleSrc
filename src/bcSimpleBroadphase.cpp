@@ -15,8 +15,6 @@ bcSimpleBroadphase::bcSimpleBroadphase() : btSimpleBroadphaseCopy() {
 	world.bcPairCache = &bcPairCache;
 }
 
-float colls = 0;
-
 void bcSimpleBroadphase::calculateOverlappingPairs(btDispatcher * dispatcher) {
 	btSimpleBroadphaseCopy::calculateOverlappingPairs(dispatcher);
 	std::cout << bcPairCache.worldCollisions.size() << std::endl;
@@ -133,13 +131,13 @@ btCollisionObject* bcSimpleBroadphase::makeBlock(glm::ivec3 pos) {
 	btTransform trans;
 	trans.setIdentity();
 	trans.setOrigin(FMath::convertVector(glm::vec3(pos) + glm::vec3(0.5f, 0.5f, 0.5f)));
-	btDefaultMotionState* motionstate = new btDefaultMotionState(trans);
 
-	btRigidBody::btRigidBodyConstructionInfo rbInfo(0, motionstate, blockShape, btVector3(0, 0, 0));
-	rbInfo.m_restitution = 0.1f;
-	rbInfo.m_friction = 0.91f;
-	btRigidBody* obj = new btRigidBody(rbInfo);
+	btCollisionObject* obj = new btCollisionObject();
+	obj->setWorldTransform(trans);
 	obj->setUserPointer(new ColBlockData);
+	obj->setCollisionShape(blockShape);
+	obj->setRestitution(0.1f);
+	obj->setFriction(0.91f);
 
 	short collisionFilterGroup = btBroadphaseProxy::CollisionFilterGroups::StaticFilter;
 	short collisionFilterMask = (short)(btBroadphaseProxy::CollisionFilterGroups::AllFilter ^ btBroadphaseProxy::CollisionFilterGroups::StaticFilter);
@@ -152,16 +150,11 @@ btCollisionObject* bcSimpleBroadphase::makeBlock(glm::ivec3 pos) {
 	proxy->m_uniqueId = INT_MIN;//Do this to prevent btBroadphasePair reordering itself
 
 	obj->setBroadphaseHandle(proxy);
-	colls++;
-
 	return obj;
 }
 
 void bcSimpleBroadphase::deleteBlock(btCollisionObject * blockCollider) {
-	colls--;
-
 	delete (ColBlockData*)blockCollider->getUserPointer();
 	delete blockCollider->getBroadphaseHandle();
-	delete ((btRigidBody*)blockCollider)->getMotionState();
 	delete blockCollider;
 }
