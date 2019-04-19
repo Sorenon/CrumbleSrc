@@ -33,6 +33,10 @@ ShaderProgram::ShaderProgram(ShaderConstructor vertex, ShaderConstructor fragmen
 		glGetProgramInfoLog(id, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADERPROGRAM::LINK_FAILED\n" << infoLog << std::endl;
 	}
+
+	viewID = glGetUniformLocation(id, "view");
+	modelID = glGetUniformLocation(id, "model");
+	projID = glGetUniformLocation(id, "projection");
 }
 
 ShaderProgram::~ShaderProgram() {

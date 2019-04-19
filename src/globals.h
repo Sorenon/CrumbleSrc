@@ -4,6 +4,8 @@
 
 #include "World.h"
 
+class Player;
+
 namespace Vectors {
 	const glm::vec3 UP = glm::vec3(0, 1, 0);
 	const glm::vec3 FORWARD = glm::vec3(0, 0, -1);
@@ -17,3 +19,7 @@ namespace CrumbleGlobals {
 };
 
 extern World world;
+extern Player* p_player;
+
+extern int wWidth;
+extern int wHeight;
