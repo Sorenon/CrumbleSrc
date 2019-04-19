@@ -15,42 +15,43 @@ bcSimpleBroadphase::bcSimpleBroadphase() : btSimpleBroadphaseCopy() {
 	world.bcPairCache = &bcPairCache;
 }
 
+float colls = 0;
+
 void bcSimpleBroadphase::calculateOverlappingPairs(btDispatcher * dispatcher) {
 	btSimpleBroadphaseCopy::calculateOverlappingPairs(dispatcher);
+	std::cout << bcPairCache.worldCollisions.size() << std::endl;
 
-	std::cout << "beg" << bcPairCache.worldCollisions.size();
 	{//Remove all uncolliding pairs
 		std::list<btBroadphasePair>::iterator it = bcPairCache.worldCollisions.begin();
 		auto end = bcPairCache.worldCollisions.end();
 		while (it != end) {
 			btBroadphasePair& pair = *it;
+			//proxy0 will allways be the blockCollider so no need to check which is which
 
-			//std::unordered_set<btCollisionObject*> &toRemove = bcPairCache.toRemove;
-			//if (toRemove.find((btCollisionObject*)pair.m_pProxy0->m_clientObject) != toRemove.end()) { //proxy0 will allways be the blockCollider so no need to check which is which
-			//	deletePair(pair, dispatcher);
-			//	it = bcPairCache.worldCollisions.erase(it);
-			//	continue;
-			//}
-
-			AABB aabb1((btCollisionObject*)pair.m_pProxy0->m_clientObject);
-			AABB aabb2((btCollisionObject*)pair.m_pProxy1->m_clientObject);
-			if (!aabb1.overlaps(aabb2)) { //TODO: check if this comparison is too different to the doWorldCollisions one
+			std::unordered_set<btCollisionObject*> &toRemove = bcPairCache.toRemove;//Delete all broken blocks
+			if (toRemove.find((btCollisionObject*)pair.m_pProxy0->m_clientObject) != toRemove.end()) {
+				((btCollisionObject*)pair.m_pProxy1->m_clientObject)->activate();
 				deletePair(pair, dispatcher);
 				it = bcPairCache.worldCollisions.erase(it);
 				continue;
+			}
 
+			AABB aabb1((btCollisionObject*)pair.m_pProxy0->m_clientObject);
+			AABB aabb2((btCollisionObject*)pair.m_pProxy1->m_clientObject);
+			if (!aabb1.overlaps(aabb2)) {
+				deletePair(pair, dispatcher);
+				it = bcPairCache.worldCollisions.erase(it);
+				continue;
 			}
 
 			++it;
 		}
 	}
-	bcPairCache.toRemove.clear();
-	std::cout << " end" << bcPairCache.worldCollisions.size() << std::endl;
 
-	////Delete all removed blockColliders
-	//for (btCollisionObject* obj : bcPairCache.toRemove) {
-	//	deleteBlock(obj);
+	//for (btCollisionObject* collBlock : bcPairCache.toRemove) {
+	//	deleteBlock(collBlock);
 	//}
+	bcPairCache.toRemove.clear();
 
 	//Collide rigedbodies with the world
 	for (int i = collisionWorld->getNumCollisionObjects() - 1; i >= 0; i--) {
@@ -75,8 +76,7 @@ void bcSimpleBroadphase::calculateOverlappingPairs(btDispatcher * dispatcher) {
 			if (cBD->colliding.empty()) {
 				deleteBlock(pair.second);
 				it2 = chunk->storage.erase(it2);
-			}
-			else {
+			} else {
 				++it2;
 			}
 		}
@@ -152,11 +152,15 @@ btCollisionObject* bcSimpleBroadphase::makeBlock(glm::ivec3 pos) {
 	proxy->m_uniqueId = INT_MIN;//Do this to prevent btBroadphasePair reordering itself
 
 	obj->setBroadphaseHandle(proxy);
+	colls++;
+
 	return obj;
 }
 
 void bcSimpleBroadphase::deleteBlock(btCollisionObject * blockCollider) {
-	delete blockCollider->getUserPointer();
+	colls--;
+
+	delete (ColBlockData*)blockCollider->getUserPointer();
 	delete blockCollider->getBroadphaseHandle();
 	delete ((btRigidBody*)blockCollider)->getMotionState();
 	delete blockCollider;

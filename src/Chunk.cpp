@@ -77,9 +77,14 @@ bool Chunk::setBlock(collumLoc x, collumLoc y, collumLoc z, int block) {
 			}
 		} 
 
-		if (block == 0) {
-			//btCollisionObject *obj = storage[glm::ivec3(x, y, z)];
-			//bcPairCache->toRemove.insert(obj);
+		if (block == 0) {//Delete blockCollider if it exits
+			glm::ivec3 vecPos(x, y, z);
+			auto it = storage.find(vecPos);
+
+			if (it != storage.end()) {
+				bcPairCache->toRemove.insert((*it).second);
+				//storage.erase(it);
+			}
 		}
 
 		return true;
