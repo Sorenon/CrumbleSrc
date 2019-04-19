@@ -16,7 +16,7 @@ include_directories("${PROJECT_BINARY_DIR}")
  
 #Library include directories
 include_directories("${GLFW_INCLUDE_DIR}")
-include_directories("${BULLET_INCLUDE_DIR}")
+include_directories("${BULLET_INCLUDE_DIR}") 
 include_directories("${PROJECT_SOURCE_DIR}/glad/include") 
 include_directories("${PROJECT_SOURCE_DIR}/headerlibs")
 

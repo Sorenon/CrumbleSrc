@@ -12,6 +12,7 @@
 #include "Player.h"
 #include "globals.h"
 #include "FMath.h"
+#include "PhysicsWorld.h"
 
 GamerRenderer::GamerRenderer() {
 	stbi_set_flip_vertically_on_load(true);
@@ -107,23 +108,23 @@ void GamerRenderer::doRender(float t) {
 		}
 	}
 
-	//{//Render bullet object
-	//	btTransform trans;
-	//	rbCube->getMotionState()->getWorldTransform(trans);
+	{//Render bullet object
+		btTransform trans;
+		p_physicsWorld->rbCube->getMotionState()->getWorldTransform(trans);
 
-	//	btVector3 transOrigin = trans.getOrigin();
+		btVector3 transOrigin = trans.getOrigin();
 
-	//	glBindVertexArray(cubeVAO.id);
-	//	glActiveTexture(GL_TEXTURE0);
-	//	glBindTexture(GL_TEXTURE_2D, texture);
+		glBindVertexArray(cubeVAO.id);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
 
-	//	glm::mat4 model = glm::mat4(1.0f);
-	//	trans.getOpenGLMatrix(glm::value_ptr(model));
-	//	model = glm::translate(model, -glm::vec3(0.5f, 0.5f, 0.5f));//TODO: impove cube VBO 
-	//	glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
+		glm::mat4 model = glm::mat4(1.0f);
+		trans.getOpenGLMatrix(glm::value_ptr(model));
+		model = glm::translate(model, -glm::vec3(0.5f, 0.5f, 0.5f));//TODO: impove cube VBO 
+		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
-	//	glDrawArrays(GL_TRIANGLES, 0, cubeVAO.vertices);
-	//}
+		glDrawArrays(GL_TRIANGLES, 0, cubeVAO.vertices);
+	}
 
 	//if (false) {//Render collisionBlocks
 	//	for (auto &it : world.chunks) {
