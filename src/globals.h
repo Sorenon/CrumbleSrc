@@ -21,7 +21,7 @@ namespace CrumbleGlobals {
 
 extern World world;
 extern Player* p_player;
-extern PhysicsWorld *p_physicsWorld;
+extern PhysicsWorld* p_physicsWorld;
 
 extern int wWidth;
 extern int wHeight;

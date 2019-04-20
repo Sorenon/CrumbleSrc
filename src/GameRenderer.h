@@ -7,7 +7,7 @@
 #include "ShaderConstructor.h"
 #include "FileUtil.h"
 
-class GamerRenderer {
+class GameRenderer {
 public:
 	ShaderProgram texturedProgram = ShaderProgram(ShaderConstructor(FileUtil::readFile("E:/CProjects/Crumble/CrumbleSrc/src/Shaders/textured.vert").c_str(), GL_VERTEX_SHADER), ShaderConstructor(FileUtil::readFile("E:/CProjects/Crumble/CrumbleSrc/src/Shaders/textured.frag").c_str(), GL_FRAGMENT_SHADER));
 	ShaderProgram texColourProgram = ShaderProgram(ShaderConstructor(FileUtil::readFile("E:/CProjects/Crumble/CrumbleSrc/src/Shaders/texColour.vert").c_str(), GL_VERTEX_SHADER), ShaderConstructor(FileUtil::readFile("E:/CProjects/Crumble/CrumbleSrc/src/Shaders/texColour.frag").c_str(), GL_FRAGMENT_SHADER));
@@ -19,8 +19,8 @@ public:
 	GLuint texture;
 
 public:
-	GamerRenderer();
-	~GamerRenderer();
+	GameRenderer();
+	~GameRenderer();
 
 	t_VAO createCubeVAO();
 	t_VAO createLineCubeVAO();

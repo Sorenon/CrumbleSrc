@@ -15,6 +15,21 @@ bcSimpleBroadphase::bcSimpleBroadphase() : btSimpleBroadphaseCopy() {
 	world.bcPairCache = &bcPairCache;
 }
 
+bcSimpleBroadphase::~bcSimpleBroadphase() {
+	//for (btBroadphasePair pair : bcPairCache.worldCollisions) {
+	//	deletePair(pair, collisionWorld->getDispatcher());
+	//}
+	//
+	//for (auto &it : world.chunks) {
+	//	Chunk *chunk = it.second;
+
+	//	for (auto it : chunk->storage) {
+	//		deleteBlock(it.second);
+	//	}
+	//	chunk->storage.clear();
+	//}
+}
+
 void bcSimpleBroadphase::calculateOverlappingPairs(btDispatcher * dispatcher) {
 	btSimpleBroadphaseCopy::calculateOverlappingPairs(dispatcher);
 	std::cout << bcPairCache.worldCollisions.size() << std::endl;
@@ -135,7 +150,7 @@ btCollisionObject* bcSimpleBroadphase::makeBlock(glm::ivec3 pos) {
 	btCollisionObject* obj = new btCollisionObject();
 	obj->setWorldTransform(trans);
 	obj->setUserPointer(new ColBlockData);
-	obj->setCollisionShape(blockShape);
+	obj->setCollisionShape(&blockShape);
 	obj->setRestitution(0.1f);
 	obj->setFriction(0.91f);
 
@@ -144,7 +159,7 @@ btCollisionObject* bcSimpleBroadphase::makeBlock(glm::ivec3 pos) {
 
 	btVector3 min;
 	btVector3 max;
-	blockShape->getAabb(trans, max, min);
+	blockShape.getAabb(trans, max, min);
 
 	btSimpleBroadphaseCopyProxy* proxy = new btSimpleBroadphaseCopyProxy(min, max, 1337, obj, collisionFilterGroup, collisionFilterMask);
 	proxy->m_uniqueId = INT_MIN;//Do this to prevent btBroadphasePair reordering itself

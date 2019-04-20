@@ -19,9 +19,10 @@ public:
 
 	bcOverlappingPairCache bcPairCache;
 
-	btBoxShape* blockShape = new btBoxShape(btVector3(btScalar(0.5f), btScalar(0.5f), btScalar(0.5f)));
+	btBoxShape blockShape = btBoxShape(btVector3(btScalar(0.5f), btScalar(0.5f), btScalar(0.5f)));
 public:
 	bcSimpleBroadphase();
+	~bcSimpleBroadphase();
 
 	virtual void calculateOverlappingPairs(btDispatcher* dispatcher);
 	virtual btOverlappingPairCache* getOverlappingPairCache();

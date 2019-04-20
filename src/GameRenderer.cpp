@@ -1,4 +1,4 @@
-#include "GamerRenderer.h"
+#include "GameRenderer.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <iostream>
 
@@ -14,17 +14,17 @@
 #include "FMath.h"
 #include "PhysicsWorld.h"
 
-GamerRenderer::GamerRenderer() {
+GameRenderer::GameRenderer() {
 	stbi_set_flip_vertically_on_load(true);
 	texture = generateTexture("C:/Users/Sorenon/Crumble/src/main/resources/grass.png");
 }
 
 
-GamerRenderer::~GamerRenderer() {
+GameRenderer::~GameRenderer() {
 	//TODO clean up
 }
 
-void GamerRenderer::doRender(float t) {
+void GameRenderer::doRender(float t) {
 	//int chunksUpdated = 0;
 	for (auto pair : world.chunks) {//Remake VAOs
 		//break;
@@ -232,7 +232,7 @@ void GamerRenderer::doRender(float t) {
 	glDisable(GL_BLEND);
 }
 
-t_VAO  GamerRenderer::createCubeVAO() {
+t_VAO  GameRenderer::createCubeVAO() {
 	std::vector<float> vertices;
 
 	//To do: add boilerplate
@@ -283,7 +283,7 @@ t_VAO  GamerRenderer::createCubeVAO() {
 	return { VAO, VBO, 6 * 6 };
 }
 
-t_VAO  GamerRenderer::createLineCubeVAO() {
+t_VAO  GameRenderer::createLineCubeVAO() {
 	float vertices[] = {
 		0.0f, 0.0f, 0.0f,  0.0f, 0.0f,//Front 8
 		1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
@@ -335,7 +335,7 @@ t_VAO  GamerRenderer::createLineCubeVAO() {
 	return { VAO, VBO, 8 * 2 + 4 * 2 };
 }
 
-t_VAO GamerRenderer::createGUIPlain() {
+t_VAO GameRenderer::createGUIPlain() {
 	float *side = createZFace(0, 0, 0, false);
 
 	GLuint VBO, VAO;
@@ -360,7 +360,7 @@ t_VAO GamerRenderer::createGUIPlain() {
 	return { VAO, VBO, 6 * 6 };
 }
 
-t_VAO GamerRenderer::createSubChunkVAO(SubChunk & subChunk, SubChunk & above, SubChunk & below, SubChunk & right, SubChunk & left, SubChunk & front, SubChunk & back) {
+t_VAO GameRenderer::createSubChunkVAO(SubChunk & subChunk, SubChunk & above, SubChunk & below, SubChunk & right, SubChunk & left, SubChunk & front, SubChunk & back) {
 	std::vector<float> vertices;
 
 	int count = 0;
@@ -457,7 +457,7 @@ t_VAO GamerRenderer::createSubChunkVAO(SubChunk & subChunk, SubChunk & above, Su
 	return { VAO, VBO, count * 6 };
 }
 
-float * GamerRenderer::createYFace(int x, int y, int z, bool flipped) {
+float * GameRenderer::createYFace(int x, int y, int z, bool flipped) {
 	float *face;
 
 	if (flipped) {
@@ -485,7 +485,7 @@ float * GamerRenderer::createYFace(int x, int y, int z, bool flipped) {
 	return face;
 }
 
-float * GamerRenderer::createXFace(int x, int y, int z, bool flipped) {
+float * GameRenderer::createXFace(int x, int y, int z, bool flipped) {
 	float *face;
 
 	if (flipped) {
@@ -513,7 +513,7 @@ float * GamerRenderer::createXFace(int x, int y, int z, bool flipped) {
 	return face;
 }
 
-float * GamerRenderer::createZFace(int x, int y, int z, bool flipped) {
+float * GameRenderer::createZFace(int x, int y, int z, bool flipped) {
 	float *face;
 
 	if (flipped) {
@@ -541,7 +541,7 @@ float * GamerRenderer::createZFace(int x, int y, int z, bool flipped) {
 	return face;
 }
 
-GLuint GamerRenderer::generateTexture(const char* path) {
+GLuint GameRenderer::generateTexture(const char* path) {
 	GLuint texture;
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
