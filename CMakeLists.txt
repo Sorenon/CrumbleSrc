@@ -33,11 +33,29 @@ file(GLOB bulletSrc
 )
 #add_library(BULLET STATIC IMPORTED)
 
-file(GLOB srcFiles
-    "${PROJECT_SOURCE_DIR}/src/*.h"
-    "${PROJECT_SOURCE_DIR}/src/*.cpp"
+file(GLOB_RECURSE sourceFiles
+    "${PROJECT_SOURCE_DIR}/src/*"
 )
 
-add_executable(Crumble "${PROJECT_SOURCE_DIR}/src/crumble.cpp" "${srcFiles}")
+foreach(FILE ${sourceFiles})
+	get_filename_component(RELDIR ${FILE} DIRECTORY )
+	file(RELATIVE_PATH PARENT_DIR "${PROJECT_SOURCE_DIR}/src" ${RELDIR})
+
+    string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}" "" GROUP "${PARENT_DIR}")
+
+    string(REPLACE "/" "\\" GROUP "${GROUP}")
+
+    if ("${FILE}" MATCHES ".*\\.cpp")
+       set(GROUP "Source Files\\${GROUP}")
+    elseif("${FILE}" MATCHES ".*\\.h")
+       set(GROUP "Header Files\\${GROUP}")
+	else()
+       set(GROUP "Resource Files\\${GROUP}")
+    endif()
+
+    source_group("${GROUP}" FILES "${FILE}")
+endforeach()
+
+add_executable(Crumble "${PROJECT_SOURCE_DIR}/src/crumble.cpp" ${sourceFiles})
 
 TARGET_LINK_LIBRARIES(Crumble GLFW GLAD opengl32 "${bulletSrc}")
