@@ -32,7 +32,6 @@ bcSimpleBroadphase::~bcSimpleBroadphase() {
 
 void bcSimpleBroadphase::calculateOverlappingPairs(btDispatcher * dispatcher) {
 	btSimpleBroadphaseCopy::calculateOverlappingPairs(dispatcher);
-	std::cout << bcPairCache.worldCollisions.size() << std::endl;
 
 	{//Remove all uncolliding pairs
 		std::list<btBroadphasePair>::iterator it = bcPairCache.worldCollisions.begin();
