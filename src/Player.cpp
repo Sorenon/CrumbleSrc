@@ -12,17 +12,7 @@ using namespace glm;
 Player::Player() {
 	transform.position = vec3(0, 90, 0);
 	transform.step();
-
-	//for (int x = 0; x < 16; x++) {
-	//	for (int y = 0; y < 256; y++) {
-	//		for (int z = 0; z < 16; z++) {
-	//			if (chunk.getBlock(x, y, z) != 0) {
-	//				AABB aabb(vec3(0, 0, 0), vec3(1, 1, 1));
-	//				world.push_back(aabb + vec3(x, y, z));
-	//			}
-	//		}
-	//	}
-	//}
+	collider = AABB(vec3(-0.4, 0, -0.4), vec3(0.4, 1.9, 0.4));
 }
 
 void Player::UpdateSingleThread() {
@@ -140,72 +130,4 @@ vec3 Player::getEyePos(float t) {
 
 vec3 Player::getEyePos() {
 	return transform.position + eyeHeight;
-}
-
-AABB Player::getLocalBoundingBox() {
-	return collider + transform.position;
-}
-
-void Player::Move() {
-	glm::vec3 move = velocity * CrumbleGlobals::FIXED_TIMESTEP;	//How far the player expects to move 
-	AABB playerCol = collider + transform.position;
-
-	std::vector<AABB> worldColliders;
-	{//Find all blocks (as AABBs) the player may collide with
-		worldColliders = world.getOverlappingBlocks(playerCol.expandByVelocity(velocity));
-	}
-
-	{//Collide along y axis
-		const float y = move.y;
-
-		for (AABB aabb : worldColliders) {
-			aabb.clipY(playerCol, move.y);
-		}
-
-		celing.clipY(playerCol, move.y);
-
-		if (y != move.y) {
-			velocity.y = 0;
-
-			if (y < 0.0f) {
-				onGround = true;
-			} else {
-				onGround = false;
-			}
-		} else {
-			onGround = false;
-		}
-
-		transform.position.y += move.y;
-		playerCol = collider + transform.position;
-	}
-
-	{//Collide along x axis
-		const float x = move.x;
-
-		for (AABB aabb : worldColliders) {
-			aabb.clipX(playerCol, move.x);
-		}
-
-		if (x != move.x) {
-			velocity.x = 0;
-		}
-
-		transform.position.x += move.x;
-		playerCol = collider + transform.position;
-	}
-
-	{//Collide along z axis
-		const float z = move.z;
-
-		for (AABB aabb : worldColliders) {
-			aabb.clipZ(playerCol, move.z);
-		}
-
-		if (z != move.z) {
-			velocity.z = 0;
-		}
-
-		transform.position.z += move.z;
-	}
 }
