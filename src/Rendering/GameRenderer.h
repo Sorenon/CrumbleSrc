@@ -2,10 +2,10 @@
 
 #include <glad/glad.h>
 
-#include "Chunk.h"
+#include "../Chunk.h"
 #include "ShaderProgram.h"
 #include "ShaderConstructor.h"
-#include "FileUtil.h"
+#include "../FileUtil.h"
 
 class GameRenderer {
 public:

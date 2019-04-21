@@ -9,10 +9,10 @@
 #include <glm/gtx/quaternion.hpp>
 #include <stb_image.h>
 
-#include "Player.h"
-#include "globals.h"
-#include "FMath.h"
-#include "PhysicsWorld.h"
+#include "../Player.h"
+#include "../globals.h"
+#include "../FMath.h"
+#include "../Physics/PhysicsWorld.h"
 
 GameRenderer::GameRenderer() {
 	stbi_set_flip_vertically_on_load(true);

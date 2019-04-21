@@ -1,7 +1,8 @@
 #include "ShaderProgram.h"
-#include "ShaderConstructor.h"
-#include "FileUtil.h"
 #include <iostream>
+
+#include "ShaderConstructor.h"
+#include "../FileUtil.h"
 
 ShaderProgram::ShaderProgram(ShaderConstructor &vertex, ShaderConstructor &fragment) {
 	id = glCreateProgram();

@@ -5,10 +5,10 @@
 #include <glm/glm.hpp>
 
 #include "btSimpleBroadphaseCopy.h"
-#include "globals.h"
-#include "FMath.h"
-#include "AABB.h"
-#include "Chunk.h"
+#include "../globals.h"
+#include "../FMath.h"
+#include "../AABB.h"
+#include "../Chunk.h"
 
 bcSimpleBroadphase::bcSimpleBroadphase() : btSimpleBroadphaseCopy() {
 	bcPairCache.defaultCache = m_pairCache;
