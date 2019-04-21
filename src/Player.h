@@ -5,13 +5,11 @@
 
 #include "Transform.h"
 #include "AABB.h"
-
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+#include "Entity.h"
 
 using namespace glm;
 
-class Player {
+class Player : public Entity {
 public:
 	Transform transform;
 	vec3 velocity;
@@ -29,7 +27,8 @@ public:
 public:
 	Player();
 
-	void Update(GLFWwindow* window);
+	virtual void UpdateSingleThread();
+	virtual void UpdateMultiThread();
 	
 	void ApplyFriction(float friction);
 	void WalkGround(vec3 wishVel);

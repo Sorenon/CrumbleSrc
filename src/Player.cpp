@@ -1,8 +1,6 @@
 #include "Player.h"
 #include <iostream>
 
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
 #include "globals.h"
@@ -27,7 +25,10 @@ Player::Player() {
 	//}
 }
 
-void Player::Update(GLFWwindow* window) {
+void Player::UpdateSingleThread() {
+}
+
+void Player::UpdateMultiThread() {
 	transform.step();
 
 	velocity.y -= 28 * CrumbleGlobals::FIXED_TIMESTEP;			//Apply gravity
