@@ -10,6 +10,8 @@
 #include <stb_image.h>
 
 #include "../Player.h"
+#include "../Entity.h"
+#include "../EntityFoo.h"
 #include "../globals.h"
 #include "../FMath.h"
 #include "../Physics/PhysicsWorld.h"
@@ -121,7 +123,20 @@ void GameRenderer::doRender(float t) {
 
 		glm::mat4 model = glm::mat4(1.0f);
 		trans.getOpenGLMatrix(glm::value_ptr(model));
-		model = glm::translate(model, -glm::vec3(0.5f, 0.5f, 0.5f));//TODO: impove cube VBO 
+		model = glm::translate(model, -glm::vec3(0.5f, 0.5f, 0.5f));
+		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
+
+		glDrawArrays(GL_TRIANGLES, 0, cubeVAO.vertices);
+	}
+
+	for (Entity* entity : entities) {
+		glBindVertexArray(cubeVAO.id);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, entity->transform.getInterpPos(t));
+		model = glm::translate(model, -glm::vec3(0.5f, 0, 0.5f));//TODO: impove cube VBO 
 		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
 		glDrawArrays(GL_TRIANGLES, 0, cubeVAO.vertices);

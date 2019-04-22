@@ -29,10 +29,6 @@ void Input::init(GLFWwindow * windowIn) {
 void Input::processInput() {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
-	//if (glfwGetKey(window, GLFW_KEY_GRAVE_ACCENT) == GLFW_PRESS) {
-	//	p_player->velocity = Vectors::ZERO;
-	//	p_player->transform.position = glm::vec3(0, 64, 0);
-	//}
 }
 
 

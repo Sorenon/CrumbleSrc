@@ -1,10 +1,12 @@
 #pragma once
+#include <vector>
 
 #include <glm/glm.hpp>
 
 #include "World.h"
 
 class Player;
+class Entity;
 class PhysicsWorld;
 class GameRenderer;
 
@@ -22,6 +24,7 @@ namespace CrumbleGlobals {
 
 extern World world;
 extern Player* p_player;
+extern std::vector<Entity*> entities;
 extern PhysicsWorld* p_physicsWorld;
 extern GameRenderer* p_gameRenderer;
 
