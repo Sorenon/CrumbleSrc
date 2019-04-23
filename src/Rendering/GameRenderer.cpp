@@ -129,17 +129,8 @@ void GameRenderer::doRender(float t) {
 		glDrawArrays(GL_TRIANGLES, 0, cubeVAO.vertices);
 	}
 
-	for (Entity* entity : entities) {
-		glBindVertexArray(cubeVAO.id);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
-
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, entity->transform.getInterpPos(t));
-		model = glm::translate(model, -glm::vec3(0.5f, 0, 0.5f));//TODO: impove cube VBO 
-		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
-
-		glDrawArrays(GL_TRIANGLES, 0, cubeVAO.vertices);
+	for (Entity* entity : entities) {//Render all entities
+		entity->Render(t, this);
 	}
 
 	//if (false) {//Render collisionBlocks

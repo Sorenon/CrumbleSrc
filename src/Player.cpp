@@ -21,6 +21,8 @@ void Player::UpdateSingleThread() {
 void Player::UpdateMultiThread() {
 	transform.step();
 
+	//std::this_thread::sleep_for(std::chrono::milliseconds(1)); //Neat
+
 	velocity.y -= 28 * CrumbleGlobals::FIXED_TIMESTEP;			//Apply gravity
 
 	vec3 forward = transform.getForward();

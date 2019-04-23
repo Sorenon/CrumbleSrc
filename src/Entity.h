@@ -7,6 +7,8 @@
 
 using namespace glm;
 
+class GameRenderer;
+
 class Entity {
 public:
 	Transform transform;
@@ -33,7 +35,8 @@ public:
 	virtual void UpdateMultiThread() = 0;
 
 	AABB getLocalBoundingBox();
-
 	void Move();
+
+	virtual void Render(float t, GameRenderer* renderer) {}
 };
 

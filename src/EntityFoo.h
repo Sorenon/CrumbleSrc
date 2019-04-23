@@ -9,5 +9,7 @@ public:
 
 	virtual void UpdateSingleThread();
 	virtual void UpdateMultiThread();
+
+	virtual void Render(float t, GameRenderer* renderer);
 };
 
