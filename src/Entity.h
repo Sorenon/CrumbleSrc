@@ -31,6 +31,11 @@ public:
 
 		Movement, Animations
 		Called Second
+
+		There could be a possible issue with bounding boxes overlapping incorrectly
+		(Possible sollution: Do movement in two phases)
+		 1. Limit velocity by world and create expanded AABB //Multithreaded
+		 2. Collide with other expanded AABBs //Single threaded
 	*/
 	virtual void UpdateMultiThread() = 0;
 

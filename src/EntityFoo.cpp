@@ -1,4 +1,6 @@
 #include "EntityFoo.h"
+#include <math.h>
+#include <iostream>
 
 #include <glm/glm.hpp>
 #include <glad/glad.h>
@@ -24,6 +26,29 @@ void EntityFoo::UpdateMultiThread() {
 
 	velocity.y -= 20 * CrumbleGlobals::FIXED_TIMESTEP;			//Apply gravity
 	velocity.y *= 0.98f;
+
+	if (onGround) {
+		glm::vec3 direction = (destination - transform.position);
+
+		glm::vec3 directionNorm(0,0,0);
+
+		if (!glm::all(glm::equal(direction, Vectors::ZERO))) {
+			directionNorm = glm::normalize(direction);
+		}
+
+		if (direction.x != 0) {
+			direction.x /= CrumbleGlobals::FIXED_TIMESTEP;
+		}
+
+		if (direction.z != 0) {
+			direction.z /= CrumbleGlobals::FIXED_TIMESTEP;
+		}
+
+		velocity.x = fabsf(direction.x) < fabsf(directionNorm.x) ? direction.x : directionNorm.x;
+		velocity.z = fabsf(direction.z) < fabsf(directionNorm.z) ? direction.z : directionNorm.z;
+	
+		std::cout << velocity.x << std::endl;
+	}
 
 	Move();
 }
