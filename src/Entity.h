@@ -12,7 +12,7 @@ class GameRenderer;
 class Entity {
 public:
 	Transform transform;
-	vec3 velocity;
+	vec3 velocity; //Velocity in m/s
 	AABB collider = AABB(0,0,0,0,0,0);
 
 	bool onGround = false;

@@ -12,6 +12,18 @@ class bcOverlappingPairCache;
 typedef long long chunkID;
 typedef int chunkPos;
 
+typedef glm::ivec3 Face;
+
+namespace Faces {
+
+	const Face Front = { 0, 0, -1 };
+	const Face Behind = { 0, 0, 1 };
+	const Face Right = { 1, 0, 0 };
+	const Face Left = { -1, 0, 0 };
+
+	const Face horizontal[] = { Front, Behind, Right, Left };
+};
+
 typedef struct {
 	bool hit = false;
 	glm::ivec3 hitPos;

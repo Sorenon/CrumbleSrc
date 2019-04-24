@@ -28,24 +28,27 @@ void EntityFoo::UpdateMultiThread() {
 	velocity.y *= 0.98f;
 
 	if (onGround) {
-		glm::vec3 direction = (destination - transform.position);
+		float speed = 2.5f;
 
-		glm::vec3 directionNorm(0,0,0);
+		glm::vec3 distance = (destination - transform.position);
+		distance.y = 0;
 
-		if (!glm::all(glm::equal(direction, Vectors::ZERO))) {
-			directionNorm = glm::normalize(direction);
+		glm::vec3 direction(0,0,0);
+
+		if (!glm::all(glm::equal(distance, Vectors::ZERO))) {
+			direction = glm::normalize(distance) * speed;
 		}
 
-		if (direction.x != 0) {
-			direction.x /= CrumbleGlobals::FIXED_TIMESTEP;
+		if (distance.x != 0) {
+			distance.x /= CrumbleGlobals::FIXED_TIMESTEP;
 		}
 
-		if (direction.z != 0) {
-			direction.z /= CrumbleGlobals::FIXED_TIMESTEP;
+		if (distance.z != 0) {
+			distance.z /= CrumbleGlobals::FIXED_TIMESTEP;
 		}
 
-		velocity.x = fabsf(direction.x) < fabsf(directionNorm.x) ? direction.x : directionNorm.x;
-		velocity.z = fabsf(direction.z) < fabsf(directionNorm.z) ? direction.z : directionNorm.z;
+		velocity.x = fabsf(distance.x) < fabsf(direction.x) ? distance.x : direction.x;
+		velocity.z = fabsf(distance.z) < fabsf(direction.z) ? distance.z : direction.z;
 	
 		std::cout << velocity.x << std::endl;
 	}

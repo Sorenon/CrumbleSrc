@@ -14,7 +14,7 @@ class KeyBinding {
 public:
 	int keyID;
 	InputType inputType;
-	GLFWwindow* window;
+	GLFWwindow* window = nullptr;
 
 	int timesPressed = 0;
 
@@ -60,8 +60,9 @@ public:
 	KeyBinding kbPlace = KeyBinding(InputType::Mouse, GLFW_MOUSE_BUTTON_RIGHT);
 	
 	KeyBinding kbNoClip = KeyBinding(InputType::Key, GLFW_KEY_F3);
+	KeyBinding kbDoThing = KeyBinding(InputType::Key, GLFW_KEY_P);
 
-	std::vector<KeyBinding*> keybinds = {&kbForward, &kbBackward, &kbLeft, &kbRight, &kbJump, &kbCrouch, &kbAttack, &kbPlace, &kbNoClip};
+	std::vector<KeyBinding*> keybinds = {&kbForward, &kbBackward, &kbLeft, &kbRight, &kbJump, &kbCrouch, &kbAttack, &kbPlace, &kbNoClip, &kbDoThing};
 
 	InputAxis axForward = InputAxis(&kbForward, &kbBackward);
 	InputAxis axRight = InputAxis(&kbRight, &kbLeft);

@@ -30,7 +30,7 @@ void GameRenderer::doRender(float t) {
 	//int chunksUpdated = 0;
 	for (auto pair : world.chunks) {//Remake VAOs
 		//break;
-		Chunk &chunk = *pair.second;
+		Chunk& chunk = *pair.second;
 		chunkID id = pair.first;
 		int x = id >> 32;
 		int z = (int)id;
@@ -39,17 +39,17 @@ void GameRenderer::doRender(float t) {
 			//std::cout << "Updating Chunk " << ++chunksUpdated << std::endl;
 
 			for (int i = 0; i < 16; i++) {
-				SubChunk *subChunk = chunk.subChunks[i];
+				SubChunk* subChunk = chunk.subChunks[i];
 				if (subChunk != nullptr && subChunk->needsUpdate) {
 
-					SubChunk &above = i + 1 >= 16 ? SubChunk::EMPTY : chunk.getSubChunkSafe(i + 1);
-					SubChunk &below = i - 1 < 0 ? SubChunk::EMPTY : chunk.getSubChunkSafe(i - 1);
+					SubChunk& above = i + 1 >= 16 ? SubChunk::EMPTY : chunk.getSubChunkSafe(i + 1);
+					SubChunk & below = i - 1 < 0 ? SubChunk::EMPTY : chunk.getSubChunkSafe(i - 1);
 
-					SubChunk &right = world.getChunkSafe(x + 1, z).getSubChunkSafe(i);
-					SubChunk &left = world.getChunkSafe(x - 1, z).getSubChunkSafe(i);
+					SubChunk & right = world.getChunkSafe(x + 1, z).getSubChunkSafe(i);
+					SubChunk & left = world.getChunkSafe(x - 1, z).getSubChunkSafe(i);
 
-					SubChunk &front = world.getChunkSafe(x, z - 1).getSubChunkSafe(i);
-					SubChunk &back = world.getChunkSafe(x, z + 1).getSubChunkSafe(i);
+					SubChunk & front = world.getChunkSafe(x, z - 1).getSubChunkSafe(i);
+					SubChunk & back = world.getChunkSafe(x, z + 1).getSubChunkSafe(i);
 
 					t_VAO oldVAO = chunk.subChunkVAOs[i];
 					if (oldVAO.id != 0) {
@@ -89,13 +89,13 @@ void GameRenderer::doRender(float t) {
 	texturedProgram.activate();
 
 	for (auto pair : world.chunks) { //Render world
-		Chunk &chunk = *pair.second;
+		Chunk& chunk = *pair.second;
 		chunkID id = pair.first;
 		int x = id >> 32;
 		int z = (int)id;
 
 		for (int i = 0; i < 16; i++) {
-			t_VAO &vao = chunk.subChunkVAOs[i];
+			t_VAO& vao = chunk.subChunkVAOs[i];
 
 			if (vao.id != 0) {
 				glBindVertexArray(vao.id);
@@ -133,28 +133,27 @@ void GameRenderer::doRender(float t) {
 		entity->Render(t, this);
 	}
 
-	//if (false) {//Render collisionBlocks
-	//	for (auto &it : world.chunks) {
-	//		Chunk *chunk = it.second;
+	//for (auto& it : world.chunks) {//Render collisionBlocks
+	//	Chunk* chunk = it.second;
 
-	//		std::unordered_map<glm::ivec3, btCollisionObject*, HashFunc_ivec3, HashFunc_ivec3>::iterator it2 = chunk->storage.begin();
-	//		auto end = chunk->storage.end();
+	//	std::unordered_map<glm::ivec3, btCollisionObject*, HashFunc_ivec3, HashFunc_ivec3>::iterator it2 = chunk->storage.begin();
+	//	auto end = chunk->storage.end();
 
-	//		while (it2 != end) {
-	//			auto pair = *it2;
+	//	while (it2 != end) {
+	//		auto pair = *it2;
 
-	//			glBindVertexArray(cubeVAO.id);
-	//			glActiveTexture(GL_TEXTURE0);
-	//			glBindTexture(GL_TEXTURE_2D, 0);
+	//		glBindVertexArray(planeVAO.id);
+	//		glActiveTexture(GL_TEXTURE0);
+	//		glBindTexture(GL_TEXTURE_2D, 0);
 
-	//			glm::mat4 model = glm::mat4(1.0f);
-	//			model = glm::translate(model, glm::vec3(pair.first) + glm::vec3(0.1f, 0.1f, 0.1f));//TODO: impove cube VBO 
-	//			glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
+	//		glm::mat4 model = glm::mat4(1.0f);
+	//		model = glm::translate(model, glm::vec3(pair.first) + glm::vec3(0, 1.01f, 1));
+	//		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
+	//		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
-	//			glDrawArrays(GL_TRIANGLES, 0, cubeVAO.vertices);
+	//		glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);
 
-	//			++it2;
-	//		}
+	//		++it2;
 	//	}
 	//}
 
@@ -226,13 +225,13 @@ void GameRenderer::doRender(float t) {
 		glDisable(GL_DEPTH_TEST);
 
 		glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
-		glBindVertexArray(plane.id);
+		glBindVertexArray(planeVAO.id);
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(-0.5, -0.5, -30));
 		glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
-		glDrawArrays(GL_TRIANGLES, 0, plane.vertices);
+		glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);
 	}
 
 	glDisable(GL_BLEND);
@@ -242,7 +241,7 @@ t_VAO  GameRenderer::createCubeVAO() {
 	std::vector<float> vertices;
 
 	//To do: add boilerplate
-	float *side = createYFace(0, 1, 0, false);
+	float* side = createYFace(0, 1, 0, false);
 	vertices.insert(vertices.end(), side, &side[6 * 5]);
 	delete[] side;
 
@@ -342,7 +341,7 @@ t_VAO  GameRenderer::createLineCubeVAO() {
 }
 
 t_VAO GameRenderer::createGUIPlain() {
-	float *side = createZFace(0, 0, 0, false);
+	float* side = createZFace(0, 0, 0, false);
 
 	GLuint VBO, VAO;
 	glGenVertexArrays(1, &VAO);
@@ -378,7 +377,7 @@ t_VAO GameRenderer::createSubChunkVAO(SubChunk & subChunk, SubChunk & above, Sub
 						if (y + 1 >= 16 ? above.getBlock(x, 0, z) == 0 : subChunk.getBlock(x, y + 1, z) == 0) {//Top side
 							count++;
 
-							float *side = createYFace(x, y + 1, z, false);
+							float* side = createYFace(x, y + 1, z, false);
 
 							vertices.insert(vertices.end(), side, &side[6 * 5]);
 
@@ -387,7 +386,7 @@ t_VAO GameRenderer::createSubChunkVAO(SubChunk & subChunk, SubChunk & above, Sub
 						if (y - 1 < 0 ? below.getBlock(x, 15, z) == 0 : subChunk.getBlock(x, y - 1, z) == 0) {//Bottom side
 							count++;
 
-							float *side = createYFace(x, y, z, true);
+							float* side = createYFace(x, y, z, true);
 
 							vertices.insert(vertices.end(), side, &side[6 * 5]);
 
@@ -398,7 +397,7 @@ t_VAO GameRenderer::createSubChunkVAO(SubChunk & subChunk, SubChunk & above, Sub
 						if (x + 1 >= 16 ? right.getBlock(0, y, z) == 0 : subChunk.getBlock(x + 1, y, z) == 0) {//Right side
 							count++;
 
-							float *side = createXFace(x + 1, y, z, false);
+							float* side = createXFace(x + 1, y, z, false);
 
 							vertices.insert(vertices.end(), side, &side[6 * 5]);
 
@@ -408,7 +407,7 @@ t_VAO GameRenderer::createSubChunkVAO(SubChunk & subChunk, SubChunk & above, Sub
 						if (x - 1 < 0 ? left.getBlock(15, y, z) == 0 : subChunk.getBlock(x - 1, y, z) == 0) {//Bottom side
 							count++;
 
-							float *side = createXFace(x, y, z, true);
+							float* side = createXFace(x, y, z, true);
 
 							vertices.insert(vertices.end(), side, &side[6 * 5]);
 
@@ -419,7 +418,7 @@ t_VAO GameRenderer::createSubChunkVAO(SubChunk & subChunk, SubChunk & above, Sub
 						if (z + 1 >= 16 ? back.getBlock(x, y, 0) == 0 : subChunk.getBlock(x, y, z + 1) == 0) {//Back side
 							count++;
 
-							float *side = createZFace(x, y, z + 1, false);
+							float* side = createZFace(x, y, z + 1, false);
 
 							vertices.insert(vertices.end(), side, &side[6 * 5]);
 
@@ -428,7 +427,7 @@ t_VAO GameRenderer::createSubChunkVAO(SubChunk & subChunk, SubChunk & above, Sub
 						if (z - 1 < 0 ? front.getBlock(x, y, 15) == 0 : subChunk.getBlock(x, y, z - 1) == 0) {//Front side
 							count++;
 
-							float *side = createZFace(x, y, z, true);
+							float* side = createZFace(x, y, z, true);
 
 							vertices.insert(vertices.end(), side, &side[6 * 5]);
 
@@ -463,8 +462,8 @@ t_VAO GameRenderer::createSubChunkVAO(SubChunk & subChunk, SubChunk & above, Sub
 	return { VAO, VBO, count * 6 };
 }
 
-float * GameRenderer::createYFace(int x, int y, int z, bool flipped) {
-	float *face;
+float* GameRenderer::createYFace(int x, int y, int z, bool flipped) {
+	float* face;
 
 	if (flipped) {
 		face = new float[5 * 6]{
@@ -476,7 +475,8 @@ float * GameRenderer::createYFace(int x, int y, int z, bool flipped) {
 		0.0f + x,  0.0f + y, 1.0f + z,  0.0f, 0.0f,
 		0.0f + x,  0.0f + y, 0.0f + z,  0.0f, 1.0f,
 		};
-	} else {
+	}
+	else {
 		face = new float[5 * 6]{
 		0.0f + x,  0.0f + y, 0.0f + z,  0.0f, 1.0f,
 		1.0f + x,  0.0f + y, 1.0f + z,  1.0f, 0.0f,
@@ -491,8 +491,8 @@ float * GameRenderer::createYFace(int x, int y, int z, bool flipped) {
 	return face;
 }
 
-float * GameRenderer::createXFace(int x, int y, int z, bool flipped) {
-	float *face;
+float* GameRenderer::createXFace(int x, int y, int z, bool flipped) {
+	float* face;
 
 	if (flipped) {
 		face = new float[5 * 6]{
@@ -504,7 +504,8 @@ float * GameRenderer::createXFace(int x, int y, int z, bool flipped) {
 		0.0f + x, 0.0f + y, 1.0f + z,  0.0f, 0.0f,
 		0.0f + x, 1.0f + y, 1.0f + z,  1.0f, 0.0f,
 		};
-	} else {
+	}
+	else {
 		face = new float[5 * 6]{
 		0.0f + x, 1.0f + y, 1.0f + z,  1.0f, 0.0f,
 		0.0f + x, 0.0f + y, 0.0f + z,  0.0f, 1.0f,
@@ -519,8 +520,8 @@ float * GameRenderer::createXFace(int x, int y, int z, bool flipped) {
 	return face;
 }
 
-float * GameRenderer::createZFace(int x, int y, int z, bool flipped) {
-	float *face;
+float* GameRenderer::createZFace(int x, int y, int z, bool flipped) {
+	float* face;
 
 	if (flipped) {
 		face = new float[5 * 6]{
@@ -532,7 +533,8 @@ float * GameRenderer::createZFace(int x, int y, int z, bool flipped) {
 		0.0f + x, 0.0f + y,  0.0f + z,  0.0f, 0.0f,
 		0.0f + x, 1.0f + y,  0.0f + z,  0.0f, 1.0f,
 		};
-	} else {
+	}
+	else {
 		face = new float[5 * 6]{
 		0.0f + x, 0.0f + y,  0.0f + z,  0.0f, 0.0f,
 		1.0f + x, 0.0f + y,  0.0f + z,  1.0f, 0.0f,
@@ -560,12 +562,13 @@ GLuint GameRenderer::generateTexture(const char* path) {
 
 	int width, height, nrChannels;
 
-	unsigned char *data = stbi_load(path, &width, &height, &nrChannels, 0);
+	unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
 
 	if (data) {
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
-	} else {
+	}
+	else {
 		std::cout << "Failed to load texture" << std::endl;
 	}
 	stbi_image_free(data);

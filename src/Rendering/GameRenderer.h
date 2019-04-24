@@ -15,7 +15,7 @@ public:
 	GLint alphaIDTexCol = glGetUniformLocation(texColourProgram.id, "alpha");
 	t_VAO cubeVAO = createCubeVAO();
 	t_VAO blockLineVAO = createLineCubeVAO();
-	t_VAO plane = createGUIPlain();
+	t_VAO planeVAO = createGUIPlain();
 	GLuint texture;
 
 public:
