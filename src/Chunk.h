@@ -47,7 +47,7 @@ public:
 	bool needsUpdate = true;
 	t_VAO subChunkVAOs[16];
 	std::unordered_map<glm::ivec3, btCollisionObject*, HashFunc_ivec3, HashFunc_ivec3> storage;
-	bcOverlappingPairCache* bcPairCache;
+	bcOverlappingPairCache* bcPairCache = nullptr;
 
 public:
 	Chunk();

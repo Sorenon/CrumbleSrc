@@ -15,8 +15,9 @@ public:
 	GLint alphaIDTexCol = glGetUniformLocation(texColourProgram.id, "alpha");
 	t_VAO cubeVAO = createCubeVAO();
 	t_VAO blockLineVAO = createLineCubeVAO();
-	t_VAO planeVAO = createGUIPlain();
+	t_VAO planeVAO = createPlain();
 	GLuint texture;
+	GLuint textureArrow;
 
 public:
 	GameRenderer();
@@ -24,11 +25,11 @@ public:
 
 	t_VAO createCubeVAO();
 	t_VAO createLineCubeVAO();
-	t_VAO createGUIPlain();
+	t_VAO createPlain();
 	t_VAO createSubChunkVAO(SubChunk &subChunk, SubChunk &above, SubChunk &below, SubChunk &right, SubChunk &left, SubChunk &front, SubChunk &back);
-	float *createXFace(int x, int y, int z, bool flipped);
-	float *createYFace(int x, int y, int z, bool flipped);
-	float *createZFace(int x, int y, int z, bool flipped);
+	float *createXFace(float x, float y, float z, bool flipped);
+	float *createYFace(float x, float y, float z, bool flipped);
+	float *createZFace(float x, float y, float z, bool flipped);
 
 	GLuint generateTexture(const char* path);
 

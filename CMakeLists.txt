@@ -9,6 +9,9 @@ set(GLFW_BINARY_DIR "" CACHE FILEPATH "path to GLFW binaries")
 
 set(BULLET_INCLUDE_DIR "" CACHE FILEPATH "path to BULLET include")
 set(BULLET_BINARY_DIR "" CACHE FILEPATH "path to BULLET binaries")
+
+set(FREETYPE_INCLUDE_DIR "" CACHE FILEPATH "path to FREETYPE include")
+set(FREETYPE_BINARY_DIR "" CACHE FILEPATH "path to FREETYPE binaries")
  
 # add the binary tree to the search path for include files
 # so that we will find TutorialConfig.h
@@ -17,12 +20,17 @@ include_directories("${PROJECT_BINARY_DIR}")
 #Library include directories
 include_directories("${GLFW_INCLUDE_DIR}")
 include_directories("${BULLET_INCLUDE_DIR}")
+include_directories("${FREETYPE_INCLUDE_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}/glad/include") 
 include_directories("${PROJECT_SOURCE_DIR}/headerlibs")
 
 #Add GLFW library 
 add_library(GLFW STATIC IMPORTED)
-set_target_properties(GLFW PROPERTIES IMPORTED_LOCATION ${GLFW_BINARY_DIR}/glfw3dll.lib)
+set_target_properties(GLFW PROPERTIES IMPORTED_LOCATION "${GLFW_BINARY_DIR}/glfw3dll.lib")
+
+#Add FREETYPE library
+add_library(FREETYPE STATIC IMPORTED)
+set_target_properties(FREETYPE PROPERTIES IMPORTED_LOCATION "${FREETYPE_BINARY_DIR}/freetype.lib")
 
 #Add glad library
 add_library(GLAD "${PROJECT_SOURCE_DIR}/glad/src/glad.c")
@@ -58,4 +66,6 @@ endforeach()
 
 add_executable(Crumble "${PROJECT_SOURCE_DIR}/src/crumble.cpp" ${sourceFiles})
 
-TARGET_LINK_LIBRARIES(Crumble GLFW GLAD opengl32 "${bulletSrc}")
+set_target_properties(Crumble PROPERTIES CXX_STANDARD 17)
+
+TARGET_LINK_LIBRARIES(Crumble GLFW GLAD FREETYPE opengl32 "${bulletSrc}")

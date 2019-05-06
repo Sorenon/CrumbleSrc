@@ -50,7 +50,7 @@ void EntityFoo::UpdateMultiThread() {
 		velocity.x = fabsf(distance.x) < fabsf(direction.x) ? distance.x : direction.x;
 		velocity.z = fabsf(distance.z) < fabsf(direction.z) ? distance.z : direction.z;
 	
-		std::cout << velocity.x << std::endl;
+		//std::cout << velocity.x << std::endl;
 	}
 
 	Move();

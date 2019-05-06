@@ -9,6 +9,7 @@ class Player;
 class Entity;
 class PhysicsWorld;
 class GameRenderer;
+class Pathfinder;
 
 namespace Vectors {
 	const glm::vec3 UP = glm::vec3(0, 1, 0);
@@ -27,6 +28,7 @@ extern Player* p_player;
 extern std::vector<Entity*> entities;
 extern PhysicsWorld* p_physicsWorld;
 extern GameRenderer* p_gameRenderer;
+extern Pathfinder* p_pathfinder;
 
 extern int wWidth;
 extern int wHeight;

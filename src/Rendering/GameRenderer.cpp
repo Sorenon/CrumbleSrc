@@ -15,10 +15,12 @@
 #include "../globals.h"
 #include "../FMath.h"
 #include "../Physics/PhysicsWorld.h"
+#include "../Pathfinder.h"
 
 GameRenderer::GameRenderer() {
 	stbi_set_flip_vertically_on_load(true);
 	texture = generateTexture("C:/Users/Sorenon/Crumble/src/main/resources/grass.png");
+	textureArrow = generateTexture("C:/Users/Sorenon/Crumble/src/main/resources/Arrow.png");
 }
 
 
@@ -133,6 +135,22 @@ void GameRenderer::doRender(float t) {
 		entity->Render(t, this);
 	}
 
+	for (PathNode* node : p_pathfinder->path) {
+		if (node->face != nullptr) {
+			glBindVertexArray(planeVAO.id);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, textureArrow);
+
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(node->pos) + glm::vec3(0.5f, 0.01f, 0.5f));
+			model = glm::rotate(model, glm::radians(node->face->angle), glm::vec3(0, 1, 0));
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
+			glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
+
+			glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);
+		}
+	}
+
 	//for (auto& it : world.chunks) {//Render collisionBlocks
 	//	Chunk* chunk = it.second;
 
@@ -144,10 +162,11 @@ void GameRenderer::doRender(float t) {
 
 	//		glBindVertexArray(planeVAO.id);
 	//		glActiveTexture(GL_TEXTURE0);
-	//		glBindTexture(GL_TEXTURE_2D, 0);
+	//		glBindTexture(GL_TEXTURE_2D, textureArrow);
 
 	//		glm::mat4 model = glm::mat4(1.0f);
-	//		model = glm::translate(model, glm::vec3(pair.first) + glm::vec3(0, 1.01f, 1));
+	//		model = glm::translate(model, glm::vec3(pair.first) + glm::vec3(0.5f, 1.01, 0.5f));
+	//		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0, 1, 0));
 	//		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
 	//		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
@@ -228,7 +247,7 @@ void GameRenderer::doRender(float t) {
 		glBindVertexArray(planeVAO.id);
 
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(-0.5, -0.5, -30));
+		model = glm::translate(model, glm::vec3(0, 0, -30));
 		glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
 		glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);
@@ -340,8 +359,8 @@ t_VAO  GameRenderer::createLineCubeVAO() {
 	return { VAO, VBO, 8 * 2 + 4 * 2 };
 }
 
-t_VAO GameRenderer::createGUIPlain() {
-	float* side = createZFace(0, 0, 0, false);
+t_VAO GameRenderer::createPlain() {
+	float* side = createZFace(-0.5f, -0.5f, 0, false);
 
 	GLuint VBO, VAO;
 	glGenVertexArrays(1, &VAO);
@@ -462,7 +481,7 @@ t_VAO GameRenderer::createSubChunkVAO(SubChunk & subChunk, SubChunk & above, Sub
 	return { VAO, VBO, count * 6 };
 }
 
-float* GameRenderer::createYFace(int x, int y, int z, bool flipped) {
+float* GameRenderer::createYFace(float x, float y, float z, bool flipped) {
 	float* face;
 
 	if (flipped) {
@@ -491,7 +510,7 @@ float* GameRenderer::createYFace(int x, int y, int z, bool flipped) {
 	return face;
 }
 
-float* GameRenderer::createXFace(int x, int y, int z, bool flipped) {
+float* GameRenderer::createXFace(float x, float y, float z, bool flipped) {
 	float* face;
 
 	if (flipped) {
@@ -520,7 +539,7 @@ float* GameRenderer::createXFace(int x, int y, int z, bool flipped) {
 	return face;
 }
 
-float* GameRenderer::createZFace(int x, int y, int z, bool flipped) {
+float* GameRenderer::createZFace(float x, float y, float z, bool flipped) {
 	float* face;
 
 	if (flipped) {

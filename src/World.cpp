@@ -3,6 +3,8 @@
 #include <vector>
 #include <limits>
 
+#include <glm/gtx/string_cast.hpp>
+
 #include "Chunk.h"
 
 chunkID World::toLong(chunkPos x, chunkPos z) {
@@ -19,22 +21,22 @@ World::~World() {
 	}
 }
 
-void World::createChunk(chunkPos x, chunkPos z, Chunk * chunk) {
+void World::createChunk(chunkPos x, chunkPos z, Chunk* chunk) {
 	chunk->bcPairCache = bcPairCache;
 	chunks[toLong(x, z)] = chunk;
 }
 
-Chunk * World::getChunk(chunkPos x, chunkPos z) {
+Chunk* World::getChunk(chunkPos x, chunkPos z) {
 	auto chunk = chunks.find(toLong(x, z));
 	return chunk == chunks.end() ? nullptr : (*chunk).second;
 }
 
-Chunk & World::getChunkSafe(chunkPos x, chunkPos z) {
+Chunk& World::getChunkSafe(chunkPos x, chunkPos z) {
 	auto chunk = chunks.find(toLong(x, z));
 	return chunk == chunks.end() ? Chunk::EMPTY : (*(*chunk).second);
 }
 
-Chunk & World::getChunkSafeBlockPos(int x, int z) {
+Chunk& World::getChunkSafeBlockPos(int x, int z) {
 	auto chunk = chunks.find(toLong(x >> 4, z >> 4));
 	return chunk == chunks.end() ? Chunk::EMPTY : (*(*chunk).second);
 }
@@ -73,7 +75,8 @@ bool World::setBlock(int x, int y, int z, int block) {
 		if (chunkItr != chunks.end()) {
 			(*chunkItr).second->updateVAOTest(0, y, collumZ);
 		}
-	} else if (collumX == 0) {
+	}
+	else if (collumX == 0) {
 		auto chunkItr = chunks.find(toLong(chunkX - 1, chunkZ));
 		if (chunkItr != chunks.end()) {
 			(*chunkItr).second->updateVAOTest(15, y, collumZ);
@@ -85,7 +88,8 @@ bool World::setBlock(int x, int y, int z, int block) {
 		if (chunkItr != chunks.end()) {
 			(*chunkItr).second->updateVAOTest(collumX, y, 0);
 		}
-	} else if (collumZ == 0) {
+	}
+	else if (collumZ == 0) {
 		auto chunkItr = chunks.find(toLong(chunkX, chunkZ - 1));
 		if (chunkItr != chunks.end()) {
 			(*chunkItr).second->updateVAOTest(collumX, y, 15);
@@ -93,7 +97,7 @@ bool World::setBlock(int x, int y, int z, int block) {
 	}
 }
 
-std::vector<AABB> World::getOverlappingBlocks(const AABB &collider) {
+std::vector<AABB> World::getOverlappingBlocks(const AABB & collider) {
 	std::vector<AABB> worldColliders;
 
 	ivec3 max(glm::ceil(collider.max));
@@ -120,7 +124,7 @@ std::vector<AABB> World::getOverlappingBlocks(const AABB &collider) {
 
 //To do: make this fit the crumble format
 //From https://gist.github.com/dogfuntom/cc881c8fc86ad43d55d8
-RayTraceResult World::rayTrace(const glm::vec3 &ray_start, const glm::vec3 &dir, float radius) {
+RayTraceResult World::rayTrace(const glm::vec3 & ray_start, const glm::vec3 & dir, float radius) {
 	if (dir.x == 0 && dir.y == 0 && dir.z == 0)
 		throw "Ray-cast in zero direction!";
 
@@ -155,7 +159,8 @@ RayTraceResult World::rayTrace(const glm::vec3 &ray_start, const glm::vec3 &dir,
 				face.x = -step.x;
 				face.y = 0;
 				face.z = 0;
-			} else {
+			}
+			else {
 				if (tMax.z > radius)
 					break;
 				scan.z += step.z;
@@ -164,7 +169,8 @@ RayTraceResult World::rayTrace(const glm::vec3 &ray_start, const glm::vec3 &dir,
 				face.y = 0;
 				face.z = -step.z;
 			}
-		} else {
+		}
+		else {
 			if (tMax.y < tMax.z) {
 				if (tMax.y > radius)
 					break;
@@ -173,7 +179,8 @@ RayTraceResult World::rayTrace(const glm::vec3 &ray_start, const glm::vec3 &dir,
 				face.x = 0;
 				face.y = -step.y;
 				face.z = 0;
-			} else {
+			}
+			else {
 				// Identical to the second case, repeated for simplicity in
 				// the conditionals.
 				if (tMax.z > radius)
@@ -197,3 +204,17 @@ float World::intbound(float s, float ds) {
 
 	return (ds > 0 ? s == 0.0f ? 1.0f : ceilf(s) - s : s - floorf(s)) / fabs(ds);
 }
+
+const Face* Faces::getFace(glm::ivec3 dir) {
+	for (const Face& face : horizontal) {
+		if (dir == face.vec) {
+			//std::cout << glm::to_string(dir) << std::endl;
+			//std::cout << glm::to_string(face.vec) << std::endl;
+
+			return &face;
+		}
+	}
+
+	return nullptr;
+};
+

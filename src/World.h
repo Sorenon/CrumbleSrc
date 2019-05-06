@@ -12,16 +12,20 @@ class bcOverlappingPairCache;
 typedef long long chunkID;
 typedef int chunkPos;
 
-typedef glm::ivec3 Face;
+typedef struct {
+	glm::ivec3 vec;
+	float angle;
+} Face;
 
 namespace Faces {
-
-	const Face Front = { 0, 0, -1 };
-	const Face Behind = { 0, 0, 1 };
-	const Face Right = { 1, 0, 0 };
-	const Face Left = { -1, 0, 0 };
+	const Face Front = { { 0, 0, -1 } , 0 };
+	const Face Behind = { { 0, 0, 1 } , 180 };
+	const Face Right = { { 1, 0, 0 } , 270 };
+	const Face Left = { { -1, 0, 0 } , 90 };
 
 	const Face horizontal[] = { Front, Behind, Right, Left };
+
+	const Face* getFace(glm::ivec3 dir);
 };
 
 typedef struct {
@@ -45,18 +49,18 @@ public:
 	World();
 	~World();
 
-	void createChunk(chunkPos x, chunkPos z, Chunk *chunk = new Chunk());
+	void createChunk(chunkPos x, chunkPos z, Chunk* chunk = new Chunk());
 
-	Chunk *getChunk(chunkPos x, chunkPos z);
-	Chunk &getChunkSafe(chunkPos x, chunkPos z);
+	Chunk* getChunk(chunkPos x, chunkPos z);
+	Chunk& getChunkSafe(chunkPos x, chunkPos z);
 
-	Chunk &getChunkSafeBlockPos(int x, int z);
+	Chunk& getChunkSafeBlockPos(int x, int z);
 
 	int getBlock(int x, int y, int z);
 	bool setBlock(int x, int y, int z, int block);
-	std::vector<AABB> getOverlappingBlocks(const AABB &collider);
+	std::vector<AABB> getOverlappingBlocks(const AABB& collider);
 
-	RayTraceResult rayTrace(const glm::vec3 &start, const glm::vec3 &dir, float radius = 10.0f);
+	RayTraceResult rayTrace(const glm::vec3& start, const glm::vec3& dir, float radius = 10.0f);
 
 private:
 	float intbound(float s, float ds);

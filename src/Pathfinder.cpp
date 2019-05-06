@@ -1,4 +1,6 @@
 #include "Pathfinder.h"
+#include <deque>
+#include <iostream>
 
 #include <glm/glm.hpp>
 
@@ -16,44 +18,153 @@ Pathfinder::~Pathfinder()
 {
 }
 
-void Pathfinder::FloodFill(const PathNode& start, int radius) {
-	frontier.push_back(start);
-	PathNode pastNode = start;
+//void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
+//	std::vector<PathNode*> visited;
+//	std::deque<PathNode*> frontier;
+//
+//	frontier.push_back(new PathNode(startPos));
+//
+//	while (!frontier.empty()) {
+//		std::cout << "scan";
+//		PathNode& currentNode = *frontier.front();
+//		frontier.pop_front();
+//
+//		//if (currentNode.previous.has_value()) {
+//		//	if (currentNode.pos == currentNode.previous->pos) {
+//		//		std::cout << "HTGAT";
+//		//	}
+//		//}
+//
+//		for (const Face facing : Faces::horizontal) {
+//			ivec3 checkPos = currentNode.pos + facing.vec;
+//
+//			if (checkPos == endPos) {//Found the path: currentNode == endNode
+//				path.push_back(new PathNode(checkPos, currentNode, 0));
+//				path.push_back(currentNode);
+//
+//				//for (PathNode& node : visited) {
+//				//	if (node.previous != nullptr) {
+//				//		if (node.pos != node.previous->pos) {
+//				//			path.push_back(PathNode(node.pos, node.previous, node.distance));
+//				//		}
+//				//	}
+//
+//				//	//path.push_back(node);
+//				//}
+//
+//				/*PathNode* reading = &currentNode;
+//				if (reading == reading->previous) {
+//					std::cout << glm::to_string(reading->pos) << std::endl;
+//				}*/
+//
+//				//PathNode reading = currentNode;
+//				//while (reading.previous != nullptr) {
+//				//	if (reading.pos == reading.previous->pos) {
+//				//		std::cout << glm::to_string(reading.pos) << std::endl;
+//				//		break;
+//				//	}
+//
+//				//	reading = *reading.previous;
+//				//	path.push_back(PathNode(reading.pos, reading.previous, reading.distance));
+//				//}
+//
+//				return;
+//			}
+//		
+//			if (ManhattanDistance(startPos, checkPos) > radius) {//Out of search radius
+//				continue;
+//			}
+//
+//			for (PathNode& node : visited) {//Have we already visited this node
+//				if (node.pos == checkPos) {
+//					goto skip;
+//				}
+//			}
+//
+//			for (PathNode& node : frontier) {//TODO: merge this into bellow loop
+//				if (node.pos == checkPos) {
+//					goto skip;
+//				}
+//			}
+//
+//			int distFromEnd = ManhattanDistance(checkPos, endPos);
+//
+//			//for (auto it = frontier.begin(); it != frontier.end(); it++) {
+//			//	if (distFromEnd < (*it).distance) {//Order the array: Scan the nodes closest to the end first
+//			//		frontier.insert(it, PathNode(checkPos, &currentNode, distFromEnd));
+//			//		goto skip;
+//			//	}
+//			//}
+//
+//			PathNode node = PathNode(checkPos, currentNode, distFromEnd);
+//			frontier.push_back(node);
+//		skip:;//GOTO
+//		}
+//
+//		visited.push_back(currentNode);
+//	}
+//
+//}
+
+void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
+	for (PathNode* node : allNodes) {
+		delete node;
+	}
+
+	std::vector<PathNode*> visited;
+	std::deque<PathNode*> frontier;
+
+	frontier.push_back(new PathNode(startPos));
 
 	while (!frontier.empty()) {
-		PathNode& current = frontier.front();
+		PathNode* currentNode = frontier.front();
+		frontier.pop_front();
 
-		for (const Face facing : Faces::horizontal) {
-			ivec3 pos = current.pos + facing;
+		for (const Face& face : Faces::horizontal) {
+			ivec3 checkPos = currentNode->pos + face.vec;
 
-			if (distance(glm::vec3(start.pos), glm::vec3(pos)) > radius) {
+			if (checkPos == endPos) {//Found the path
+				path.push_back(new PathNode(checkPos, currentNode, 0));
+				path.push_back(currentNode);
+
+				PathNode* reading = currentNode;
+				while (reading->previous != nullptr) {//Follow the path back to the start
+					reading = reading->previous;
+					path.push_back(reading);
+				}
+
+				return;
+			}
+
+			if (ManhattanDistance(startPos, checkPos) > radius) {//Out of search radius
 				continue;
 			}
 
-			for (PathNode& node : visited) {
-				if (node.pos == pos) {
+			for (PathNode* node : visited) {//Have we already visited this node
+				if (node->pos == checkPos) {
 					goto skip;
 				}
 			}
 
-			for (PathNode& node : frontier) {
-				if (node.pos == pos) {
+			for (PathNode* node : frontier) {//TODO: merge this into bellow loop
+				if (node->pos == checkPos) {
 					goto skip;
 				}
 			}
 
-			current = start;
-			frontier.push_back(PathNode(pos, current.pos));
+			PathNode* newNode = new PathNode(checkPos, currentNode, 0);
+			frontier.push_back(newNode);
 
 		skip:;//GOTO
 		}
 
-		visited.push_back(current);
-
-		frontier.pop_front();
+		visited.push_back(currentNode);
 	}
 
-	for (PathNode &node : visited) {
-		world.setBlock(node.pos.x, node.pos.y, node.pos.z, 1);
-	}
+	allNodes = visited;
+	std::cout << allNodes.size() - 61;
+}
+
+int Pathfinder::ManhattanDistance(ivec3 start, ivec3 end) {
+	return fabs(start.x - end.x) + fabs(start.z - end.z);
 }
