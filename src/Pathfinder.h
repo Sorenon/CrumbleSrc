@@ -43,7 +43,7 @@ class Pathfinder {
 public:
 	std::vector<PathNode*> path;
 	std::vector<PathNode*> allNodes;
-	int currentNode;
+	int currentNodeIndex;
 
 public:
 	Pathfinder();

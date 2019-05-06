@@ -110,6 +110,8 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 	for (PathNode* node : allNodes) {
 		delete node;
 	}
+	allNodes = std::vector<PathNode*>();
+	path = std::vector<PathNode*>();
 
 	std::vector<PathNode*> visited;
 	std::deque<PathNode*> frontier;
@@ -123,6 +125,10 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 		for (const Face& face : Faces::horizontal) {
 			ivec3 checkPos = currentNode->pos + face.vec;
 
+			if (world.getBlock(checkPos.x, checkPos.y, checkPos.z) != 0) {
+				continue;
+			}
+
 			if (checkPos == endPos) {//Found the path
 				path.push_back(new PathNode(checkPos, currentNode, 0));
 				path.push_back(currentNode);
@@ -132,6 +138,9 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 					reading = reading->previous;
 					path.push_back(reading);
 				}
+
+				allNodes = visited;
+				currentNodeIndex = path.size() - 1;
 
 				return;
 			}
@@ -161,8 +170,9 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 		visited.push_back(currentNode);
 	}
 
-	allNodes = visited;
-	std::cout << allNodes.size() - 61;
+	//allNodes = visited;
+	//currentNodeIndex = path.size() - 1;
+	//std::cout << allNodes.size() - 61;
 }
 
 int Pathfinder::ManhattanDistance(ivec3 start, ivec3 end) {

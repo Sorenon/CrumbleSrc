@@ -5,7 +5,7 @@
 
 class EntityFoo : public Entity {
 public:
-	glm::vec3 destination = glm::vec3(5, 64, 5);
+	//glm::vec3 destination = glm::vec3(5, 64, 5);
 
 public:
 	EntityFoo();

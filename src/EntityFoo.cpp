@@ -6,6 +6,7 @@
 #include <glad/glad.h>
 
 #include "globals.h"
+#include "Pathfinder.h"
 #include "Rendering/GameRenderer.h"
 
 EntityFoo::EntityFoo() {
@@ -30,7 +31,13 @@ void EntityFoo::UpdateMultiThread() {
 	if (onGround) {
 		float speed = 2.5f;
 
-		glm::vec3 distance = (destination - transform.position);
+		PathNode* destination = p_pathfinder->path[p_pathfinder->currentNodeIndex];
+		if (p_pathfinder->currentNodeIndex != 0 && glm::distance((glm::vec3(destination->pos) + glm::vec3(0.5f, 0, 0.5f)), transform.position) == 0.0f) {
+			destination = p_pathfinder->path[--p_pathfinder->currentNodeIndex];
+		}
+
+
+		glm::vec3 distance = ((glm::vec3(destination->pos) + glm::vec3(0.5f, 0, 0.5f)) - transform.position);
 		distance.y = 0;
 
 		glm::vec3 direction(0,0,0);
