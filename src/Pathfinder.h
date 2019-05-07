@@ -33,7 +33,9 @@ public:
 		pos = posIn;
 		previous = previousIn;
 
-		face = Faces::getFace(previousIn->pos - posIn);
+		vec3 diff = previousIn->pos - posIn;
+		diff.y = 0;
+		face = Faces::getFace(diff);
 
 		distance = dist;
 	};

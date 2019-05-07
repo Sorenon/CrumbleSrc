@@ -118,6 +118,8 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 
 	frontier.push_back(new PathNode(startPos));
 
+	int i = 0;
+
 	while (!frontier.empty()) {
 		PathNode* currentNode = frontier.front();
 		frontier.pop_front();
@@ -126,12 +128,22 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 			ivec3 checkPos = currentNode->pos + face.vec;
 
 			if (world.getBlock(checkPos.x, checkPos.y, checkPos.z) != 0) {
-				continue;
+				checkPos.y++;
+
+				if (world.getBlock(checkPos.x, checkPos.y, checkPos.z) != 0) {
+					continue;
+				}
+			}
+			else if (world.getBlock(checkPos.x, checkPos.y - 1, checkPos.z) == 0) {
+				checkPos.y--;
 			}
 
 			if (checkPos == endPos) {//Found the path
-				path.push_back(new PathNode(checkPos, currentNode, 0));
+				PathNode* newNode = new PathNode(checkPos, currentNode, i++);
+				path.push_back(newNode);
 				path.push_back(currentNode);
+				visited.push_back(newNode);
+				visited.push_back(currentNode);
 
 				PathNode* reading = currentNode;
 				while (reading->previous != nullptr) {//Follow the path back to the start
@@ -161,7 +173,7 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 				}
 			}
 
-			PathNode* newNode = new PathNode(checkPos, currentNode, 0);
+			PathNode* newNode = new PathNode(checkPos, currentNode, i++);
 			frontier.push_back(newNode);
 
 		skip:;//GOTO
@@ -170,9 +182,8 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 		visited.push_back(currentNode);
 	}
 
-	//allNodes = visited;
-	//currentNodeIndex = path.size() - 1;
-	//std::cout << allNodes.size() - 61;
+	allNodes = visited;
+	currentNodeIndex = 0;
 }
 
 int Pathfinder::ManhattanDistance(ivec3 start, ivec3 end) {

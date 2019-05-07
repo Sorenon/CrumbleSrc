@@ -23,7 +23,8 @@ namespace Faces {
 	const Face Right = { { 1, 0, 0 } , 270 };
 	const Face Left = { { -1, 0, 0 } , 90 };
 
-	const Face horizontal[] = { Front, Behind, Right, Left };
+	//const Face horizontal[] = { Front, Behind, Right, Left };
+	const Face horizontal[] = { Front, Left, Behind, Right };
 
 	const Face* getFace(glm::ivec3 dir);
 };

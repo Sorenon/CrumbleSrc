@@ -136,6 +136,7 @@ void GameRenderer::doRender(float t) {
 	}
 
 	for (PathNode* node : p_pathfinder->path) {
+	//for (PathNode* node : p_pathfinder->allNodes) {
 		if (node->face != nullptr) {
 			glBindVertexArray(planeVAO.id);
 			glActiveTexture(GL_TEXTURE0);
@@ -143,6 +144,7 @@ void GameRenderer::doRender(float t) {
 
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, glm::vec3(node->pos) + glm::vec3(0.5f, 0.01f, 0.5f));
+			//model = glm::translate(model, glm::vec3(0, node->distance / 60.0f, 0));
 			model = glm::rotate(model, glm::radians(node->face->angle), glm::vec3(0, 1, 0));
 			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
 			glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
@@ -210,8 +212,6 @@ void GameRenderer::doRender(float t) {
 	//	}
 	//}
 
-	RayTraceResult result = world.rayTrace(p_player->getEyePos(t), p_player->transform.getLook(t));
-
 	texColourProgram.activate();
 
 	glEnable(GL_BLEND);
@@ -222,7 +222,8 @@ void GameRenderer::doRender(float t) {
 	glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(view));
 	glUniform1f(alphaIDTexCol, 0.4f);
 
-	if (result.hit) {
+	RayTraceResult result = world.rayTrace(p_player->getEyePos(t), p_player->transform.getLook(t));
+	if (result.hit) {//Draw selection box
 		glDisable(GL_CULL_FACE);
 		glLineWidth(2.5f);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
