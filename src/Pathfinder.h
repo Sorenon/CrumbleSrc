@@ -19,17 +19,16 @@ public:
 
 	ivec3 pos;
 	const Face* face = nullptr;
-	int distance = 0;
+	int accumulatedCost = 0;
+	int priority = 0;
+	bool inPath = false;
 
 public:
 	PathNode(ivec3 posIn) {
 		pos = posIn;
-		//face = nullptr;
-
-		face = &Faces::Front;
 	};
 
-	PathNode(ivec3 posIn, PathNode* previousIn, int dist) {
+	PathNode(ivec3 posIn, PathNode* previousIn, int accumulatedCostIn = -1, int priorityIn = -1) {
 		pos = posIn;
 		previous = previousIn;
 
@@ -37,7 +36,8 @@ public:
 		diff.y = 0;
 		face = Faces::getFace(diff);
 
-		distance = dist;
+		accumulatedCost = accumulatedCostIn;
+		priority = priorityIn;
 	};
 };
 

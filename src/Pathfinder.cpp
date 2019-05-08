@@ -118,28 +118,45 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 
 	frontier.push_back(new PathNode(startPos));
 
-	int i = 0;
-
 	while (!frontier.empty()) {
 		PathNode* currentNode = frontier.front();
 		frontier.pop_front();
 
 		for (const Face& face : Faces::horizontal) {
+			if (currentNode->face != nullptr && face.vec == currentNode->face->vec) {//Stop the pathfinder from scaning the currentNode's parent node
+				continue;
+			}
+
 			ivec3 checkPos = currentNode->pos + face.vec;
+			int cost = 0;
 
 			if (world.getBlock(checkPos.x, checkPos.y, checkPos.z) != 0) {
 				checkPos.y++;
+				cost += 5;
 
 				if (world.getBlock(checkPos.x, checkPos.y, checkPos.z) != 0) {
 					continue;
 				}
 			}
 			else if (world.getBlock(checkPos.x, checkPos.y - 1, checkPos.z) == 0) {
+				cost++;
 				checkPos.y--;
+
+				if (world.getBlock(checkPos.x, checkPos.y - 1, checkPos.z) == 0) {
+					cost += 3;
+					checkPos.y--;
+
+					if (world.getBlock(checkPos.x, checkPos.y - 1, checkPos.z) == 0) {
+						continue;
+					}
+				}
 			}
 
 			if (checkPos == endPos) {//Found the path
-				PathNode* newNode = new PathNode(checkPos, currentNode, i++);
+				PathNode* newNode = new PathNode(checkPos, currentNode);
+				newNode->inPath = true;
+				currentNode->inPath = true;
+
 				path.push_back(newNode);
 				path.push_back(currentNode);
 				visited.push_back(newNode);
@@ -149,10 +166,12 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 				while (reading->previous != nullptr) {//Follow the path back to the start
 					reading = reading->previous;
 					path.push_back(reading);
+					reading->inPath = true;
 				}
 
 				allNodes = visited;
 				currentNodeIndex = path.size() - 1;
+				std::cout << allNodes.size();
 
 				return;
 			}
@@ -167,14 +186,36 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 				}
 			}
 
-			for (PathNode* node : frontier) {//TODO: merge this into bellow loop
-				if (node->pos == checkPos) {
-					goto skip;
+			{//Add new node to the fontier
+				const int accumulatedCost = currentNode->accumulatedCost + cost;
+				const int priority = accumulatedCost + ManhattanDistance(checkPos, endPos); //Lower has higher priority
+
+				std::deque<PathNode*>::iterator place;
+				bool foundPlace = false;
+
+				for (auto it = frontier.begin(); it != frontier.end(); it++) {
+					if ((*it)->pos == checkPos) {
+						goto skip;//Node is already in frontier
+					}
+
+					if (priority < (*it)->priority) {
+						if (!foundPlace) {
+							place = it;
+							foundPlace = true;
+						}
+					}
+				}
+
+				PathNode* newNode = new PathNode(checkPos, currentNode, accumulatedCost, priority);
+
+				if (foundPlace) {
+					frontier.insert(place, newNode);
+				}
+				else {
+					frontier.push_back(newNode);
 				}
 			}
 
-			PathNode* newNode = new PathNode(checkPos, currentNode, i++);
-			frontier.push_back(newNode);
 
 		skip:;//GOTO
 		}

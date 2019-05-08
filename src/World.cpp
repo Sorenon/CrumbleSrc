@@ -28,17 +28,17 @@ void World::createChunk(chunkPos x, chunkPos z, Chunk* chunk) {
 
 Chunk* World::getChunk(chunkPos x, chunkPos z) {
 	auto chunk = chunks.find(toLong(x, z));
-	return chunk == chunks.end() ? nullptr : (*chunk).second;
+	return chunk == chunks.end() ? nullptr : chunk->second;
 }
 
 Chunk& World::getChunkSafe(chunkPos x, chunkPos z) {
 	auto chunk = chunks.find(toLong(x, z));
-	return chunk == chunks.end() ? Chunk::EMPTY : (*(*chunk).second);
+	return chunk == chunks.end() ? Chunk::EMPTY : (*chunk->second);
 }
 
 Chunk& World::getChunkSafeBlockPos(int x, int z) {
 	auto chunk = chunks.find(toLong(x >> 4, z >> 4));
-	return chunk == chunks.end() ? Chunk::EMPTY : (*(*chunk).second);
+	return chunk == chunks.end() ? Chunk::EMPTY : (*chunk->second);
 }
 
 int World::getBlock(int x, int y, int z) {
@@ -47,7 +47,7 @@ int World::getBlock(int x, int y, int z) {
 	}
 
 	auto chunk = chunks.find(toLong(x >> 4, z >> 4));
-	return chunk == chunks.end() ? 0 : (*chunk).second->getBlock(x & 15, y, z & 15);
+	return chunk == chunks.end() ? 0 : chunk->second->getBlock(x & 15, y, z & 15);
 }
 
 bool World::setBlock(int x, int y, int z, int block) {
@@ -108,7 +108,7 @@ std::vector<AABB> World::getOverlappingBlocks(const AABB & collider) {
 			for (int z = min.z; z <= max.z; z++) {
 				if (y < 256 && y >= 0) {
 					if (getBlock(x, y, z) != 0) {
-						AABB aabb = AABB::blockAABB + vec3(x, y, z);//WHY!!!! TODO: FIX THE NEED FOR THIS
+						AABB aabb = AABB::blockAABB + ivec3(x, y, z);//WHY!!!! TODO: FIX THE NEED FOR THIS, fix what?
 
 						if (aabb.overlaps(collider)) {
 							worldColliders.push_back(aabb);
