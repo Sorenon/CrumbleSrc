@@ -136,7 +136,7 @@ void GameRenderer::doRender(float t) {
 	}
 
 	//for (PathNode* node : p_pathfinder->path) {
-	for (PathNode* node : p_pathfinder->allNodes) {
+	for (PathNode* node : p_pathfinder->closedSet) {
 		glBindVertexArray(planeVAO.id);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textureArrow);

@@ -31,10 +31,33 @@ void EntityFoo::UpdateMultiThread() {
 	velocity.x = 0;
 	velocity.z = 0;
 
-	if (!p_pathfinder->path.empty()) {
-		const float speed = onGround ? 2.5f : 1.0f;
+	Pathfinder& pathfinder = *p_pathfinder;
+	if (--pathRefresh <= 0 && onGround) {
+		bool needsUpdate = false;
 
-		Pathfinder& pathfinder = *p_pathfinder;
+		if (pathfinder.path.empty() || pathfinder.path.front()->pos != destination || glm::distance(glm::vec3(0.5f, 0, 0.5f) + glm::vec3(pathfinder.path[pathfinder.currentNodeIndex]->pos), transform.position) > 1.5f) {
+			needsUpdate = true;
+		}
+		else {
+			for (int i = pathfinder.currentNodeIndex; i >= 0; i--) {
+				glm::ivec3 nodePos = pathfinder.path[i]->pos;
+				if (world.getBlock(nodePos.x, nodePos.y, nodePos.z) != 0) {
+					needsUpdate = true;
+					break;
+				}
+			}
+		}
+
+		if (needsUpdate) {
+			pathfinder.FindPath(glm::floor(transform.position), destination, 16);
+		}
+	}
+	if (pathRefresh <= 0) {
+		pathRefresh = 20;
+	}
+
+	if (!pathfinder.path.empty()) {
+		const float speed = onGround ? 2.5f : 1.0f;
 
 		PathNode* destinationNode = pathfinder.path[pathfinder.currentNodeIndex];
 

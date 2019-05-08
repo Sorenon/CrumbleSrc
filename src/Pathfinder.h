@@ -44,7 +44,7 @@ public:
 class Pathfinder {
 public:
 	std::vector<PathNode*> path;
-	std::vector<PathNode*> allNodes;
+	std::vector<PathNode*> closedSet;
 	int currentNodeIndex;
 
 public:

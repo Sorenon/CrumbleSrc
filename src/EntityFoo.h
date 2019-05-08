@@ -5,7 +5,8 @@
 
 class EntityFoo : public Entity {
 public:
-	//glm::vec3 destination = glm::vec3(5, 64, 5);
+	glm::ivec3 destination = glm::ivec3(7, 64, 8);
+	int pathRefresh = 20;
 
 public:
 	EntityFoo();

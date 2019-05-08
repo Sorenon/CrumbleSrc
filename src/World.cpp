@@ -208,9 +208,6 @@ float World::intbound(float s, float ds) {
 const Face* Faces::getFace(glm::ivec3 dir) {
 	for (const Face& face : horizontal) {
 		if (dir == face.vec) {
-			//std::cout << glm::to_string(dir) << std::endl;
-			//std::cout << glm::to_string(face.vec) << std::endl;
-
 			return &face;
 		}
 	}
