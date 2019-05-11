@@ -16,5 +16,7 @@ public:
 	virtual void UpdateMultiThread();
 
 	virtual void Render(float t, GameRenderer* renderer);
+
+	bool shouldRebuildPath();
 };
 

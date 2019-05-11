@@ -11,7 +11,7 @@
 
 EntityFoo::EntityFoo() {
 	//collider = AABB(vec3(-0.25f, 0, -0.25f), vec3(0.25f, 0.5f, 0.25f));
-	collider = AABB(vec3(-0.5f, 0, -0.5f), vec3(0.5f, 1, 0.5f));
+	collider = AABB(vec3(-0.49f, 0, -0.49f), vec3(0.49f, 1, 0.49f));
 }
 
 
@@ -25,35 +25,16 @@ void EntityFoo::UpdateSingleThread() {
 void EntityFoo::UpdateMultiThread() {
 	transform.step();
 
-	velocity.y -= 20 * CrumbleGlobals::FIXED_TIMESTEP;			//Apply gravity
+	velocity.y -= 20 * CrumbleGlobals::FIXED_TIMESTEP;	//Apply gravity
 	velocity.y *= 0.98f;
 
 	velocity.x = 0;
 	velocity.z = 0;
 
 	Pathfinder& pathfinder = *p_pathfinder;
-	if (--pathRefresh <= 0 && onGround) {
-		bool needsUpdate = false;
 
-		if (pathfinder.path.empty() || pathfinder.path.front()->pos != destination || glm::distance(glm::vec3(0.5f, 0, 0.5f) + glm::vec3(pathfinder.path[pathfinder.currentNodeIndex]->pos), transform.position) > 1.5f) {
-			needsUpdate = true;
-		}
-		else {
-			for (int i = pathfinder.currentNodeIndex; i >= 0; i--) {
-				glm::ivec3 nodePos = pathfinder.path[i]->pos;
-				if (world.getBlock(nodePos.x, nodePos.y, nodePos.z) != 0) {
-					needsUpdate = true;
-					break;
-				}
-			}
-		}
-
-		if (needsUpdate) {
-			pathfinder.FindPath(glm::floor(transform.position), destination, 16);
-		}
-	}
-	if (pathRefresh <= 0) {
-		pathRefresh = 20;
+	if (shouldRebuildPath()) {
+		pathfinder.FindPath(glm::floor(transform.position), destination, 16);
 	}
 
 	if (!pathfinder.path.empty()) {
@@ -61,11 +42,29 @@ void EntityFoo::UpdateMultiThread() {
 
 		PathNode* destinationNode = pathfinder.path[pathfinder.currentNodeIndex];
 
-		if (pathfinder.currentNodeIndex != 0 && glm::distance(glm::vec3(destinationNode->pos) + glm::vec3(0.5f, 0, 0.5f), transform.position) == 0.0f) {
-			destinationNode = pathfinder.path[--pathfinder.currentNodeIndex];
+		if (pathfinder.currentNodeIndex != 0) {//Find the next path node
+			//if (glm::distance(destinationNode->getWorldPos(), transform.position) == 0.0f) {
+			//	destinationNode = pathfinder.path[--pathfinder.currentNodeIndex];
+			//}
+
+			int nextYChange = 0;
+			for (int i = pathfinder.currentNodeIndex; i >= 0; i--) {
+				if (pathfinder.path[i]->pos.y != std::floor(transform.position.y)) {
+					nextYChange = i;
+					break;
+				}
+			}
+
+			//float maxRadius = collider.max.x > (0.75f / 2) ? collider.max.x : 0.75f - collider.max.x;
+			float maxRadius = collider.max.x;
+			vec3 difference = transform.position - destinationNode->getWorldPos();
+
+			if (std::abs(difference.x) < maxRadius && std::abs(difference.z) < maxRadius && std::abs(difference.y) < 1) {
+				destinationNode = pathfinder.path[--pathfinder.currentNodeIndex];
+			}
 		}
 
-		glm::vec3 distanceToNode = ((glm::vec3(destinationNode->pos) + glm::vec3(0.5f, 0, 0.5f)) - transform.position);
+		glm::vec3 distanceToNode = destinationNode->getWorldPos() - transform.position;
 		if (onGround && distanceToNode.y > 0) {
 			velocity.y += 8.0f;
 		}
@@ -89,7 +88,7 @@ void EntityFoo::UpdateMultiThread() {
 		velocity.z = fabsf(distanceToNode.z) < fabsf(directionToNode.z) ? distanceToNode.z : directionToNode.z;
 	}
 	else {
-		transform.rotation.y += glm::radians(5.0f);
+		//transform.rotation.y += glm::radians(5.0f);
 	}
 
 	//std::cout << velocity.x << std::endl;
@@ -113,4 +112,44 @@ void EntityFoo::Render(float t, GameRenderer * renderer) {
 	glUniformMatrix4fv(renderer->texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
 	glDrawArrays(GL_TRIANGLES, 0, renderer->cubeVAO.vertices);
+
+
+	if (!p_pathfinder->path.empty()){
+		glBindVertexArray(renderer->planeVAO.id);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, renderer->texture);
+
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(p_pathfinder->path[p_pathfinder->currentNodeIndex]->pos) + glm::vec3(0.5f, 2, 0.5f));
+
+		glUniformMatrix4fv(renderer->texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
+
+		glDrawArrays(GL_TRIANGLES, 0, renderer->planeVAO.vertices);
+	}
+}
+
+bool EntityFoo::shouldRebuildPath() {
+	Pathfinder& pathfinder = *p_pathfinder;
+
+	if (--pathRefresh <= 0 && onGround) {
+		pathRefresh = 20;
+
+		if (pathfinder.path.empty() || pathfinder.path.front()->pos != destination) {
+			return true;
+		}
+
+		if (glm::distance(glm::vec3(0.5f, 0, 0.5f) + glm::vec3(pathfinder.path[pathfinder.currentNodeIndex]->pos), transform.position) > 1.5f) {
+			return true;
+		}
+
+		for (int i = pathfinder.currentNodeIndex; i >= 0; i--) {
+			glm::ivec3 nodePos = pathfinder.path[i]->pos;
+			if (world.getBlock(nodePos.x, nodePos.y, nodePos.z) != 0) {
+				return true;
+				break;
+			}
+		}
+	}
+
+	return false;
 }

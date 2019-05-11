@@ -39,6 +39,10 @@ public:
 		accumulatedCost = accumulatedCostIn;
 		priority = priorityIn;
 	};
+
+	vec3 getWorldPos() {
+		return vec3(pos) + glm::vec3(0.5f, 0, 0.5f);
+	};
 };
 
 class Pathfinder {
