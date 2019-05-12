@@ -29,44 +29,8 @@ GameRenderer::~GameRenderer() {
 }
 
 void GameRenderer::doRender(float t) {
-	//int chunksUpdated = 0;
-	for (auto pair : world.chunks) {//Remake VAOs
-		//break;
-		Chunk& chunk = *pair.second;
-		chunkID id = pair.first;
-		int x = id >> 32;
-		int z = (int)id;
-
-		if (chunk.needsUpdate) {
-			//std::cout << "Updating Chunk " << ++chunksUpdated << std::endl;
-
-			for (int i = 0; i < 16; i++) {
-				SubChunk* subChunk = chunk.subChunks[i];
-				if (subChunk != nullptr && subChunk->needsUpdate) {
-
-					SubChunk& above = i + 1 >= 16 ? SubChunk::EMPTY : chunk.getSubChunkSafe(i + 1);
-					SubChunk & below = i - 1 < 0 ? SubChunk::EMPTY : chunk.getSubChunkSafe(i - 1);
-
-					SubChunk & right = world.getChunkSafe(x + 1, z).getSubChunkSafe(i);
-					SubChunk & left = world.getChunkSafe(x - 1, z).getSubChunkSafe(i);
-
-					SubChunk & front = world.getChunkSafe(x, z - 1).getSubChunkSafe(i);
-					SubChunk & back = world.getChunkSafe(x, z + 1).getSubChunkSafe(i);
-
-					t_VAO oldVAO = chunk.subChunkVAOs[i];
-					if (oldVAO.id != 0) {
-						glDeleteVertexArrays(1, &oldVAO.id);
-						glDeleteBuffers(1, &oldVAO.VBO);
-					}
-
-					chunk.subChunkVAOs[i] = createSubChunkVAO(*subChunk, above, below, right, left, front, back);
-
-					subChunk->needsUpdate = false;
-				}
-			}
-			chunk.needsUpdate = false;
-		}
-	}
+	UpdateWorld(mainWorld);
+	UpdateWorld(subWorld);
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -90,28 +54,8 @@ void GameRenderer::doRender(float t) {
 
 	texturedProgram.activate();
 
-	for (auto pair : world.chunks) { //Render world
-		Chunk& chunk = *pair.second;
-		chunkID id = pair.first;
-		int x = id >> 32;
-		int z = (int)id;
-
-		for (int i = 0; i < 16; i++) {
-			t_VAO& vao = chunk.subChunkVAOs[i];
-
-			if (vao.id != 0) {
-				glBindVertexArray(vao.id);
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, texture);
-
-				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::translate(model, glm::vec3(x * 16, i * 16, z * 16));
-				glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
-
-				glDrawArrays(GL_TRIANGLES, 0, vao.vertices);
-			}
-		}
-	}
+	RenderWorld(mainWorld);
+	RenderWorld(subWorld);
 
 	{//Render bullet object
 		btTransform trans;
@@ -230,7 +174,7 @@ void GameRenderer::doRender(float t) {
 	glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(view));
 	glUniform1f(alphaIDTexCol, 0.4f);
 
-	RayTraceResult result = world.rayTrace(p_player->getEyePos(t), p_player->transform.getLook(t));
+	RayTraceResult result = subWorld.rayTrace(p_player->getEyePos(t) - subWorld.offset, p_player->transform.getLook(t));
 	if (result.hit) {//Draw selection box
 		glDisable(GL_CULL_FACE);
 		glLineWidth(2.5f);
@@ -240,7 +184,12 @@ void GameRenderer::doRender(float t) {
 		glBindVertexArray(blockLineVAO.id);
 
 		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, subWorld.offset);
+
+		model = glm::rotate(model, subWorld.rotation.y, Vectors::UP);
+
 		model = glm::translate(model, glm::vec3(result.hitPos));
+
 		glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
 		glDrawArrays(GL_LINES, 0, blockLineVAO.vertices);
@@ -265,7 +214,76 @@ void GameRenderer::doRender(float t) {
 	glDisable(GL_BLEND);
 }
 
-t_VAO  GameRenderer::createCubeVAO() {
+void GameRenderer::UpdateWorld(World& world) {//Remake VAOs
+	for (auto pair : world.chunks) {
+		Chunk& chunk = *pair.second;
+		chunkID id = pair.first;
+		int x = id >> 32;
+		int z = (int)id;
+
+		if (chunk.needsUpdate) {
+			//std::cout << "Updating Chunk " << ++chunksUpdated << std::endl;
+
+			for (int i = 0; i < 16; i++) {
+				SubChunk* subChunk = chunk.subChunks[i];
+				if (subChunk != nullptr && subChunk->needsUpdate) {
+
+					SubChunk& above = i + 1 >= 16 ? SubChunk::EMPTY : chunk.getSubChunkSafe(i + 1);
+					SubChunk & below = i - 1 < 0 ? SubChunk::EMPTY : chunk.getSubChunkSafe(i - 1);
+
+					SubChunk & right = world.getChunkSafe(x + 1, z).getSubChunkSafe(i);
+					SubChunk & left = world.getChunkSafe(x - 1, z).getSubChunkSafe(i);
+
+					SubChunk & front = world.getChunkSafe(x, z - 1).getSubChunkSafe(i);
+					SubChunk & back = world.getChunkSafe(x, z + 1).getSubChunkSafe(i);
+
+					t_VAO oldVAO = chunk.subChunkVAOs[i];
+					if (oldVAO.id != 0) {
+						glDeleteVertexArrays(1, &oldVAO.id);
+						glDeleteBuffers(1, &oldVAO.VBO);
+					}
+
+					chunk.subChunkVAOs[i] = createSubChunkVAO(*subChunk, above, below, right, left, front, back);
+
+					subChunk->needsUpdate = false;
+				}
+			}
+			chunk.needsUpdate = false;
+		}
+	}
+}
+
+void GameRenderer::RenderWorld(World& world) {
+	for (auto pair : world.chunks) {
+		Chunk& chunk = *pair.second;
+		chunkID id = pair.first;
+		int x = id >> 32;
+		int z = (int)id;
+
+		for (int i = 0; i < 16; i++) {
+			t_VAO& vao = chunk.subChunkVAOs[i];
+
+			if (vao.id != 0) {
+				glBindVertexArray(vao.id);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, texture);
+
+				glm::mat4 model = glm::mat4(1.0f);
+				model = glm::translate(model, world.offset);
+
+				model = glm::rotate(model, world.rotation.y, Vectors::UP);
+
+				model = glm::translate(model, glm::vec3(x * 16, i * 16, z * 16)/* - glm::vec3(0.5f, 0, 0.5f)*/);
+
+				glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
+
+				glDrawArrays(GL_TRIANGLES, 0, vao.vertices);
+			}
+		}
+	}
+}
+
+t_VAO GameRenderer::createCubeVAO() {
 	std::vector<float> vertices;
 
 	//To do: add boilerplate

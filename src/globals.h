@@ -23,7 +23,8 @@ namespace CrumbleGlobals {
 	const float PHYSICS_TIMESTEP = 1.0f / 120.0f;
 };
 
-extern World world;
+extern World mainWorld;
+extern World subWorld;
 extern Player* p_player;
 extern std::vector<Entity*> entities;
 extern PhysicsWorld* p_physicsWorld;

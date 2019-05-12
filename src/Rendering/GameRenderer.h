@@ -6,6 +6,7 @@
 #include "ShaderProgram.h"
 #include "ShaderConstructor.h"
 #include "../FileUtil.h"
+#include "../World.h"
 
 class GameRenderer {
 public:
@@ -34,5 +35,8 @@ public:
 	GLuint generateTexture(const char* path);
 
 	void doRender(float t);
+
+	void UpdateWorld(World& world);//Remake VAOs
+	void RenderWorld(World& world);
 };
 

@@ -46,6 +46,9 @@ public:
 	std::unordered_map<chunkID, Chunk*> chunks;
 	bcOverlappingPairCache* bcPairCache;
 
+	glm::vec3 offset;
+	glm::vec3 rotation;
+
 public:
 	World();
 	~World();
@@ -66,4 +69,3 @@ public:
 private:
 	float intbound(float s, float ds);
 };
-

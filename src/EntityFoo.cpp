@@ -144,7 +144,7 @@ bool EntityFoo::shouldRebuildPath() {
 
 		for (int i = pathfinder.currentNodeIndex; i >= 0; i--) {
 			glm::ivec3 nodePos = pathfinder.path[i]->pos;
-			if (world.getBlock(nodePos.x, nodePos.y, nodePos.z) != 0) {
+			if (mainWorld.getBlock(nodePos.x, nodePos.y, nodePos.z) != 0) {
 				return true;
 				break;
 			}

@@ -12,7 +12,7 @@
 
 bcSimpleBroadphase::bcSimpleBroadphase() : btSimpleBroadphaseCopy() {
 	bcPairCache.defaultCache = m_pairCache;
-	world.bcPairCache = &bcPairCache;
+	mainWorld.bcPairCache = &bcPairCache;
 }
 
 bcSimpleBroadphase::~bcSimpleBroadphase() {
@@ -75,7 +75,7 @@ void bcSimpleBroadphase::calculateOverlappingPairs(btDispatcher * dispatcher) {
 	}
 
 	//Delete all unused blocks
-	for (auto &it : world.chunks) {
+	for (auto &it : mainWorld.chunks) {
 		Chunk *chunk = it.second;
 
 		std::unordered_map<glm::ivec3, btCollisionObject*, HashFunc_ivec3, HashFunc_ivec3>::iterator it2 = chunk->storage.begin();
@@ -106,10 +106,10 @@ const btOverlappingPairCache* bcSimpleBroadphase::getOverlappingPairCache() cons
 void bcSimpleBroadphase::doWorldCollisions(btCollisionObject* obj) {
 	if ((obj->getBroadphaseHandle()->m_collisionFilterMask & btBroadphaseProxy::CollisionFilterGroups::StaticFilter) != 0) {
 
-		for (AABB &aabb : world.getOverlappingBlocks(AABB(obj))) {
+		for (AABB &aabb : mainWorld.getOverlappingBlocks(AABB(obj))) {
 			glm::ivec3 pos = aabb.min;
 
-			Chunk &chunk = world.getChunkSafeBlockPos(pos.x, pos.z);
+			Chunk &chunk = mainWorld.getChunkSafeBlockPos(pos.x, pos.z);
 			auto it = chunk.storage.find(glm::ivec3(pos.x % 16, pos.y, pos.z % 16));
 			btCollisionObject* blockCollider;
 			if (it == chunk.storage.end()) {//BlockCollider doesn't exist yet 
