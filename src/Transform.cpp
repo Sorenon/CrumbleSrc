@@ -17,6 +17,7 @@ vec3 Transform::getForward() {
 	return glm::normalize(forward);
 }
 
+//Static
 vec3 Transform::getLook(vec3 mixedRotation) {
 	vec3 front;
 	float pitch = mixedRotation.x;

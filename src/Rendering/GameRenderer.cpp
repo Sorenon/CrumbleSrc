@@ -57,6 +57,25 @@ void GameRenderer::doRender(float t) {
 	RenderWorld(mainWorld);
 	RenderWorld(subWorld);
 
+	//{
+	//	glm::mat4 model = glm::mat4(1.0f);
+	//	model = glm::rotate(model, -subWorld.rotation.y, Vectors::UP);
+	//	model = glm::translate(model, -subWorld.offset);
+
+	//	glm::vec3 eyepos = glm::vec3(model * glm::vec4(p_player->getEyePos(t), 1));
+
+	//	glBindVertexArray(cubeVAO.id);
+	//	glActiveTexture(GL_TEXTURE0);
+	//	glBindTexture(GL_TEXTURE_2D, texture);
+
+	//	glm::mat4 model2 = glm::mat4(1.0f);
+	//	model2 = glm::translate(model2, eyepos);
+	//	model2 = glm::translate(model2, subWorld.offset);
+	//	glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model2));
+
+	//	glDrawArrays(GL_TRIANGLES, 0, cubeVAO.vertices);
+	//}
+
 	{//Render bullet object
 		btTransform trans;
 		p_physicsWorld->rbCube->getMotionState()->getWorldTransform(trans);
@@ -174,7 +193,19 @@ void GameRenderer::doRender(float t) {
 	glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(view));
 	glUniform1f(alphaIDTexCol, 0.4f);
 
-	RayTraceResult result = subWorld.rayTrace(p_player->getEyePos(t) - subWorld.offset, p_player->transform.getLook(t));
+	glm::vec3 eyePos = p_player->getEyePos(t) - subWorld.offset;
+
+	{
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, -subWorld.rotation.x, Vectors::RIGHT);
+		model = glm::rotate(model, -subWorld.rotation.y, Vectors::UP);
+		model = glm::translate(model, -subWorld.offset);
+		eyePos = glm::vec3(model * glm::vec4(p_player->getEyePos(t), 1));
+	}
+
+	glm::vec3 rayDir = Transform::getLook({ p_player->transform.getInterpRot(t).x + subWorld.rotation.x, p_player->transform.getInterpRot(t).y + subWorld.rotation.y, 0 });
+
+	RayTraceResult result = subWorld.rayTrace(eyePos, rayDir);
 	if (result.hit) {//Draw selection box
 		glDisable(GL_CULL_FACE);
 		glLineWidth(2.5f);
@@ -272,8 +303,9 @@ void GameRenderer::RenderWorld(World& world) {
 				model = glm::translate(model, world.offset);
 
 				model = glm::rotate(model, world.rotation.y, Vectors::UP);
+				model = glm::rotate(model, world.rotation.x, Vectors::RIGHT);
 
-				model = glm::translate(model, glm::vec3(x * 16, i * 16, z * 16)/* - glm::vec3(0.5f, 0, 0.5f)*/);
+				model = glm::translate(model, glm::vec3(x * 16, i * 16, z * 16));
 
 				glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
