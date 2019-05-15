@@ -19,5 +19,7 @@ namespace FMath {
 	btVector3 convertVector(glm::vec3 vec);
 	
 	glm::quat convertQuaternion(btQuaternion quat);
+
+	glm::quat createQuaternion(glm::vec3 rotation);
 };
 

@@ -30,4 +30,9 @@ glm::quat FMath::convertQuaternion(btQuaternion quat) {
 	return glm::quat(quat.getX(), quat.getY(), quat.getZ(), quat.getW());
 }
 
+glm::quat FMath::createQuaternion(glm::vec3 rotation) {
+	return glm::quat(glm::vec3(rotation.x, 0, 0)) * glm::quat(glm::vec3(0, rotation.y, 0)) * glm::quat(glm::vec3(0, 0, rotation.z));
+	// possibly faulty expliantion -> //x (yaw) is around world axis while y & z (yaw & roll) is around local axis
+}
+
 

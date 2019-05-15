@@ -43,8 +43,10 @@ void GameRenderer::doRender(float t) {
 	//glUniformMatrix4fv(projID, 1, GL_FALSE, glm::value_ptr(glm::scale(projection, glm::vec3(0.5f, 0.5f, 1)))); //Interesting effect
 
 	glm::mat4 view = glm::mat4(1.0f);
-	view = glm::rotate(view, p_player->transform.rotation.x, Vectors::RIGHT);
-	view = glm::rotate(view, p_player->transform.rotation.y, Vectors::UP);
+	//view = glm::rotate(view, p_player->transform.rotation.x, Vectors::RIGHT);
+	//view = glm::rotate(view, p_player->transform.rotation.y, Vectors::UP);
+
+	view = view * glm::toMat4(FMath::createQuaternion(p_player->transform.getInterpRot(t)));
 	view = glm::translate(view, -p_player->getEyePos(t));
 
 	glUniformMatrix4fv(texturedProgram.viewID, 1, GL_FALSE, glm::value_ptr(view));
@@ -60,6 +62,7 @@ void GameRenderer::doRender(float t) {
 	//{
 	//	glm::mat4 model = glm::mat4(1.0f);
 	//	model = glm::rotate(model, -subWorld.rotation.y, Vectors::UP);
+	//	model = glm::rotate(model, -subWorld.rotation.x, Vectors::RIGHT);
 	//	model = glm::translate(model, -subWorld.offset);
 
 	//	glm::vec3 eyepos = glm::vec3(model * glm::vec4(p_player->getEyePos(t), 1));
@@ -197,14 +200,18 @@ void GameRenderer::doRender(float t) {
 
 	{
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, -subWorld.rotation.x, Vectors::RIGHT);
-		model = glm::rotate(model, -subWorld.rotation.y, Vectors::UP);
+		model = model * glm::toMat4(FMath::createQuaternion(-subWorld.rotation));
+		
 		model = glm::translate(model, -subWorld.offset);
 		eyePos = glm::vec3(model * glm::vec4(p_player->getEyePos(t), 1));
 	}
 
 	glm::vec3 rayDir = Transform::getLook({ p_player->transform.getInterpRot(t).x + subWorld.rotation.x, p_player->transform.getInterpRot(t).y + subWorld.rotation.y, 0 });
+	glm::quat qRot = FMath::createQuaternion(p_player->transform.getInterpRot(t));
 
+	qRot = qRot * glm::quat(subWorld.rotation);
+
+	rayDir = Vectors::FORWARD * qRot;
 	RayTraceResult result = subWorld.rayTrace(eyePos, rayDir);
 	if (result.hit) {//Draw selection box
 		glDisable(GL_CULL_FACE);
@@ -217,7 +224,7 @@ void GameRenderer::doRender(float t) {
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, subWorld.offset);
 
-		model = glm::rotate(model, subWorld.rotation.y, Vectors::UP);
+		model = model * glm::toMat4(glm::quat(subWorld.rotation));
 
 		model = glm::translate(model, glm::vec3(result.hitPos));
 
@@ -301,9 +308,8 @@ void GameRenderer::RenderWorld(World& world) {
 
 				glm::mat4 model = glm::mat4(1.0f);
 				model = glm::translate(model, world.offset);
-
-				model = glm::rotate(model, world.rotation.y, Vectors::UP);
-				model = glm::rotate(model, world.rotation.x, Vectors::RIGHT);
+				
+				model = model * glm::toMat4(glm::quat(world.rotation));
 
 				model = glm::translate(model, glm::vec3(x * 16, i * 16, z * 16));
 
