@@ -202,6 +202,10 @@ float World::intbound(float s, float ds) {
 	if (ds < 0 && sIsInt)
 		return 0;
 
+	if (ds == 0) {
+		return FLT_MAX;
+	}
+
 	return (ds > 0 ? s == 0.0f ? 1.0f : ceilf(s) - s : s - floorf(s)) / fabs(ds);
 }
 

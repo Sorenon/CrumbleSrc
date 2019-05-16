@@ -48,6 +48,7 @@ public:
 
 	glm::vec3 offset;
 	glm::vec3 rotation;
+	glm::vec3 centerOfMassOffset;
 
 public:
 	World();

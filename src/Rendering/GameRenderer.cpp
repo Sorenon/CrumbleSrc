@@ -38,7 +38,7 @@ void GameRenderer::doRender(float t) {
 	texturedProgram.activate();
 
 	float renderDistance = 12;
-	glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float)wWidth / (float)wHeight, 0.05f, renderDistance * 16 * (float)sqrt(2));
+	glm::mat4 projection = glm::perspective(glm::radians(70.0f), (float)wWidth / (float)wHeight, 0.05f, renderDistance * 16 * (float)sqrt(2));
 	glUniformMatrix4fv(texturedProgram.projID, 1, GL_FALSE, glm::value_ptr(projection));
 	//glUniformMatrix4fv(projID, 1, GL_FALSE, glm::value_ptr(glm::scale(projection, glm::vec3(0.5f, 0.5f, 1)))); //Interesting effect
 
@@ -200,9 +200,12 @@ void GameRenderer::doRender(float t) {
 
 	{
 		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, subWorld.centerOfMassOffset);
+
 		model = model * glm::toMat4(FMath::createQuaternion(-subWorld.rotation));
 		
 		model = glm::translate(model, -subWorld.offset);
+
 		eyePos = glm::vec3(model * glm::vec4(p_player->getEyePos(t), 1));
 	}
 
@@ -227,6 +230,7 @@ void GameRenderer::doRender(float t) {
 		model = model * glm::toMat4(glm::quat(subWorld.rotation));
 
 		model = glm::translate(model, glm::vec3(result.hitPos));
+		model = glm::translate(model, -subWorld.centerOfMassOffset);
 
 		glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
@@ -312,6 +316,7 @@ void GameRenderer::RenderWorld(World& world) {
 				model = model * glm::toMat4(glm::quat(world.rotation));
 
 				model = glm::translate(model, glm::vec3(x * 16, i * 16, z * 16));
+				model = glm::translate(model, -subWorld.centerOfMassOffset);
 
 				glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
