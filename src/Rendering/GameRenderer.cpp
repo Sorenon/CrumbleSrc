@@ -152,25 +152,13 @@ void GameRenderer::doRender(float t) {
 	glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(view));
 	glUniform1f(alphaIDTexCol, 0.4f);
 
-	glm::vec3 eyePos = p_player->getEyePos(t) - subWorld.offset;
+	glm::vec3 eyePos = glm::vec3(subWorld.translationMatrix * glm::vec4(p_player->getEyePos(t), 1));
 
-	{
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, subWorld.centerOfMassOffset);
+	glm::quat playerLook = FMath::createQuaternion(p_player->transform.getInterpRot(t));
+	playerLook = playerLook * glm::quat(subWorld.rotation);
 
-		model = model * glm::toMat4(FMath::createQuaternion(-subWorld.rotation));
-		
-		model = glm::translate(model, -subWorld.offset);
+	glm::vec3 rayDir = Vectors::FORWARD * playerLook;
 
-		eyePos = glm::vec3(model * glm::vec4(p_player->getEyePos(t), 1));
-	}
-
-	glm::vec3 rayDir = Transform::getLook({ p_player->transform.getInterpRot(t).x + subWorld.rotation.x, p_player->transform.getInterpRot(t).y + subWorld.rotation.y, 0 });
-	glm::quat qRot = FMath::createQuaternion(p_player->transform.getInterpRot(t));
-
-	qRot = qRot * glm::quat(subWorld.rotation);
-
-	rayDir = Vectors::FORWARD * qRot;
 	RayTraceResult result = subWorld.rayTrace(eyePos, rayDir);
 	if (result.hit) {//Draw selection box
 		glDisable(GL_CULL_FACE);

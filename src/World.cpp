@@ -3,9 +3,13 @@
 #include <vector>
 #include <limits>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include "Chunk.h"
+#include "FMath.h"
 
 chunkID World::toLong(chunkPos x, chunkPos z) {
 	return ((chunkID)x & 4294967295LL) << 32 | (chunkID)z & 4294967295LL;
@@ -122,7 +126,7 @@ std::vector<AABB> World::getOverlappingBlocks(const AABB & collider) {
 	return worldColliders;
 }
 
-//To do: make this fit the crumble format
+//To do: clean
 //From https://gist.github.com/dogfuntom/cc881c8fc86ad43d55d8
 RayTraceResult World::rayTrace(const glm::vec3 & ray_start, const glm::vec3 & dir, float radius) {
 	if (dir.x == 0 && dir.y == 0 && dir.z == 0)
@@ -195,6 +199,14 @@ RayTraceResult World::rayTrace(const glm::vec3 & ray_start, const glm::vec3 & di
 	}
 
 	return result;
+}
+
+void World::updateTranslationMatrix() {
+	translationMatrix = glm::mat4(1.0f); 
+	
+	translationMatrix = glm::translate(translationMatrix, centerOfMassOffset);
+	translationMatrix = translationMatrix * glm::toMat4(FMath::createQuaternion(-rotation));
+	translationMatrix = glm::translate(translationMatrix, -offset);
 }
 
 float World::intbound(float s, float ds) {

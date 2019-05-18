@@ -49,6 +49,7 @@ public:
 	glm::vec3 offset;
 	glm::vec3 rotation;
 	glm::vec3 centerOfMassOffset;
+	glm::mat4 translationMatrix = glm::mat4(1.0f); //Used to translate worldPositions into relitive possitions of this world
 
 public:
 	World();
@@ -67,6 +68,7 @@ public:
 
 	RayTraceResult rayTrace(const glm::vec3& start, const glm::vec3& dir, float radius = 10.0f);
 
+	void updateTranslationMatrix();
 private:
 	float intbound(float s, float ds);
 };
