@@ -29,8 +29,8 @@ GameRenderer::~GameRenderer() {
 }
 
 void GameRenderer::doRender(float t) {
-	UpdateWorld(mainWorld);
-	UpdateWorld(subWorld);
+	updateWorld(mainWorld);
+	updateWorld(subWorld);
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -43,9 +43,6 @@ void GameRenderer::doRender(float t) {
 	//glUniformMatrix4fv(projID, 1, GL_FALSE, glm::value_ptr(glm::scale(projection, glm::vec3(0.5f, 0.5f, 1)))); //Interesting effect
 
 	glm::mat4 view = glm::mat4(1.0f);
-	//view = glm::rotate(view, p_player->transform.rotation.x, Vectors::RIGHT);
-	//view = glm::rotate(view, p_player->transform.rotation.y, Vectors::UP);
-
 	view = view * glm::toMat4(FMath::createQuaternion(p_player->transform.getInterpRot(t)));
 	view = glm::translate(view, -p_player->getEyePos(t));
 
@@ -56,50 +53,9 @@ void GameRenderer::doRender(float t) {
 
 	texturedProgram.activate();
 
-	RenderWorld(mainWorld);
-	RenderWorld(subWorld);
-
-	//{
-	//	glm::mat4 model = glm::mat4(1.0f);
-	//	model = glm::rotate(model, -subWorld.rotation.y, Vectors::UP);
-	//	model = glm::rotate(model, -subWorld.rotation.x, Vectors::RIGHT);
-	//	model = glm::translate(model, -subWorld.offset);
-
-	//	glm::vec3 eyepos = glm::vec3(model * glm::vec4(p_player->getEyePos(t), 1));
-
-	//	glBindVertexArray(cubeVAO.id);
-	//	glActiveTexture(GL_TEXTURE0);
-	//	glBindTexture(GL_TEXTURE_2D, texture);
-
-	//	glm::mat4 model2 = glm::mat4(1.0f);
-	//	model2 = glm::translate(model2, eyepos);
-	//	model2 = glm::translate(model2, subWorld.offset);
-	//	glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model2));
-
-	//	glDrawArrays(GL_TRIANGLES, 0, cubeVAO.vertices);
-	//}
-
-	{//Render bullet object
-		btTransform trans;
-		p_physicsWorld->rbCube->getMotionState()->getWorldTransform(trans);
-
-		btVector3 transOrigin = trans.getOrigin();
-
-		glBindVertexArray(cubeVAO.id);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
-
-		glm::mat4 model = glm::mat4(1.0f);
-		trans.getOpenGLMatrix(glm::value_ptr(model));
-		model = glm::translate(model, -glm::vec3(0.5f, 0.5f, 0.5f));
-		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
-
-		glDrawArrays(GL_TRIANGLES, 0, cubeVAO.vertices);
-	}
-
-	for (Entity* entity : entities) {//Render all entities
-		entity->Render(t, this);
-	}
+	renderWorld(mainWorld);
+	renderWorld(subWorld);
+	renderEntities(t);
 
 	for (PathNode* node : p_pathfinder->path) {
 	//for (PathNode* node : p_pathfinder->closedSet) {
@@ -256,7 +212,7 @@ void GameRenderer::doRender(float t) {
 	glDisable(GL_BLEND);
 }
 
-void GameRenderer::UpdateWorld(World& world) {//Remake VAOs
+void GameRenderer::updateWorld(World& world) {//Remake VAOs
 	for (auto pair : world.chunks) {
 		Chunk& chunk = *pair.second;
 		chunkID id = pair.first;
@@ -295,7 +251,7 @@ void GameRenderer::UpdateWorld(World& world) {//Remake VAOs
 	}
 }
 
-void GameRenderer::RenderWorld(World& world) {
+void GameRenderer::renderWorld(World& world) {
 	for (auto pair : world.chunks) {
 		Chunk& chunk = *pair.second;
 		chunkID id = pair.first;
@@ -316,13 +272,37 @@ void GameRenderer::RenderWorld(World& world) {
 				model = model * glm::toMat4(glm::quat(world.rotation));
 
 				model = glm::translate(model, glm::vec3(x * 16, i * 16, z * 16));
-				model = glm::translate(model, -subWorld.centerOfMassOffset);
+				model = glm::translate(model, -world.centerOfMassOffset);
 
 				glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
 				glDrawArrays(GL_TRIANGLES, 0, vao.vertices);
 			}
 		}
+	}
+}
+
+void GameRenderer::renderEntities(float t) {
+	{//Render bullet object
+		btTransform trans;
+		p_physicsWorld->rbCube->getMotionState()->getWorldTransform(trans);
+
+		btVector3 transOrigin = trans.getOrigin();
+
+		glBindVertexArray(cubeVAO.id);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+
+		glm::mat4 model = glm::mat4(1.0f);
+		trans.getOpenGLMatrix(glm::value_ptr(model));
+		model = glm::translate(model, -glm::vec3(0.5f, 0.5f, 0.5f));
+		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
+
+		glDrawArrays(GL_TRIANGLES, 0, cubeVAO.vertices);
+	}
+
+	for (Entity* entity : entities) {//Render all entities
+		entity->Render(t, this);
 	}
 }
 

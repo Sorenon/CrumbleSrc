@@ -36,7 +36,9 @@ public:
 
 	void doRender(float t);
 
-	void UpdateWorld(World& world);//Remake VAOs
-	void RenderWorld(World& world);
+	void updateWorld(World& world);//Remake VAOs
+	void renderWorld(World& world);//Render VAOs
+
+	void renderEntities(float t);//Render entities and bullet entities
 };
 
