@@ -13,8 +13,10 @@ class GameRenderer {
 public:
 	ShaderProgram texturedProgram = ShaderProgram(ShaderConstructor(FileUtil::readFile("E:/CProjects/Crumble/CrumbleSrc/src/Shaders/textured.vert").c_str(), GL_VERTEX_SHADER), ShaderConstructor(FileUtil::readFile("E:/CProjects/Crumble/CrumbleSrc/src/Shaders/textured.frag").c_str(), GL_FRAGMENT_SHADER));
 	ShaderProgram texColourProgram = ShaderProgram(ShaderConstructor(FileUtil::readFile("E:/CProjects/Crumble/CrumbleSrc/src/Shaders/texColour.vert").c_str(), GL_VERTEX_SHADER), ShaderConstructor(FileUtil::readFile("E:/CProjects/Crumble/CrumbleSrc/src/Shaders/texColour.frag").c_str(), GL_FRAGMENT_SHADER));
+	ShaderProgram portalStencilProgram = ShaderProgram(ShaderConstructor(FileUtil::readFile("E:/CProjects/Crumble/CrumbleSrc/src/Shaders/portalStencil.vert").c_str(), GL_VERTEX_SHADER), ShaderConstructor(FileUtil::readFile("E:/CProjects/Crumble/CrumbleSrc/src/Shaders/portalStencil.frag").c_str(), GL_FRAGMENT_SHADER));
 
 	GLint colourIDTexCol = glGetUniformLocation(texColourProgram.id, "colour");
+	GLint colourIDPortal = glGetUniformLocation(texColourProgram.id, "colour");
 	t_VAO cubeVAO = createCubeVAO();
 	t_VAO blockLineVAO = createLineCubeVAO();
 	t_VAO planeVAO = createPlain();

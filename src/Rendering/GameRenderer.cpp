@@ -50,9 +50,10 @@ void GameRenderer::doRender(float t) {
 		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 		glStencilMask(0x01);
 
-		//glColorMask(false, false, false, false);
-		glDepthFunc(GL_ALWAYS);
-		glDepthRange(1, 1); //Clear the depth buffer where the plane is drawn
+		texColourProgram.activate();
+		glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(projMat));
+		glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(viewMat));
+		glUniform4f(colourIDTexCol, 0.2f, 0.3f, 0.3f, 1.0f);
 
 		{
 			glClear(GL_STENCIL_BUFFER_BIT);
@@ -61,20 +62,35 @@ void GameRenderer::doRender(float t) {
 			glBindVertexArray(planeVAO.id);
 
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0, 65, -3));
+			model = glm::translate(model, glm::vec3(0.5f, 65.5f, -3.0f));
 			model = glm::scale(model, glm::vec3(3, 3, 3));
 
-			glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
+			glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 			glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);
 		}
-
-		glDepthFunc(GL_LEQUAL);
-		glDepthRange(0, 1);
 
 		glStencilFunc(GL_EQUAL, 0x01, 0xFF);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 		glStencilMask(0x00);
 
+		{
+			glDepthFunc(GL_ALWAYS);
+			glDepthRange(1, 1); //Clear the depth buffer where the plane is drawn
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glBindVertexArray(planeVAO.id);
+
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.5f, 65.5f, -3.0f));
+			model = glm::scale(model, glm::vec3(3, 3, 3));
+
+			glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
+			glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);
+
+			glDepthFunc(GL_LEQUAL);
+			glDepthRange(0, 1);
+		}
 
 		glm::mat4 oldView = viewMat;
 		viewMat = glm::translate(viewMat, glm::vec3(0, -1, 10));
