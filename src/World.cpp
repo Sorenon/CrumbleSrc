@@ -148,6 +148,7 @@ RayTraceResult World::rayTrace(const glm::vec3 & ray_start, const glm::vec3 & di
 			result.hit = true;
 			result.hitPos = scan;
 			result.face = face;
+			result.distance = glm::distance(glm::floor(ray_start), glm::vec3(result.hitPos));
 			break;
 		}
 

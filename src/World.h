@@ -33,6 +33,7 @@ typedef struct {
 	bool hit = false;
 	glm::ivec3 hitPos;
 	glm::ivec3 face;
+	float distance;
 
 	operator bool() const { return hit; };
 
@@ -46,10 +47,10 @@ public:
 	std::unordered_map<chunkID, Chunk*> chunks;
 	bcOverlappingPairCache* bcPairCache;
 
-	glm::vec3 offset;
+	glm::vec3 offset;	//How far off 0,0,0 this world's center of mass is translated
 	glm::vec3 rotation;
 	glm::vec3 centerOfMassOffset;
-	glm::mat4 translationMatrix = glm::mat4(1.0f); //Used to translate worldPositions into relitive possitions of this world
+	glm::mat4 translationMatrix = glm::mat4(1.0f); //Used to translate global positions into relitive positions of this world (*= global->relitive, /= relitive->global)
 
 public:
 	World();

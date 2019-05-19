@@ -169,15 +169,14 @@ void GameRenderer::doRender(float t) {
 		glBindVertexArray(blockLineVAO.id);
 
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, subWorld.offset);
-
-		model = model * glm::toMat4(glm::quat(subWorld.rotation));
-
-		model = glm::translate(model, glm::vec3(result.hitPos));
-		model = glm::translate(model, -subWorld.centerOfMassOffset);
+		{
+			model = glm::translate(model, subWorld.offset);
+			model = model * glm::toMat4(glm::quat(subWorld.rotation));
+			model = glm::translate(model, glm::vec3(result.hitPos));
+			model = glm::translate(model, -subWorld.centerOfMassOffset);
+		}
 
 		glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
-
 		glDrawArrays(GL_LINES, 0, blockLineVAO.vertices);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
@@ -255,12 +254,12 @@ void GameRenderer::renderWorld(World& world) {
 				glBindTexture(GL_TEXTURE_2D, texture);
 
 				glm::mat4 model = glm::mat4(1.0f);
-				model = glm::translate(model, world.offset);
-				
-				model = model * glm::toMat4(glm::quat(world.rotation));
-
-				model = glm::translate(model, glm::vec3(x * 16, i * 16, z * 16));
-				model = glm::translate(model, -world.centerOfMassOffset);
+				{
+					model = glm::translate(model, world.offset);
+					model = model * glm::toMat4(glm::quat(world.rotation));
+					model = glm::translate(model, glm::vec3(x * 16, i * 16, z * 16));
+					model = glm::translate(model, -world.centerOfMassOffset);
+				}
 
 				glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
