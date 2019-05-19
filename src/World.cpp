@@ -145,7 +145,7 @@ RayTraceResult World::rayTrace(const glm::vec3 & ray_start, const glm::vec3 & di
 
 	while (true) {
 		if (getBlock(scan.x, scan.y, scan.z) == 1) {
-			result.hit = true;
+			result.hasHit = true;
 			result.hitPos = scan;
 			result.face = face;
 			result.distance = glm::distance(glm::floor(ray_start), glm::vec3(result.hitPos));

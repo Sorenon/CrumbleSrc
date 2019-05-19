@@ -160,7 +160,7 @@ void GameRenderer::doRender(float t) {
 	glm::vec3 rayDir = Vectors::FORWARD * playerLook;
 
 	RayTraceResult result = subWorld.rayTrace(eyePos, rayDir);
-	if (result.hit) {//Draw selection box
+	if (result.hasHit) {//Draw selection box
 		glDisable(GL_CULL_FACE);
 		glLineWidth(2.5f);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

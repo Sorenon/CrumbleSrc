@@ -30,12 +30,12 @@ namespace Faces {
 };
 
 typedef struct _RayTraceResult {
-	bool hit = false;
+	bool hasHit = false;
 	glm::ivec3 hitPos;
 	glm::ivec3 face;
 	float distance;
 
-	operator bool() const { return hit; };
+	operator bool() const { return hasHit; };
 
 }RayTraceResult;
 
