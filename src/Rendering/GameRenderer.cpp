@@ -30,9 +30,9 @@ GameRenderer::~GameRenderer() {
 }
 
 void GameRenderer::doRender(float t) {
-	updateWorld(scene.mainWorld);
-	for (World& subWorld : scene.subWorlds) {
-		updateWorld(subWorld);
+	updateWorld(&scene.mainWorld);
+	for (SubWorld& subWorld : scene.subWorlds) {
+		updateWorld(&subWorld);
 	}
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -56,7 +56,7 @@ void GameRenderer::doRender(float t) {
 	texturedProgram.activate();
 
 	renderWorld(scene.mainWorld);
-	for (World& subWorld : scene.subWorlds) {
+	for (SubWorld& subWorld : scene.subWorlds) {
 		renderWorld(subWorld);
 	}
 	renderEntities(t);
@@ -149,8 +149,8 @@ void GameRenderer::doRender(float t) {
 	renderUI(t);
 }
 
-void GameRenderer::updateWorld(World & world) {//Remake VAOs
-	for (auto pair : world.chunks) {
+void GameRenderer::updateWorld(World * world) {//Remake VAOs
+	for (auto pair : world->chunks) {
 		Chunk& chunk = *pair.second;
 		chunkID id = pair.first;
 		int x = id >> 32;
@@ -166,11 +166,11 @@ void GameRenderer::updateWorld(World & world) {//Remake VAOs
 					SubChunk& above = i + 1 >= 16 ? SubChunk::EMPTY : chunk.getSubChunkSafe(i + 1);
 					SubChunk & below = i - 1 < 0 ? SubChunk::EMPTY : chunk.getSubChunkSafe(i - 1);
 
-					SubChunk & right = world.getChunkSafe(x + 1, z).getSubChunkSafe(i);
-					SubChunk & left = world.getChunkSafe(x - 1, z).getSubChunkSafe(i);
+					SubChunk & right = world->getChunkSafe(x + 1, z).getSubChunkSafe(i);
+					SubChunk & left = world->getChunkSafe(x - 1, z).getSubChunkSafe(i);
 
-					SubChunk & front = world.getChunkSafe(x, z - 1).getSubChunkSafe(i);
-					SubChunk & back = world.getChunkSafe(x, z + 1).getSubChunkSafe(i);
+					SubChunk & front = world->getChunkSafe(x, z - 1).getSubChunkSafe(i);
+					SubChunk & back = world->getChunkSafe(x, z + 1).getSubChunkSafe(i);
 
 					t_VAO oldVAO = chunk.subChunkVAOs[i];
 					if (oldVAO.id != 0) {
@@ -189,6 +189,32 @@ void GameRenderer::updateWorld(World & world) {//Remake VAOs
 }
 
 void GameRenderer::renderWorld(World & world) {
+	for (auto pair : world.chunks) {
+		Chunk& chunk = *pair.second;
+		chunkID id = pair.first;
+		int x = id >> 32;
+		int z = (int)id;
+
+		for (int i = 0; i < 16; i++) {
+			t_VAO& vao = chunk.subChunkVAOs[i];
+
+			if (vao.id != 0) {
+				glBindVertexArray(vao.id);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, texture);
+
+				glm::mat4 model = glm::mat4(1.0f);
+				model = glm::translate(model, glm::vec3(x * 16, i * 16, z * 16));
+
+				glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
+
+				glDrawArrays(GL_TRIANGLES, 0, vao.vertices);
+			}
+		}
+	}
+}
+
+void GameRenderer::renderWorld(SubWorld & world) {
 	for (auto pair : world.chunks) {
 		Chunk& chunk = *pair.second;
 		chunkID id = pair.first;
@@ -259,34 +285,31 @@ void GameRenderer::renderUI(float t) {
 	glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(view));
 	glUniform1f(alphaIDTexCol, 0.4f);
 
-	//glm::vec3 eyePos = glm::vec3(subWorld.translationMatrix * glm::vec4(p_player->getEyePos(t), 1));
+	RayTraceResult result = scene.RayTraceAllWorlds(t);
+	if (result.hasHit) {//Draw selection box
+		glDisable(GL_CULL_FACE);
+		glLineWidth(2.5f);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(glm::scale(projection, glm::vec3(1, 1, 0.999f))));//Emulating a slightly lower FOV
 
-	//glm::quat playerLook = FMath::createQuaternion(p_player->transform.getInterpRot(t));
-	//playerLook = playerLook * glm::quat(subWorld.rotation);
+		glBindVertexArray(blockLineVAO.id);
 
-	//glm::vec3 rayDir = Vectors::FORWARD * playerLook;
+		glm::mat4 model = glm::mat4(1.0f);
+		if (result.world->isSubWorld) {
+			SubWorld& subWorld = *(SubWorld*)result.world;
+			model = glm::translate(model, subWorld.offset);
+			model = model * glm::toMat4(glm::quat(subWorld.rotation));
+			model = glm::translate(model, glm::vec3(result.hitPos));
+			model = glm::translate(model, -subWorld.centerOfMassOffset);
+		}
+		else {
+			model = glm::translate(model, glm::vec3(result.hitPos));
+		}
 
-	//RayTraceResult result = subWorld.rayTrace(eyePos, rayDir);
-	//if (result.hasHit) {//Draw selection box
-	//	glDisable(GL_CULL_FACE);
-	//	glLineWidth(2.5f);
-	//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	//	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(glm::scale(projection, glm::vec3(1, 1, 0.999f))));//Emulating a slightly lower FOV
-
-	//	glBindVertexArray(blockLineVAO.id);
-
-	//	glm::mat4 model = glm::mat4(1.0f);
-	//	{
-	//		model = glm::translate(model, subWorld.offset);
-	//		model = model * glm::toMat4(glm::quat(subWorld.rotation));
-	//		model = glm::translate(model, glm::vec3(result.hitPos));
-	//		model = glm::translate(model, -subWorld.centerOfMassOffset);
-	//	}
-
-	//	glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
-	//	glDrawArrays(GL_LINES, 0, blockLineVAO.vertices);
-	//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	//}
+		glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
+		glDrawArrays(GL_LINES, 0, blockLineVAO.vertices);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(projection));
 
 	{//Render gui

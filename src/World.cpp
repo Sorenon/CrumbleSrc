@@ -203,7 +203,7 @@ RayTraceResult World::rayTrace(const glm::vec3 & ray_start, const glm::vec3 & di
 	return result;
 }
 
-void World::updateTranslationMatrix() {
+void SubWorld::UpdateTranslationMatrix() {
 	translationMatrix = glm::mat4(1.0f); 
 	
 	translationMatrix = glm::translate(translationMatrix, centerOfMassOffset);

@@ -20,8 +20,8 @@ RayTraceResult Scene::RayTraceAllWorlds(float t) {
 
 	results.push_back(RayTraceFromPlayer(t, mainWorld));
 	for (int i = 0; i < subWorlds.size(); i++) {
-		World* world = &subWorlds[i];
-		results[i + 1] = RayTraceFromPlayer(t, *world);
+		SubWorld& world = subWorlds[i];
+		results[i + 1] = RayTraceFromPlayer(t, world);
 	}
 
 	RayTraceResult chosen;
@@ -42,6 +42,12 @@ RayTraceResult Scene::RayTraceAllWorlds(float t) {
 }
 
 RayTraceResult Scene::RayTraceFromPlayer(float t, World& world) {
+	RayTraceResult result;
+
+	return world.rayTrace(p_player->getEyePos(t), p_player->transform.getLook(t));
+}
+
+RayTraceResult Scene::RayTraceFromPlayer(float t, SubWorld& world) {
 	RayTraceResult result;
 
 	glm::vec3 eyePos = glm::vec3(world.translationMatrix * glm::vec4(p_player->getEyePos(t), 1));

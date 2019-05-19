@@ -10,7 +10,7 @@ class Scene
 {
 public:
 	World mainWorld;
-	std::vector<World> subWorlds;
+	std::vector<SubWorld> subWorlds;
 	std::vector<Entity*> entities;//Possible TODO: Sort more expensive entites to be at the front to increase multithreaded update efficency (But may require more CPU time than it saves)
 
 public:
@@ -19,5 +19,6 @@ public:
 
 	RayTraceResult RayTraceAllWorlds(float t);
 	RayTraceResult RayTraceFromPlayer(float t, World& world);
+	RayTraceResult RayTraceFromPlayer(float t, SubWorld& world);
 };
 

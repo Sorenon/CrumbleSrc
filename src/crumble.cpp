@@ -87,7 +87,6 @@ public:
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void updateEntities(ThreadPool& pool, ThreadUnit& threadData);
-RayTraceResult rayTraceFromPlayer(World& world, float t);
 void interactWithWorlds(Input& input, float t);
 void end();
 
@@ -119,8 +118,8 @@ int main(int argc, char* argv[]) {
 	//subWorld.setBlock(5, 66, 5, 1);
 	scene.mainWorld.setBlock(0, 62, 0, 1);
 
-	scene.subWorlds.push_back(World());
-	World& subWorld = scene.subWorlds[0];
+	scene.subWorlds.push_back(SubWorld());
+	SubWorld& subWorld = scene.subWorlds[0];
 
 	subWorld.offset = glm::vec3(5, 66, 5);
 	subWorld.centerOfMassOffset = glm::vec3(0.5f, 0.5f, 0.5f);
@@ -128,7 +127,7 @@ int main(int argc, char* argv[]) {
 	subWorld.setBlock(0, 2, 0, 1);
 
 	subWorld.rotation = glm::vec3(0, 0, glm::radians(45.0f));
-	subWorld.updateTranslationMatrix();
+	subWorld.UpdateTranslationMatrix();
 
 	FT_Library ft;
 	if (FT_Init_FreeType(&ft))
@@ -227,8 +226,8 @@ int main(int argc, char* argv[]) {
 		}
 
 		physicsWorld.dynamicsWorld->stepSimulation(1 / 60.f, 10, 1 / 120.f);
-		//subWorld.rotation += glm::vec3(0, 0, glm::radians(1.0f));
-		//subWorld.updateTranslationMatrix();
+		subWorld.rotation += glm::vec3(0, 0, glm::radians(1.0f));
+		subWorld.UpdateTranslationMatrix();
 
 		{
 			float sensitivity = 0.15f;
@@ -320,19 +319,6 @@ void updateEntities(ThreadPool & pool, ThreadUnit & threadData) {
 		pool.done = true;
 		threadData.readyOrExecuting = false;
 	}
-}
-
-RayTraceResult rayTraceFromPlayer(World & world, float t) {
-	RayTraceResult result;
-
-	glm::vec3 eyePos = glm::vec3(world.translationMatrix * glm::vec4(p_player->getEyePos(t), 1));
-
-	glm::quat playerLook = FMath::createQuaternion(p_player->transform.getInterpRot(t));//Use quat to avoid gimbal lock
-	playerLook = playerLook * glm::quat(world.rotation);
-
-	glm::vec3 rayDir = Vectors::FORWARD * playerLook;
-
-	return world.rayTrace(eyePos, rayDir);
 }
 
 void interactWithWorlds(Input & input, float t) {
