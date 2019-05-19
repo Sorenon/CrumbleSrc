@@ -6,6 +6,7 @@
 
 #include "World.h"
 #include "globals.h"
+#include "Scene.h"
 
 using namespace glm;
 
@@ -113,7 +114,9 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 	closedSet = std::vector<PathNode*>();
 	path = std::vector<PathNode*>();
 
-	if (mainWorld.getBlock(endPos.x, endPos.y, endPos.z) != 0 || mainWorld.getBlock(startPos.x, startPos.y, startPos.z) != 0) {
+	World& world = scene.mainWorld;
+
+	if (scene.mainWorld.getBlock(endPos.x, endPos.y, endPos.z) != 0 || world.getBlock(startPos.x, startPos.y, startPos.z) != 0) {
 		return;
 	}
 
@@ -133,23 +136,23 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 			ivec3 checkPos = currentNode->pos + face.vec;
 			int cost = 0;
 
-			if (mainWorld.getBlock(checkPos.x, checkPos.y, checkPos.z) != 0) {
+			if (world.getBlock(checkPos.x, checkPos.y, checkPos.z) != 0) {
 				checkPos.y++;
 				cost += 5;
 
-				if (mainWorld.getBlock(checkPos.x, checkPos.y, checkPos.z) != 0) {
+				if (world.getBlock(checkPos.x, checkPos.y, checkPos.z) != 0) {
 					continue;
 				}
 			}
-			else if (mainWorld.getBlock(checkPos.x, checkPos.y - 1, checkPos.z) == 0) {
+			else if (world.getBlock(checkPos.x, checkPos.y - 1, checkPos.z) == 0) {
 				cost++;
 				checkPos.y--;
 
-				if (mainWorld.getBlock(checkPos.x, checkPos.y - 1, checkPos.z) == 0) {
+				if (world.getBlock(checkPos.x, checkPos.y - 1, checkPos.z) == 0) {
 					cost += 3;
 					checkPos.y--;
 
-					if (mainWorld.getBlock(checkPos.x, checkPos.y - 1, checkPos.z) == 0) {
+					if (world.getBlock(checkPos.x, checkPos.y - 1, checkPos.z) == 0) {
 						continue;
 					}
 				}

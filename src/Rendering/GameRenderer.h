@@ -19,6 +19,7 @@ public:
 	t_VAO planeVAO = createPlain();
 	GLuint texture;
 	GLuint textureArrow;
+	float renderDistance = 12;
 
 public:
 	GameRenderer();
@@ -40,5 +41,7 @@ public:
 	void renderWorld(World& world);//Render VAOs
 
 	void renderEntities(float t);//Render entities and bullet entities
+
+	void renderUI(float t);
 };
 

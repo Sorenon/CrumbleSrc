@@ -36,6 +36,7 @@
 #include "Rendering/GameRenderer.h"
 #include "Physics/PhysicsWorld.h"
 #include "Pathfinder.h"
+#include "Scene.h"
 
 typedef struct _ThreadUnit {
 	int id;
@@ -97,12 +98,10 @@ int wWidth = windowStartWidth;
 int wHeight = windowStartHeight;
 
 Player* p_player;
-std::vector<Entity*> entities;//Possible TODO: Sort more expensive entites to be at the front to increase multithreaded update efficency (But may require more CPU time than it saves)
 PhysicsWorld* p_physicsWorld;
 GameRenderer* p_gameRenderer;
 Pathfinder* p_pathfinder;
-World mainWorld;
-World subWorld;
+Scene scene;
 
 std::mutex entityMutex;
 int entityIndex = 0;
@@ -113,20 +112,20 @@ int main(int argc, char* argv[]) {
 
 	for (int x = -1; x <= 1; x++) {
 		for (int z = -1; z <= 1; z++) {
-			mainWorld.createChunk(x, z, new Chunk(4));
+			scene.mainWorld.createChunk(x, z, new Chunk(4));
 		}
 	}
 
 	//subWorld.setBlock(5, 66, 5, 1);
-	mainWorld.setBlock(0, 62, 0, 1);
+	scene.mainWorld.setBlock(0, 62, 0, 1);
 
-	subWorld.offset = glm::vec3(5, 66, 5);
-	subWorld.centerOfMassOffset = glm::vec3(0.5f, 0.5f, 0.5f);
-	subWorld.setBlock(0, 0, 0, 1);
-	subWorld.setBlock(0, 2, 0, 1);
+	//subWorld.offset = glm::vec3(5, 66, 5);
+	//subWorld.centerOfMassOffset = glm::vec3(0.5f, 0.5f, 0.5f);
+	//subWorld.setBlock(0, 0, 0, 1);
+	//subWorld.setBlock(0, 2, 0, 1);
 
-	subWorld.rotation = glm::vec3(0, 0, glm::radians(45.0f));
-	subWorld.updateTranslationMatrix();
+	//subWorld.rotation = glm::vec3(0, 0, glm::radians(45.0f));
+	//subWorld.updateTranslationMatrix();
 
 	FT_Library ft;
 	if (FT_Init_FreeType(&ft))
@@ -167,7 +166,7 @@ int main(int argc, char* argv[]) {
 	Player player;
 	p_player = &player;
 	player.transform.rotation.x = glm::radians(180.0f);
-	entities.push_back(p_player);
+	scene.entities.push_back(p_player);
 
 	EntityFoo entityFoo;
 	entityFoo.transform.position = vec3(0, 90, 0);
@@ -191,7 +190,7 @@ int main(int argc, char* argv[]) {
 	Pathfinder pathfinder;
 	p_pathfinder = &pathfinder;
 
-	mainWorld.setBlock(2, 64, 3, 1);
+	scene.mainWorld.setBlock(2, 64, 3, 1);
 
 	//pathfinder.FindPath({ 0, 64, 0 }, { 3, 64, 3 }, 5);
 
@@ -225,8 +224,8 @@ int main(int argc, char* argv[]) {
 		}
 
 		physicsWorld.dynamicsWorld->stepSimulation(1 / 60.f, 10, 1 / 120.f);
-		subWorld.rotation += glm::vec3(0, 0, glm::radians(1.0f));
-		subWorld.updateTranslationMatrix();
+		//subWorld.rotation += glm::vec3(0, 0, glm::radians(1.0f));
+		//subWorld.updateTranslationMatrix();
 
 		{
 			float sensitivity = 0.15f;
@@ -269,7 +268,7 @@ int main(int argc, char* argv[]) {
 
 		renderer.doRender(t);
 
-		interactWithWorlds(input, t, {&subWorld, &mainWorld});
+		interactWithWorlds(input, t, {/*&subWorld, */ &scene.mainWorld});
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -297,19 +296,19 @@ void updateEntities(ThreadPool & pool, ThreadUnit & threadData) {
 		}//pool.mtx.unlock
 
 
-		while (entityIndex < entities.size() && !pool.done) {
+		while (entityIndex < scene.entities.size() && !pool.done) {
 			{//entityMutex.lock
 				std::lock_guard<std::mutex> lock(entityMutex);
 				int i = entityIndex++;
 
-				if (i >= entities.size()) {
+				if (i >= scene.entities.size()) {
 					pool.done = true; //We have reached the end of the list
 					break;
 				}
 
 				//std::cout << threadData.id << " on " << i << std::endl;
 
-				entity = entities[i];
+				entity = scene.entities[i];
 			}//entityMutex.unlock
 
 			entity->UpdateMultiThread();

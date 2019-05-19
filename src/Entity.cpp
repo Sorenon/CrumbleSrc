@@ -5,6 +5,7 @@
 
 #include "globals.h"
 #include "AABB.h"
+#include "Scene.h"
 
 Entity::Entity() {
 }
@@ -21,7 +22,7 @@ void Entity::Move() {
 	glm::vec3 move = velocity * CrumbleGlobals::FIXED_TIMESTEP;	//How far the entity expects to move 
 	AABB entityCol = getLocalBoundingBox();
 
-	std::vector<AABB> worldColliders = mainWorld.getOverlappingBlocks(entityCol.expandByVelocity(velocity)); //Find all blocks (as AABBs) the entity may collide with
+	std::vector<AABB> worldColliders = scene.mainWorld.getOverlappingBlocks(entityCol.expandByVelocity(velocity)); //Find all blocks (as AABBs) the entity may collide with
 
 	{//Collide along y axis
 		const float y = move.y;

@@ -5,6 +5,7 @@
 
 #include "World.h"
 
+class Scene;
 class Player;
 class Entity;
 class PhysicsWorld;
@@ -23,10 +24,8 @@ namespace CrumbleGlobals {
 	const float PHYSICS_TIMESTEP = 1.0f / 120.0f;
 };
 
-extern World mainWorld;
-extern World subWorld;
+extern Scene scene;
 extern Player* p_player;
-extern std::vector<Entity*> entities;
 extern PhysicsWorld* p_physicsWorld;
 extern GameRenderer* p_gameRenderer;
 extern Pathfinder* p_pathfinder;

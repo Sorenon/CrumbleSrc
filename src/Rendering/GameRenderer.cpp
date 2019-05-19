@@ -16,6 +16,7 @@
 #include "../FMath.h"
 #include "../Physics/PhysicsWorld.h"
 #include "../Pathfinder.h"
+#include "../Scene.h"
 
 GameRenderer::GameRenderer() {
 	stbi_set_flip_vertically_on_load(true);
@@ -29,15 +30,14 @@ GameRenderer::~GameRenderer() {
 }
 
 void GameRenderer::doRender(float t) {
-	updateWorld(mainWorld);
-	updateWorld(subWorld);
+	updateWorld(scene.mainWorld);
+	//updateWorld(subWorld);
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	texturedProgram.activate();
 
-	float renderDistance = 12;
 	glm::mat4 projection = glm::perspective(glm::radians(70.0f), (float)wWidth / (float)wHeight, 0.05f, renderDistance * 16 * (float)sqrt(2));
 	glUniformMatrix4fv(texturedProgram.projID, 1, GL_FALSE, glm::value_ptr(projection));
 	//glUniformMatrix4fv(projID, 1, GL_FALSE, glm::value_ptr(glm::scale(projection, glm::vec3(0.5f, 0.5f, 1)))); //Interesting effect
@@ -53,12 +53,12 @@ void GameRenderer::doRender(float t) {
 
 	texturedProgram.activate();
 
-	renderWorld(mainWorld);
-	renderWorld(subWorld);
+	renderWorld(scene.mainWorld);
+	//renderWorld(subWorld);
 	renderEntities(t);
 
 	for (PathNode* node : p_pathfinder->path) {
-	//for (PathNode* node : p_pathfinder->closedSet) {
+		//for (PathNode* node : p_pathfinder->closedSet) {
 		glBindVertexArray(planeVAO.id);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textureArrow);
@@ -142,64 +142,10 @@ void GameRenderer::doRender(float t) {
 	//	}
 	//}
 
-	texColourProgram.activate();
-
-	glEnable(GL_BLEND);
-	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(view));
-	glUniform1f(alphaIDTexCol, 0.4f);
-
-	glm::vec3 eyePos = glm::vec3(subWorld.translationMatrix * glm::vec4(p_player->getEyePos(t), 1));
-
-	glm::quat playerLook = FMath::createQuaternion(p_player->transform.getInterpRot(t));
-	playerLook = playerLook * glm::quat(subWorld.rotation);
-
-	glm::vec3 rayDir = Vectors::FORWARD * playerLook;
-
-	RayTraceResult result = subWorld.rayTrace(eyePos, rayDir);
-	if (result.hasHit) {//Draw selection box
-		glDisable(GL_CULL_FACE);
-		glLineWidth(2.5f);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(glm::scale(projection, glm::vec3(1, 1, 0.999f))));//Emulating a slightly lower FOV
-
-		glBindVertexArray(blockLineVAO.id);
-
-		glm::mat4 model = glm::mat4(1.0f);
-		{
-			model = glm::translate(model, subWorld.offset);
-			model = model * glm::toMat4(glm::quat(subWorld.rotation));
-			model = glm::translate(model, glm::vec3(result.hitPos));
-			model = glm::translate(model, -subWorld.centerOfMassOffset);
-		}
-
-		glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_LINES, 0, blockLineVAO.vertices);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	}
-	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(projection));
-
-	{//Render gui
-		glEnable(GL_CULL_FACE);
-		glDisable(GL_DEPTH_TEST);
-
-		glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
-		glBindVertexArray(planeVAO.id);
-
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0, 0, -30));
-		glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
-
-		glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);
-	}
-
-	glDisable(GL_BLEND);
+	renderUI(t);
 }
 
-void GameRenderer::updateWorld(World& world) {//Remake VAOs
+void GameRenderer::updateWorld(World & world) {//Remake VAOs
 	for (auto pair : world.chunks) {
 		Chunk& chunk = *pair.second;
 		chunkID id = pair.first;
@@ -238,7 +184,7 @@ void GameRenderer::updateWorld(World& world) {//Remake VAOs
 	}
 }
 
-void GameRenderer::renderWorld(World& world) {
+void GameRenderer::renderWorld(World & world) {
 	for (auto pair : world.chunks) {
 		Chunk& chunk = *pair.second;
 		chunkID id = pair.first;
@@ -288,9 +234,72 @@ void GameRenderer::renderEntities(float t) {
 		glDrawArrays(GL_TRIANGLES, 0, cubeVAO.vertices);
 	}
 
-	for (Entity* entity : entities) {//Render all entities
+	for (Entity* entity : scene.entities) {//Render all entities
 		entity->Render(t, this);
 	}
+}
+
+void GameRenderer::renderUI(float t) {
+	texColourProgram.activate();
+
+	glEnable(GL_BLEND);
+	glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glm::mat4 view = glm::mat4(1.0f);
+	view = view * glm::toMat4(FMath::createQuaternion(p_player->transform.getInterpRot(t)));
+	view = glm::translate(view, -p_player->getEyePos(t));
+	glm::mat4 projection = glm::perspective(glm::radians(70.0f), (float)wWidth / (float)wHeight, 0.05f, renderDistance * 16 * (float)sqrt(2));
+
+	glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(view));
+	glUniform1f(alphaIDTexCol, 0.4f);
+
+	//glm::vec3 eyePos = glm::vec3(subWorld.translationMatrix * glm::vec4(p_player->getEyePos(t), 1));
+
+	//glm::quat playerLook = FMath::createQuaternion(p_player->transform.getInterpRot(t));
+	//playerLook = playerLook * glm::quat(subWorld.rotation);
+
+	//glm::vec3 rayDir = Vectors::FORWARD * playerLook;
+
+	//RayTraceResult result = subWorld.rayTrace(eyePos, rayDir);
+	//if (result.hasHit) {//Draw selection box
+	//	glDisable(GL_CULL_FACE);
+	//	glLineWidth(2.5f);
+	//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(glm::scale(projection, glm::vec3(1, 1, 0.999f))));//Emulating a slightly lower FOV
+
+	//	glBindVertexArray(blockLineVAO.id);
+
+	//	glm::mat4 model = glm::mat4(1.0f);
+	//	{
+	//		model = glm::translate(model, subWorld.offset);
+	//		model = model * glm::toMat4(glm::quat(subWorld.rotation));
+	//		model = glm::translate(model, glm::vec3(result.hitPos));
+	//		model = glm::translate(model, -subWorld.centerOfMassOffset);
+	//	}
+
+	//	glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
+	//	glDrawArrays(GL_LINES, 0, blockLineVAO.vertices);
+	//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	//}
+	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(projection));
+
+	{//Render gui
+		glEnable(GL_CULL_FACE);
+		glDisable(GL_DEPTH_TEST);
+
+		glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
+		glBindVertexArray(planeVAO.id);
+
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0, 0, -30));
+		glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
+
+		glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);
+	}
+
+	glDisable(GL_BLEND);
 }
 
 t_VAO GameRenderer::createCubeVAO() {

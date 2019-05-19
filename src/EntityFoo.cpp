@@ -8,6 +8,7 @@
 #include "globals.h"
 #include "Pathfinder.h"
 #include "Rendering/GameRenderer.h"
+#include "Scene.h"
 
 EntityFoo::EntityFoo() {
 	//collider = AABB(vec3(-0.25f, 0, -0.25f), vec3(0.25f, 0.5f, 0.25f));
@@ -144,7 +145,7 @@ bool EntityFoo::shouldRebuildPath() {
 
 		for (int i = pathfinder.currentNodeIndex; i >= 0; i--) {
 			glm::ivec3 nodePos = pathfinder.path[i]->pos;
-			if (mainWorld.getBlock(nodePos.x, nodePos.y, nodePos.z) != 0) {
+			if (scene.mainWorld.getBlock(nodePos.x, nodePos.y, nodePos.z) != 0) {
 				return true;
 				break;
 			}
