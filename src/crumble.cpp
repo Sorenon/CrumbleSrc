@@ -87,6 +87,7 @@ public:
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void updateEntities(ThreadPool& pool, ThreadUnit& threadData);
 void interactWithWorld(Input& input, float t, World& world);
+RayTraceResult rayTraceFromPlayer(World& world, float t);
 void end();
 
 GLFWwindow* window;
@@ -268,20 +269,72 @@ int main(int argc, char* argv[]) {
 
 		renderer.doRender(t);
 
-		//interactWithWorld(input, t, mainWorld);
-		//interactWithWorld(input, t, subWorld);
 		{
-			RayTraceResult result;
+			while (input.kbPlace.execute()) {
+				RayTraceResult result1 = rayTraceFromPlayer(mainWorld, t);
+				RayTraceResult result2 = rayTraceFromPlayer(subWorld, t);
+
+				bool main = result1.hit;
+				bool sub = result2.hit;
+
+				if (main && sub) {
+					if (result2.distance < result1.distance) {
+						sub = true;
+						main = false;
+					}
+					else {
+						sub = false;
+						main = true;
+					}
+				}
+
+				if (main) {
+					glm::ivec3 placePos = result1.hitPos + result1.face;
+					AABB playerCol = p_player->getLocalBoundingBox();
+
+					if ((AABB::blockAABB + placePos).overlaps(playerCol)) {
+						//if (player.onGround && !(AABB::blockAABB + placePos).overlaps(playerCol + Vectors::UP) && world.getOverlappingBlocks(playerCol.expandByVelocity(glm::vec3(0, 1, 0))).empty()) {
+						//	world.setBlock(placePos.x, placePos.y, placePos.z, 1);
+						//	player.transform.position.y += 0.25f;
+						//	player.velocity.y += 7.8f;
+						//}
+					}
+					else {
+						mainWorld.setBlock(placePos.x, placePos.y, placePos.z, 1);
+					}
+				}
+				else if (sub) {
+					glm::ivec3 placePos = result2.hitPos + result2.face;
+					subWorld.setBlock(placePos.x, placePos.y, placePos.z, 1);
+				}
+			}
 
 			while (input.kbAttack.execute()) {
-				result = mainWorld.rayTrace(p_player->getEyePos(t), p_player->transform.getLook(t));
+				RayTraceResult result1 = rayTraceFromPlayer(mainWorld, t);
+				RayTraceResult result2 = rayTraceFromPlayer(subWorld, t);
 
-				if (result.hit) {
-					mainWorld.setBlock(result.hitPos.x, result.hitPos.y, result.hitPos.z, 0);
+				bool main = result1.hit;
+				bool sub = result2.hit;
+
+				if (main && sub) {
+					if (result2.distance < result1.distance) {
+						sub = true;
+						main = false;
+					}
+					else {
+						sub = false;
+						main = true;
+					}
+				}
+
+				if (main) {
+					mainWorld.setBlock(result1.hitPos.x, result1.hitPos.y, result1.hitPos.z, 0);
+				}
+				else if (sub) {
+					subWorld.setBlock(result2.hitPos.x, result2.hitPos.y, result2.hitPos.z, 0);
 				}
 			}
 		}
-
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -332,7 +385,7 @@ void updateEntities(ThreadPool & pool, ThreadUnit & threadData) {
 	}
 }
 
-void interactWithWorld(Input & input, float t, World & world) {
+RayTraceResult rayTraceFromPlayer(World& world, float t) {
 	RayTraceResult result;
 
 	glm::vec3 eyePos = glm::vec3(world.translationMatrix * glm::vec4(p_player->getEyePos(t), 1));
@@ -342,31 +395,7 @@ void interactWithWorld(Input & input, float t, World & world) {
 
 	glm::vec3 rayDir = Vectors::FORWARD * playerLook;
 
-	while (input.kbPlace.execute()) {
-		result = world.rayTrace(eyePos, rayDir);
-		glm::ivec3 placePos = result.hitPos + result.face;
-		AABB playerCol = p_player->getLocalBoundingBox();
-		std::cout << result.distance << std::endl;
-
-		if ((AABB::blockAABB + placePos).overlaps(playerCol)) {
-			//if (player.onGround && !(AABB::blockAABB + placePos).overlaps(playerCol + Vectors::UP) && world.getOverlappingBlocks(playerCol.expandByVelocity(glm::vec3(0, 1, 0))).empty()) {
-			//	world.setBlock(placePos.x, placePos.y, placePos.z, 1);
-			//	player.transform.position.y += 0.25f;
-			//	player.velocity.y += 7.8f;
-			//}
-		}
-		else {
-			world.setBlock(placePos.x, placePos.y, placePos.z, 1);
-		}
-	}
-
-	while (input.kbAttack.execute()) {
-		result = world.rayTrace(eyePos, rayDir);
-
-		if (result.hit) {
-			world.setBlock(result.hitPos.x, result.hitPos.y, result.hitPos.z, 0);
-		}
-	}
+	return world.rayTrace(eyePos, rayDir);
 }
 
 void end() {

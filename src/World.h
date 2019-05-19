@@ -12,7 +12,7 @@ class bcOverlappingPairCache;
 typedef long long chunkID;
 typedef int chunkPos;
 
-typedef struct {
+typedef struct _Face {
 	glm::ivec3 vec;
 	float angle;
 } Face;
@@ -29,7 +29,7 @@ namespace Faces {
 	const Face* getFace(glm::ivec3 dir);
 };
 
-typedef struct {
+typedef struct _RayTraceResult {
 	bool hit = false;
 	glm::ivec3 hitPos;
 	glm::ivec3 face;
