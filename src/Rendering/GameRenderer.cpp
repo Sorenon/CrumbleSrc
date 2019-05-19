@@ -30,6 +30,11 @@ GameRenderer::~GameRenderer() {
 }
 
 void GameRenderer::doRender(float t) {
+	renderScene(t);
+	renderUI(t);
+}
+
+void GameRenderer::renderScene(float t) {
 	updateWorld(&scene.mainWorld);
 	for (SubWorld& subWorld : scene.subWorlds) {
 		updateWorld(&subWorld);
@@ -60,7 +65,9 @@ void GameRenderer::doRender(float t) {
 		renderWorld(subWorld);
 	}
 	renderEntities(t);
+}
 
+void GameRenderer::debugDrawPath() {
 	for (PathNode* node : p_pathfinder->path) {
 		//for (PathNode* node : p_pathfinder->closedSet) {
 		glBindVertexArray(planeVAO.id);
@@ -86,7 +93,9 @@ void GameRenderer::doRender(float t) {
 
 		glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);
 	}
+}
 
+void GameRenderer::debugDrawColliders() {
 	//for (auto& it : world.chunks) {//Render collisionBlocks
 	//	Chunk* chunk = it.second;
 
@@ -111,7 +120,9 @@ void GameRenderer::doRender(float t) {
 	//		++it2;
 	//	}
 	//}
+}
 
+void GameRenderer::debugDrawBulletDebug() {
 	//{//Draw bullet debug
 	//	dynamicsWorld->debugDrawWorld();
 	//	std::vector<float> &vertices = debugDraw->vertices;
@@ -145,11 +156,9 @@ void GameRenderer::doRender(float t) {
 	//		debugDraw->count = 0;
 	//	}
 	//}
-
-	renderUI(t);
 }
 
-void GameRenderer::updateWorld(World * world) {//Remake VAOs
+void GameRenderer::updateWorld(World* world) {//Remake VAOs
 	for (auto pair : world->chunks) {
 		Chunk& chunk = *pair.second;
 		chunkID id = pair.first;
@@ -164,13 +173,13 @@ void GameRenderer::updateWorld(World * world) {//Remake VAOs
 				if (subChunk != nullptr && subChunk->needsUpdate) {
 
 					SubChunk& above = i + 1 >= 16 ? SubChunk::EMPTY : chunk.getSubChunkSafe(i + 1);
-					SubChunk & below = i - 1 < 0 ? SubChunk::EMPTY : chunk.getSubChunkSafe(i - 1);
+					SubChunk& below = i - 1 < 0 ? SubChunk::EMPTY : chunk.getSubChunkSafe(i - 1);
 
-					SubChunk & right = world->getChunkSafe(x + 1, z).getSubChunkSafe(i);
-					SubChunk & left = world->getChunkSafe(x - 1, z).getSubChunkSafe(i);
+					SubChunk& right = world->getChunkSafe(x + 1, z).getSubChunkSafe(i);
+					SubChunk& left = world->getChunkSafe(x - 1, z).getSubChunkSafe(i);
 
-					SubChunk & front = world->getChunkSafe(x, z - 1).getSubChunkSafe(i);
-					SubChunk & back = world->getChunkSafe(x, z + 1).getSubChunkSafe(i);
+					SubChunk& front = world->getChunkSafe(x, z - 1).getSubChunkSafe(i);
+					SubChunk& back = world->getChunkSafe(x, z + 1).getSubChunkSafe(i);
 
 					t_VAO oldVAO = chunk.subChunkVAOs[i];
 					if (oldVAO.id != 0) {
@@ -188,7 +197,7 @@ void GameRenderer::updateWorld(World * world) {//Remake VAOs
 	}
 }
 
-void GameRenderer::renderWorld(World & world) {
+void GameRenderer::renderWorld(World& world) {
 	for (auto pair : world.chunks) {
 		Chunk& chunk = *pair.second;
 		chunkID id = pair.first;
@@ -286,7 +295,7 @@ void GameRenderer::renderUI(float t) {
 	glUniform1f(alphaIDTexCol, 0.4f);
 
 	RayTraceResult result = scene.RayTraceAllWorlds(t);
-	if (result.hasHit) {//Draw selection box
+	if (result.hasHit) {//Draw block selection box
 		glDisable(GL_CULL_FACE);
 		glLineWidth(2.5f);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -312,7 +321,7 @@ void GameRenderer::renderUI(float t) {
 	}
 	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(projection));
 
-	{//Render gui
+	{//Render crosshair
 		glEnable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 

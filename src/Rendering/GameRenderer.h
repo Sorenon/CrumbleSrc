@@ -36,6 +36,11 @@ public:
 	GLuint generateTexture(const char* path);
 
 	void doRender(float t);
+	void renderScene(float t);
+
+	void debugDrawPath();
+	void debugDrawColliders();
+	void debugDrawBulletDebug();
 
 	void updateWorld(World* world);//Remake VAOs
 	void renderWorld(World& world);//Render VAOs

@@ -267,9 +267,7 @@ int main(int argc, char* argv[]) {
 		entityFoo.destination = glm::floor(player.transform.position);
 
 		float t = accumulator / CrumbleGlobals::FIXED_TIMESTEP;
-
 		renderer.doRender(t);
-
 		interactWithWorlds(input, t);
 
 		glfwSwapBuffers(window);
