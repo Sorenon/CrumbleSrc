@@ -31,11 +31,11 @@ GameRenderer::~GameRenderer() {
 
 void GameRenderer::doRender(float t) {
 	{
-		viewMat = glm::mat4(1.0f);
-		viewMat = viewMat * glm::toMat4(FMath::createQuaternion(p_player->transform.getInterpRot(t)));
-		viewMat = glm::translate(viewMat, -p_player->getEyePos(t));
+		viewMatrix = glm::mat4(1.0f);
+		viewMatrix = viewMatrix * glm::toMat4(FMath::createQuaternion(p_player->transform.getInterpRot(t)));
+		viewMatrix = glm::translate(viewMatrix, -p_player->getEyePos(t));
 
-		projMat = glm::perspective(glm::radians(70.0f), (float)wWidth / (float)wHeight, 0.05f, renderDistance * 16 * (float)sqrt(2));
+		projMatrix = glm::perspective(glm::radians(70.0f), (float)wWidth / (float)wHeight, 0.05f, renderDistance * 16 * (float)sqrt(2));
 	}
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -43,61 +43,17 @@ void GameRenderer::doRender(float t) {
 
 	renderScene(t);
 
-	{
+	{//Render portal
 		glEnable(GL_STENCIL_TEST);
 
-		glStencilFunc(GL_ALWAYS, 0x01, 0xFF);
-		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-		glStencilMask(0x01);
+		renderPortalStencil();
 
-		texColourProgram.activate();
-		glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(projMat));
-		glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(viewMat));
-		glUniform4f(colourIDTexCol, 0.2f, 0.3f, 0.3f, 1.0f);
-
-		{
-			glClear(GL_STENCIL_BUFFER_BIT);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glBindVertexArray(planeVAO.id);
-
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.5f, 65.5f, -3.0f));
-			model = glm::scale(model, glm::vec3(3, 3, 3));
-
-			glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
-			glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);
-		}
-
-		glStencilFunc(GL_EQUAL, 0x01, 0xFF);
-		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-		glStencilMask(0x00);
-
-		{
-			glDepthFunc(GL_ALWAYS);
-			glDepthRange(1, 1); //Clear the depth buffer where the plane is drawn
-
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, 0);
-			glBindVertexArray(planeVAO.id);
-
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.5f, 65.5f, -3.0f));
-			model = glm::scale(model, glm::vec3(3, 3, 3));
-
-			glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
-			glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);
-
-			glDepthFunc(GL_LEQUAL);
-			glDepthRange(0, 1);
-		}
-
-		glm::mat4 oldView = viewMat;
-		viewMat = glm::translate(viewMat, glm::vec3(0, -1, 10));
+		glm::mat4 oldView = viewMatrix;
+		viewMatrix = glm::translate(viewMatrix, -scene.portal.exit);//The portal's position is 0,1,-10
 
 		renderScene(t);
 
-		viewMat = oldView;
+		viewMatrix = oldView;
 
 		glDisable(GL_STENCIL_TEST);
 	}
@@ -113,8 +69,8 @@ void GameRenderer::renderScene(float t) {
 
 	texturedProgram.activate();
 
-	glUniformMatrix4fv(texturedProgram.projID, 1, GL_FALSE, glm::value_ptr(projMat));
-	glUniformMatrix4fv(texturedProgram.viewID, 1, GL_FALSE, glm::value_ptr(viewMat));
+	glUniformMatrix4fv(texturedProgram.projID, 1, GL_FALSE, glm::value_ptr(projMatrix));
+	glUniformMatrix4fv(texturedProgram.viewID, 1, GL_FALSE, glm::value_ptr(viewMatrix));
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -126,95 +82,47 @@ void GameRenderer::renderScene(float t) {
 	renderEntities(t);
 }
 
-void GameRenderer::debugDrawPath() {
-	for (PathNode* node : p_pathfinder->path) {
-		//for (PathNode* node : p_pathfinder->closedSet) {
-		glBindVertexArray(planeVAO.id);
+void GameRenderer::renderPortalStencil() {
+	glEnable(GL_DEPTH_CLAMP);//Allows the camera to be right next to the plane and still it
+
+	glStencilFunc(GL_ALWAYS, 0x01, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	glStencilMask(0x01);
+
+	texColourProgram.activate();
+	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(projMatrix));
+	glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+	glUniform4f(colourIDTexCol, 0.2f, 0.3f, 0.3f, 1.0f);
+
+	{
+		glClear(GL_STENCIL_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textureArrow);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glBindVertexArray(planeVAO.id);
 
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(node->pos) + glm::vec3(0.5f, 0.01f, 0.5f));
+		model = glm::translate(model, scene.portal.position);
+		model = glm::scale(model, glm::vec3(3, 3, 3));
 
-		if (node->inPath) {
-			model = glm::translate(model, glm::vec3(0, 0.05f, 0));
-		}
-
-		if (node->face != nullptr) {
-			model = glm::rotate(model, glm::radians(node->face->angle), glm::vec3(0, 1, 0));
-			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
-		}
-		else {
-			model = glm::rotate(model, glm::radians(-80.0f), glm::vec3(1, 0, 0));
-		}
-
-		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
-
+		glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);
 	}
-}
 
-void GameRenderer::debugDrawColliders() {
-	//for (auto& it : world.chunks) {//Render collisionBlocks
-	//	Chunk* chunk = it.second;
+	glStencilFunc(GL_EQUAL, 0x01, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+	glStencilMask(0x00);
 
-	//	std::unordered_map<glm::ivec3, btCollisionObject*, HashFunc_ivec3, HashFunc_ivec3>::iterator it2 = chunk->storage.begin();
-	//	auto end = chunk->storage.end();
+	{//This has to be done after the stencil is made because glDepthFunc(GL_ALWAYS) would allow the quad to be seen through walls
+		glDepthFunc(GL_ALWAYS);
+		glDepthRange(1, 1); //Clear the depth buffer where the plane is drawn by making all the fragments be drawn at gl_fragDepth=1
 
-	//	while (it2 != end) {
-	//		auto pair = *it2;
+		glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);//Uniforms and texture is already set
 
-	//		glBindVertexArray(planeVAO.id);
-	//		glActiveTexture(GL_TEXTURE0);
-	//		glBindTexture(GL_TEXTURE_2D, textureArrow);
+		glDepthFunc(GL_LEQUAL);
+		glDepthRange(0, 1);
+	}
 
-	//		glm::mat4 model = glm::mat4(1.0f);
-	//		model = glm::translate(model, glm::vec3(pair.first) + glm::vec3(0.5f, 1.01, 0.5f));
-	//		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0, 1, 0));
-	//		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
-	//		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
-
-	//		glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);
-
-	//		++it2;
-	//	}
-	//}
-}
-
-void GameRenderer::debugDrawBulletDebug() {
-	//{//Draw bullet debug
-	//	dynamicsWorld->debugDrawWorld();
-	//	std::vector<float> &vertices = debugDraw->vertices;
-	//	if (!vertices.empty()) {
-	//		GLuint VBO, VAO;
-	//		glGenVertexArrays(1, &VAO);
-	//		glGenBuffers(1, &VBO);
-
-	//		glBindVertexArray(VAO);
-
-	//		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	//		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
-
-
-	//		// position attribute
-	//		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	//		glEnableVertexAttribArray(0);
-	//		// texture coord attribute
-	//		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	//		glEnableVertexAttribArray(1);
-
-	//		glm::mat4 model = glm::mat4(1.0f);
-	//		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
-
-	//		glDrawArrays(GL_LINES, 0, debugDraw->count);
-
-	//		glDeleteVertexArrays(1, &VAO);
-	//		glDeleteBuffers(1, &VBO);
-
-	//		vertices.clear();
-	//		debugDraw->count = 0;
-	//	}
-	//}
+	glDisable(GL_DEPTH_CLAMP);
 }
 
 void GameRenderer::updateWorld(World * world) {//Remake VAOs
@@ -395,6 +303,97 @@ void GameRenderer::renderUI(float t) {
 	}
 
 	glDisable(GL_BLEND);
+}
+
+void GameRenderer::debugDrawPath() {
+	for (PathNode* node : p_pathfinder->path) {
+		//for (PathNode* node : p_pathfinder->closedSet) {
+		glBindVertexArray(planeVAO.id);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textureArrow);
+
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(node->pos) + glm::vec3(0.5f, 0.01f, 0.5f));
+
+		if (node->inPath) {
+			model = glm::translate(model, glm::vec3(0, 0.05f, 0));
+		}
+
+		if (node->face != nullptr) {
+			model = glm::rotate(model, glm::radians(node->face->angle), glm::vec3(0, 1, 0));
+			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
+		}
+		else {
+			model = glm::rotate(model, glm::radians(-80.0f), glm::vec3(1, 0, 0));
+		}
+
+		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
+
+		glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);
+	}
+}
+
+void GameRenderer::debugDrawColliders() {
+	//for (auto& it : world.chunks) {//Render collisionBlocks
+	//	Chunk* chunk = it.second;
+
+	//	std::unordered_map<glm::ivec3, btCollisionObject*, HashFunc_ivec3, HashFunc_ivec3>::iterator it2 = chunk->storage.begin();
+	//	auto end = chunk->storage.end();
+
+	//	while (it2 != end) {
+	//		auto pair = *it2;
+
+	//		glBindVertexArray(planeVAO.id);
+	//		glActiveTexture(GL_TEXTURE0);
+	//		glBindTexture(GL_TEXTURE_2D, textureArrow);
+
+	//		glm::mat4 model = glm::mat4(1.0f);
+	//		model = glm::translate(model, glm::vec3(pair.first) + glm::vec3(0.5f, 1.01, 0.5f));
+	//		model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0, 1, 0));
+	//		model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
+	//		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
+
+	//		glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);
+
+	//		++it2;
+	//	}
+	//}
+}
+
+void GameRenderer::debugDrawBulletDebug() {
+	//{//Draw bullet debug
+	//	dynamicsWorld->debugDrawWorld();
+	//	std::vector<float> &vertices = debugDraw->vertices;
+	//	if (!vertices.empty()) {
+	//		GLuint VBO, VAO;
+	//		glGenVertexArrays(1, &VAO);
+	//		glGenBuffers(1, &VBO);
+
+	//		glBindVertexArray(VAO);
+
+	//		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	//		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
+
+
+	//		// position attribute
+	//		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	//		glEnableVertexAttribArray(0);
+	//		// texture coord attribute
+	//		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	//		glEnableVertexAttribArray(1);
+
+	//		glm::mat4 model = glm::mat4(1.0f);
+	//		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
+
+	//		glDrawArrays(GL_LINES, 0, debugDraw->count);
+
+	//		glDeleteVertexArrays(1, &VAO);
+	//		glDeleteBuffers(1, &VBO);
+
+	//		vertices.clear();
+	//		debugDraw->count = 0;
+	//	}
+	//}
 }
 
 t_VAO GameRenderer::createCubeVAO() {
