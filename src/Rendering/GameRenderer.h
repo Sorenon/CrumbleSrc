@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 
 #include "../Chunk.h"
 #include "ShaderProgram.h"
@@ -13,13 +14,16 @@ public:
 	ShaderProgram texturedProgram = ShaderProgram(ShaderConstructor(FileUtil::readFile("E:/CProjects/Crumble/CrumbleSrc/src/Shaders/textured.vert").c_str(), GL_VERTEX_SHADER), ShaderConstructor(FileUtil::readFile("E:/CProjects/Crumble/CrumbleSrc/src/Shaders/textured.frag").c_str(), GL_FRAGMENT_SHADER));
 	ShaderProgram texColourProgram = ShaderProgram(ShaderConstructor(FileUtil::readFile("E:/CProjects/Crumble/CrumbleSrc/src/Shaders/texColour.vert").c_str(), GL_VERTEX_SHADER), ShaderConstructor(FileUtil::readFile("E:/CProjects/Crumble/CrumbleSrc/src/Shaders/texColour.frag").c_str(), GL_FRAGMENT_SHADER));
 
-	GLint alphaIDTexCol = glGetUniformLocation(texColourProgram.id, "alpha");
+	GLint colourIDTexCol = glGetUniformLocation(texColourProgram.id, "colour");
 	t_VAO cubeVAO = createCubeVAO();
 	t_VAO blockLineVAO = createLineCubeVAO();
 	t_VAO planeVAO = createPlain();
 	GLuint texture;
 	GLuint textureArrow;
 	float renderDistance = 12;
+
+	glm::mat4 viewMat;
+	glm::mat4 projMat;
 
 public:
 	GameRenderer();
