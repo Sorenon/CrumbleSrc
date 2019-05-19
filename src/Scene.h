@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 
+#include "globals.h"
 #include "World.h"
 
 class Entity;
@@ -15,5 +16,8 @@ public:
 public:
 	Scene();
 	~Scene();
+
+	RayTraceResult RayTraceAllWorlds(float t);
+	RayTraceResult RayTraceFromPlayer(float t, World& world);
 };
 

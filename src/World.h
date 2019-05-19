@@ -29,11 +29,14 @@ namespace Faces {
 	const Face* getFace(glm::ivec3 dir);
 };
 
+class World;
+
 typedef struct _RayTraceResult {
 	bool hasHit = false;
 	glm::ivec3 hitPos;
 	glm::ivec3 face;
-	float distance;
+	float distance = 0.0f;
+	World* world = nullptr;
 
 	operator bool() const { return hasHit; };
 

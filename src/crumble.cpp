@@ -88,7 +88,7 @@ public:
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void updateEntities(ThreadPool& pool, ThreadUnit& threadData);
 RayTraceResult rayTraceFromPlayer(World& world, float t);
-void interactWithWorlds(Input& input, float t, std::vector<World*> worlds);
+void interactWithWorlds(Input& input, float t);
 void end();
 
 GLFWwindow* window;
@@ -119,13 +119,16 @@ int main(int argc, char* argv[]) {
 	//subWorld.setBlock(5, 66, 5, 1);
 	scene.mainWorld.setBlock(0, 62, 0, 1);
 
-	//subWorld.offset = glm::vec3(5, 66, 5);
-	//subWorld.centerOfMassOffset = glm::vec3(0.5f, 0.5f, 0.5f);
-	//subWorld.setBlock(0, 0, 0, 1);
-	//subWorld.setBlock(0, 2, 0, 1);
+	scene.subWorlds.push_back(World());
+	World& subWorld = scene.subWorlds[0];
 
-	//subWorld.rotation = glm::vec3(0, 0, glm::radians(45.0f));
-	//subWorld.updateTranslationMatrix();
+	subWorld.offset = glm::vec3(5, 66, 5);
+	subWorld.centerOfMassOffset = glm::vec3(0.5f, 0.5f, 0.5f);
+	subWorld.setBlock(0, 0, 0, 1);
+	subWorld.setBlock(0, 2, 0, 1);
+
+	subWorld.rotation = glm::vec3(0, 0, glm::radians(45.0f));
+	subWorld.updateTranslationMatrix();
 
 	FT_Library ft;
 	if (FT_Init_FreeType(&ft))
@@ -268,7 +271,7 @@ int main(int argc, char* argv[]) {
 
 		renderer.doRender(t);
 
-		interactWithWorlds(input, t, {/*&subWorld, */ &scene.mainWorld});
+		interactWithWorlds(input, t);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -319,7 +322,7 @@ void updateEntities(ThreadPool & pool, ThreadUnit & threadData) {
 	}
 }
 
-RayTraceResult rayTraceFromPlayer(World& world, float t) {
+RayTraceResult rayTraceFromPlayer(World & world, float t) {
 	RayTraceResult result;
 
 	glm::vec3 eyePos = glm::vec3(world.translationMatrix * glm::vec4(p_player->getEyePos(t), 1));
@@ -332,84 +335,32 @@ RayTraceResult rayTraceFromPlayer(World& world, float t) {
 	return world.rayTrace(eyePos, rayDir);
 }
 
-void interactWithWorlds(Input& input, float t, std::vector<World*> worlds) {
-	struct RayPair {
-		RayTraceResult result;
-		World* world = nullptr;
-	};
+void interactWithWorlds(Input & input, float t) {
+	while (input.kbPlace.execute()) {
+		RayTraceResult& result = scene.RayTraceAllWorlds(t);
+		if (result.hasHit) {
 
-	{
-		while (input.kbPlace.execute()) {
-			std::vector<RayPair> pairs(worlds.size());
+			glm::ivec3 placePos = result.hitPos + result.face;
+			AABB playerCol = p_player->getLocalBoundingBox();
 
-			for (int i = 0; i < worlds.size(); i++) {
-				World* world = worlds[i];
-				pairs[i].world = world;
-				pairs[i].result = rayTraceFromPlayer(*world, t);
+			if ((AABB::blockAABB + placePos).overlaps(playerCol)) { //TODO: make this work with subWorlds
+				//if (player.onGround && !(AABB::blockAABB + placePos).overlaps(playerCol + Vectors::UP) && world.getOverlappingBlocks(playerCol.expandByVelocity(glm::vec3(0, 1, 0))).empty()) {
+				//	world.setBlock(placePos.x, placePos.y, placePos.z, 1);
+				//	player.transform.position.y += 0.25f;
+				//	player.velocity.y += 7.8f;
+				//}
 			}
-
-			RayPair chosen;
-			for (RayPair pair : pairs) {
-				if (pair.result.hasHit) {
-					if (chosen.result.hasHit) {
-						if (pair.result.distance < chosen.result.distance) {
-							chosen = pair;
-						}
-					}
-					else {
-						chosen = pair;
-					}
-				}
-			}
-
-			RayTraceResult& result = chosen.result;
-			if (result.hasHit) {
-
-				glm::ivec3 placePos = result.hitPos + result.face;
-				AABB playerCol = p_player->getLocalBoundingBox();
-
-				if ((AABB::blockAABB + placePos).overlaps(playerCol)) { //TODO: make this work with subWorlds
-					//if (player.onGround && !(AABB::blockAABB + placePos).overlaps(playerCol + Vectors::UP) && world.getOverlappingBlocks(playerCol.expandByVelocity(glm::vec3(0, 1, 0))).empty()) {
-					//	world.setBlock(placePos.x, placePos.y, placePos.z, 1);
-					//	player.transform.position.y += 0.25f;
-					//	player.velocity.y += 7.8f;
-					//}
-				}
-				else {
-					chosen.world->setBlock(placePos.x, placePos.y, placePos.z, 1);
-				}
+			else {
+				result.world->setBlock(placePos.x, placePos.y, placePos.z, 1);
 			}
 		}
+	}
 
-		while (input.kbAttack.execute()) {
-			std::vector<RayPair> pairs(worlds.size());
-
-			for (int i = 0; i < worlds.size(); i++) {
-				World* world = worlds[i];
-				pairs[i].world = world;
-				pairs[i].result = rayTraceFromPlayer(*world, t);
-			}
-
-			RayPair chosen;
-			for (RayPair pair : pairs) {
-				if (pair.result.hasHit) {
-					if (chosen.result.hasHit) {
-						if (pair.result.distance < chosen.result.distance) {
-							chosen = pair;
-						}
-					}
-					else {
-						chosen = pair;
-					}
-				}
-			}
-
-			RayTraceResult& result = chosen.result;
-			if (result.hasHit) {
-				chosen.world->setBlock(result.hitPos.x, result.hitPos.y, result.hitPos.z, 0);
-			}
+	while (input.kbAttack.execute()) {
+		RayTraceResult& result = scene.RayTraceAllWorlds(t);
+		if (result.hasHit) {
+			result.world->setBlock(result.hitPos.x, result.hitPos.y, result.hitPos.z, 0);
 		}
-
 	}
 }
 

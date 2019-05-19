@@ -126,7 +126,7 @@ std::vector<AABB> World::getOverlappingBlocks(const AABB & collider) {
 	return worldColliders;
 }
 
-//To do: clean
+//TODO: clean this up
 //From https://gist.github.com/dogfuntom/cc881c8fc86ad43d55d8
 RayTraceResult World::rayTrace(const glm::vec3 & ray_start, const glm::vec3 & dir, float radius) {
 	if (dir.x == 0 && dir.y == 0 && dir.z == 0)
@@ -141,6 +141,7 @@ RayTraceResult World::rayTrace(const glm::vec3 & ray_start, const glm::vec3 & di
 	radius /= glm::length(dir);
 
 	RayTraceResult result;
+	result.world = this;
 	glm::ivec3 face;
 
 	while (true) {
@@ -148,7 +149,7 @@ RayTraceResult World::rayTrace(const glm::vec3 & ray_start, const glm::vec3 & di
 			result.hasHit = true;
 			result.hitPos = scan;
 			result.face = face;
-			result.distance = glm::distance(glm::floor(ray_start), glm::vec3(result.hitPos));
+			result.distance = glm::distance(glm::floor(ray_start), glm::vec3(result.hitPos));//Flimsy method, should be improved
 			break;
 		}
 

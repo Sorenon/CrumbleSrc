@@ -31,7 +31,9 @@ GameRenderer::~GameRenderer() {
 
 void GameRenderer::doRender(float t) {
 	updateWorld(scene.mainWorld);
-	//updateWorld(subWorld);
+	for (World& subWorld : scene.subWorlds) {
+		updateWorld(subWorld);
+	}
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -54,7 +56,9 @@ void GameRenderer::doRender(float t) {
 	texturedProgram.activate();
 
 	renderWorld(scene.mainWorld);
-	//renderWorld(subWorld);
+	for (World& subWorld : scene.subWorlds) {
+		renderWorld(subWorld);
+	}
 	renderEntities(t);
 
 	for (PathNode* node : p_pathfinder->path) {
