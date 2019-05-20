@@ -50,16 +50,16 @@ void GameRenderer::doRender(float t) {
 		renderPortalStencil();
 
 		glm::mat4 oldViewMatrix = viewMatrix;
-		viewMatrix = glm::translate(viewMatrix, -scene.portal.exit);//The portal's position is 0,1,-10
 
+		viewMatrix = glm::translate(viewMatrix, -(scene.portal.exit - scene.portal.position));//Get the difference from the output of the portal and the input to find the proper perspective
 		{
 			texturedProgram.activate();
-			glm::vec4 plane(0, 0, -1, -13);
+			glm::vec4 plane(0, 0, -1, scene.portal.exit.z);
 
 			glUniform4fv(texturedProgram.clipPlaneID, 1, glm::value_ptr(plane));
 			glEnable(GL_CLIP_DISTANCE0);
 
-			renderScene(t);
+			renderScene(t);//TODO: render this to a framebuffer to allow for aftereffects
 
 			glDisable(GL_CLIP_DISTANCE0);
 		}
