@@ -1,11 +1,13 @@
 #include "Entity.h"
 #include <vector>
+#include <iostream>
 
 #include <glm/glm.hpp>
 
 #include "globals.h"
 #include "AABB.h"
 #include "Scene.h"
+#include "FMath.h"
 
 Entity::Entity() {
 }
@@ -73,6 +75,19 @@ void Entity::Move() {
 			velocity.z = 0;
 		}
 
-		transform.position.z += move.z;
+		const float oldZPos = transform.position.z;
+
+		if (FMath::greaterTorE(transform.position.z, scene.portal.position.z) && FMath::lessThanOrE(transform.position.z + move.z, scene.portal.position.z)) {
+			float diffZ = scene.portal.position.z - transform.position.z;
+			//std::cout << diffZ - move.z << std::endl;
+			transform.position.z = scene.portal.exit.z - 3 - (diffZ - move.z);
+			transform.prevPosition.z = transform.position.z - move.z;
+		}
+		else {
+			transform.position.z += move.z;
+		}
+
+		const float newZPos = transform.position.z;
+		//std::cout << oldZPos - newZPos << std::endl;
 	}
 }

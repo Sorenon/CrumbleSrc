@@ -41,6 +41,8 @@ void GameRenderer::doRender(float t) {
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	//std::cout << p_player->getEyePos(t).z << std::endl;
+
 	renderScene(t);
 
 	{//Render portal

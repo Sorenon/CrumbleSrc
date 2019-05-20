@@ -116,7 +116,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	scene.portal.position = glm::vec3(0.5f, 65.5f, -3.0f);
-	scene.portal.exit = glm::vec3(0, 1, -10);
+	scene.portal.exit = glm::vec3(0, 0, -10);
 
 	//subWorld.setBlock(5, 66, 5, 1);
 	scene.mainWorld.setBlock(0, 62, 0, 1);
@@ -171,7 +171,6 @@ int main(int argc, char* argv[]) {
 	Player player;
 	p_player = &player;
 	player.transform.rotation.x = glm::radians(180.0f);
-	player.transform.position.z = -2.99999f;
 
 	scene.entities.push_back(p_player);
 
