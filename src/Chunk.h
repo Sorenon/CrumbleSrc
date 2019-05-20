@@ -23,7 +23,7 @@ struct HashFunc_ivec3 {
 typedef struct {
 	GLuint id = 0;
 	GLuint VBO = 0;
-	int vertices = 0;
+	int count = 0;
 }t_VAO;
 
 class SubChunk {

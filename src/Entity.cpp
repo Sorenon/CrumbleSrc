@@ -78,7 +78,7 @@ void Entity::Move() {
 		const float oldZPos = transform.position.z;
 
 		if (FMath::greaterTorE(transform.position.z, scene.portal.position.z) && FMath::lessThanOrE(transform.position.z + move.z, scene.portal.position.z)) {
-			float diffZ = scene.portal.position.z - transform.position.z;
+			const float diffZ = scene.portal.position.z - transform.position.z;
 			//std::cout << diffZ - move.z << std::endl;
 			transform.position.z = scene.portal.exit.z - (diffZ - move.z);
 			transform.prevPosition.z = transform.position.z - move.z;

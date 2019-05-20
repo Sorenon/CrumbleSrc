@@ -109,14 +109,12 @@ void GameRenderer::renderPortalStencil() {
 		glClear(GL_STENCIL_BUFFER_BIT);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, 0);
-		glBindVertexArray(planeVAO.id);
+		glBindVertexArray(scene.portal.planeVAO.id);
 
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, scene.portal.position);
-		model = glm::scale(model, glm::vec3(3, 3, 3));
+		glm::mat4 model = glm::translate(glm::mat4(1.0f), scene.portal.position);
 
 		glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);
+		glDrawArrays(GL_TRIANGLES, 0, scene.portal.planeVAO.count);
 	}
 
 	glStencilFunc(GL_EQUAL, 0x01, 0xFF);
@@ -127,7 +125,7 @@ void GameRenderer::renderPortalStencil() {
 		glDepthFunc(GL_ALWAYS);
 		glDepthRange(1, 1); //Clear the depth buffer where the plane is drawn by making all the fragments be drawn at gl_fragDepth=1
 
-		glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);//Uniforms and texture is already set
+		glDrawArrays(GL_TRIANGLES, 0, scene.portal.planeVAO.count);//Uniforms and texture is already set
 
 		glDepthFunc(GL_LEQUAL);
 		glDepthRange(0, 1);
@@ -195,7 +193,7 @@ void GameRenderer::renderWorld(World & world) {
 
 				glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
-				glDrawArrays(GL_TRIANGLES, 0, vao.vertices);
+				glDrawArrays(GL_TRIANGLES, 0, vao.count);
 			}
 		}
 	}
@@ -226,7 +224,7 @@ void GameRenderer::renderWorld(SubWorld & world) {
 
 				glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
-				glDrawArrays(GL_TRIANGLES, 0, vao.vertices);
+				glDrawArrays(GL_TRIANGLES, 0, vao.count);
 			}
 		}
 	}
@@ -248,7 +246,7 @@ void GameRenderer::renderEntities(float t) {
 		model = glm::translate(model, -glm::vec3(0.5f, 0.5f, 0.5f));
 		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
-		glDrawArrays(GL_TRIANGLES, 0, cubeVAO.vertices);
+		glDrawArrays(GL_TRIANGLES, 0, cubeVAO.count);
 	}
 
 	for (Entity* entity : scene.entities) {//Render all entities
@@ -294,7 +292,7 @@ void GameRenderer::renderUI(float t) {
 		}
 
 		glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_LINES, 0, blockLineVAO.vertices);
+		glDrawArrays(GL_LINES, 0, blockLineVAO.count);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(projection));
@@ -310,7 +308,7 @@ void GameRenderer::renderUI(float t) {
 		model = glm::translate(model, glm::vec3(0, 0, -30));
 		glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
-		glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);
+		glDrawArrays(GL_TRIANGLES, 0, planeVAO.count);
 	}
 
 	glDisable(GL_BLEND);
@@ -340,7 +338,7 @@ void GameRenderer::debugDrawPath() {
 
 		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
-		glDrawArrays(GL_TRIANGLES, 0, planeVAO.vertices);
+		glDrawArrays(GL_TRIANGLES, 0, planeVAO.count);
 	}
 }
 
@@ -510,7 +508,7 @@ t_VAO  GameRenderer::createLineCubeVAO() {
 	return { VAO, VBO, 8 * 2 + 4 * 2 };
 }
 
-t_VAO GameRenderer::createPlain() {
+t_VAO GameRenderer::createPlane() {
 	float* side = createZFace(-0.5f, -0.5f, 0, false);
 
 	GLuint VBO, VAO;
@@ -531,6 +529,38 @@ t_VAO GameRenderer::createPlain() {
 
 	glBindVertexArray(0);
 	delete[] side;
+
+	return { VAO, VBO, 6 * 6 };
+}
+
+t_VAO GameRenderer::createPlane(float x, float y, float z, float height, float width) {
+	const float face[] = {
+			0.0f  + x, 0.0f   + y,  0.0f + z,  0.0f, 0.0f,
+			width + x, 0.0f   + y,  0.0f + z,  1.0f, 0.0f,
+			width + x, height + y,  0.0f + z,  1.0f, 1.0f,
+
+			width + x, height + y,  0.0f + z,  1.0f, 1.0f,
+			0.0f  + x, height + y,  0.0f + z,  0.0f, 1.0f,
+			0.0f  + x, 0.0f   + y,  0.0f + z,  0.0f, 0.0f,
+	};
+
+	GLuint VBO, VAO;
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+
+	glBindVertexArray(VAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float[5 * 6]), &face[0], GL_STATIC_DRAW);
+
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// texture coord attribute
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	glBindVertexArray(0);
 
 	return { VAO, VBO, 6 * 6 };
 }

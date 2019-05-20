@@ -17,7 +17,7 @@ public:
 	GLint colourIDTexCol = glGetUniformLocation(texColourProgram.id, "colour");
 	t_VAO cubeVAO = createCubeVAO();
 	t_VAO blockLineVAO = createLineCubeVAO();
-	t_VAO planeVAO = createPlain();
+	t_VAO planeVAO = createPlane();
 	GLuint texture;
 	GLuint textureArrow;
 	float renderDistance = 12;
@@ -31,7 +31,8 @@ public:
 
 	t_VAO createCubeVAO();
 	t_VAO createLineCubeVAO();
-	t_VAO createPlain();
+	t_VAO createPlane();
+	t_VAO createPlane(float x, float y, float z, float height, float width);
 	t_VAO createSubChunkVAO(SubChunk &subChunk, SubChunk &above, SubChunk &below, SubChunk &right, SubChunk &left, SubChunk &front, SubChunk &back);
 	float *createXFace(float x, float y, float z, bool flipped);
 	float *createYFace(float x, float y, float z, bool flipped);

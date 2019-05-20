@@ -112,7 +112,7 @@ void EntityFoo::Render(float t, GameRenderer * renderer) {
 
 	glUniformMatrix4fv(renderer->texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
-	glDrawArrays(GL_TRIANGLES, 0, renderer->cubeVAO.vertices);
+	glDrawArrays(GL_TRIANGLES, 0, renderer->cubeVAO.count);
 
 
 	if (!p_pathfinder->path.empty()){
@@ -125,7 +125,7 @@ void EntityFoo::Render(float t, GameRenderer * renderer) {
 
 		glUniformMatrix4fv(renderer->texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
-		glDrawArrays(GL_TRIANGLES, 0, renderer->planeVAO.vertices);
+		glDrawArrays(GL_TRIANGLES, 0, renderer->planeVAO.count);
 	}
 }
 

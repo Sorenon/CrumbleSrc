@@ -105,6 +105,7 @@ Scene scene;
 std::mutex entityMutex;
 int entityIndex = 0;
 
+//BEFORE RELEASE OF ANY KIND I HAVE TO FIGURE OUT THE ISSUE WITH THE MOUSE JUMPING
 int main(int argc, char* argv[]) {
 	PhysicsWorld physicsWorld;
 	p_physicsWorld = &physicsWorld;
@@ -115,8 +116,8 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	scene.portal.position = glm::vec3(0, 65, -3.0f);
-	scene.portal.exit = glm::vec3(0, 65, -13);
+	scene.portal.position = glm::vec3(0, 64, -3.5f);
+	scene.portal.exit = glm::vec3(0, 64, -13);
 
 	//subWorld.setBlock(5, 66, 5, 1);
 	scene.mainWorld.setBlock(0, 62, 0, 1);
@@ -192,6 +193,8 @@ int main(int argc, char* argv[]) {
 	glfwSwapInterval(1);
 	GameRenderer renderer;
 	p_gameRenderer = &renderer;
+
+	scene.portal.planeVAO = renderer.createPlane(0, 0, 0, 3, 3);
 
 	Pathfinder pathfinder;
 	p_pathfinder = &pathfinder;

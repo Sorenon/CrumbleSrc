@@ -3,10 +3,13 @@
 
 #include "globals.h"
 #include "World.h"
+#include "Rendering/GameRenderer.h"
 
 typedef struct {
 	glm::vec3 position;
 	glm::vec3 exit;
+
+	t_VAO planeVAO;
 }Portal;
 
 class Entity;
