@@ -38,6 +38,7 @@ ShaderProgram::ShaderProgram(ShaderConstructor vertex, ShaderConstructor fragmen
 	viewID = glGetUniformLocation(id, "view");
 	modelID = glGetUniformLocation(id, "model");
 	projID = glGetUniformLocation(id, "projection");
+	clipPlaneID = glGetUniformLocation(id, "clipPlane");
 }
 
 ShaderProgram::~ShaderProgram() {

@@ -7,9 +7,14 @@ out vec2 TexCoord;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform vec4 clipPlane;
 
 void main()
 {
-	gl_Position = projection * view * model * vec4(aPos, 1.0f);
+	vec4 worldPosition = model * vec4(aPos, 1.0f);
+
+	gl_ClipDistance[0] = dot(worldPosition, clipPlane);
+
+	gl_Position = projection * view * worldPosition;
 	TexCoord = vec2(aTexCoord.x, aTexCoord.y);
 }

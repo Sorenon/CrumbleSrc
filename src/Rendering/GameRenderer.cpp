@@ -42,7 +42,6 @@ void GameRenderer::doRender(float t) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//std::cout << p_player->getEyePos(t).z << std::endl;
-
 	renderScene(t);
 
 	{//Render portal
@@ -50,12 +49,22 @@ void GameRenderer::doRender(float t) {
 
 		renderPortalStencil();
 
-		glm::mat4 oldView = viewMatrix;
+		glm::mat4 oldViewMatrix = viewMatrix;
 		viewMatrix = glm::translate(viewMatrix, -scene.portal.exit);//The portal's position is 0,1,-10
 
-		renderScene(t);
+		{
+			texturedProgram.activate();
+			glm::vec4 plane(0, 0, -1, -13);
 
-		viewMatrix = oldView;
+			glUniform4fv(texturedProgram.clipPlaneID, 1, glm::value_ptr(plane));
+			glEnable(GL_CLIP_DISTANCE0);
+
+			renderScene(t);
+
+			glDisable(GL_CLIP_DISTANCE0);
+		}
+
+		viewMatrix = oldViewMatrix;
 
 		glDisable(GL_STENCIL_TEST);
 	}

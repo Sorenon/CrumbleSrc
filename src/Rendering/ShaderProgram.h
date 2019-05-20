@@ -11,6 +11,8 @@ public:
 	GLint viewID;
 	GLint modelID;
 	GLint projID;
+	GLint clipPlaneID;
+
 
 public:
 	ShaderProgram(ShaderConstructor &vertex, ShaderConstructor &fragment);
