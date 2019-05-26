@@ -129,11 +129,11 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 		openSet.pop_front();
 
 		for (const Face& face : Faces::horizontal) {
-			if (currentNode->face != nullptr && face.vec == currentNode->face->vec) {//Stop the pathfinder from scaning the currentNode's parent node
+			if (currentNode->face != nullptr && face.normalVector == currentNode->face->normalVector) {//Stop the pathfinder from scaning the currentNode's parent node
 				continue;
 			}
 
-			ivec3 checkPos = currentNode->pos + face.vec;
+			ivec3 checkPos = currentNode->pos + face.normalVector;
 			int cost = 0;
 
 			if (world.getBlock(checkPos.x, checkPos.y, checkPos.z) != 0) {

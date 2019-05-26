@@ -42,6 +42,9 @@ void GameRenderer::doRender(float t) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//std::cout << p_player->getEyePos(t).z << std::endl;
+
+	texturedProgram.activate();
+
 	renderScene(t);
 
 	{//Render portal
@@ -54,7 +57,11 @@ void GameRenderer::doRender(float t) {
 		viewMatrix = glm::translate(viewMatrix, -(scene.portal.exit - scene.portal.position));//Get the difference from the output of the portal and the input to find the proper perspective
 		{
 			texturedProgram.activate();
-			glm::vec4 plane(0, 0, -1, scene.portal.exit.z);
+
+			glm::vec3 normal = scene.portal.facing.normalVector;
+			glm::vec3 dist1 = -normal * scene.portal.exit;
+			float dist = dist1.z;
+			glm::vec4 plane(normal, dist);
 
 			glUniform4fv(texturedProgram.clipPlaneID, 1, glm::value_ptr(plane));
 			glEnable(GL_CLIP_DISTANCE0);
@@ -103,7 +110,8 @@ void GameRenderer::renderPortalStencil() {
 	texColourProgram.activate();
 	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(projMatrix));
 	glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-	glUniform4f(colourIDTexCol, 0.2f, 0.3f, 0.3f, 1.0f);
+	//glUniform4f(colourIDTexCol, 0.2f, 0.3f, 0.3f, 1.0f);
+	glUniform4f(colourIDTexCol, 1, 1, 0.3f, 1.0f);
 
 	{
 		glClear(GL_STENCIL_BUFFER_BIT);
@@ -111,10 +119,20 @@ void GameRenderer::renderPortalStencil() {
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glBindVertexArray(scene.portal.planeVAO.id);
 
-		glm::mat4 model = glm::translate(glm::mat4(1.0f), scene.portal.position);
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, scene.portal.position);
+		model = glm::rotate(model, scene.portal.facing.angle, glm::vec3(0, 1, 0));
 
 		glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, scene.portal.planeVAO.count);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glUniform4f(colourIDTexCol, 0, 0, 0, 1);
+		glLineWidth(5);
+
+		glDrawArrays(GL_TRIANGLES, 0, scene.portal.planeVAO.count);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 
 	glStencilFunc(GL_EQUAL, 0x01, 0xFF);
@@ -124,11 +142,13 @@ void GameRenderer::renderPortalStencil() {
 	{//This has to be done after the stencil is made because glDepthFunc(GL_ALWAYS) would allow the quad to be seen through walls
 		glDepthFunc(GL_ALWAYS);
 		glDepthRange(1, 1); //Clear the depth buffer where the plane is drawn by making all the fragments be drawn at gl_fragDepth=1
+		glColorMask(false, false, false, false);
 
 		glDrawArrays(GL_TRIANGLES, 0, scene.portal.planeVAO.count);//Uniforms and texture is already set
 
 		glDepthFunc(GL_LEQUAL);
 		glDepthRange(0, 1);
+		glColorMask(true, true, true, true);
 	}
 
 	glDisable(GL_DEPTH_CLAMP);
@@ -535,13 +555,13 @@ t_VAO GameRenderer::createPlane() {
 
 t_VAO GameRenderer::createPlane(float x, float y, float z, float height, float width) {
 	const float face[] = {
-			0.0f  + x, 0.0f   + y,  0.0f + z,  0.0f, 0.0f,
-			width + x, 0.0f   + y,  0.0f + z,  1.0f, 0.0f,
+			0.0f + x, 0.0f + y,  0.0f + z,  0.0f, 0.0f,
+			width + x, 0.0f + y,  0.0f + z,  1.0f, 0.0f,
 			width + x, height + y,  0.0f + z,  1.0f, 1.0f,
 
 			width + x, height + y,  0.0f + z,  1.0f, 1.0f,
-			0.0f  + x, height + y,  0.0f + z,  0.0f, 1.0f,
-			0.0f  + x, 0.0f   + y,  0.0f + z,  0.0f, 0.0f,
+			0.0f + x, height + y,  0.0f + z,  0.0f, 1.0f,
+			0.0f + x, 0.0f + y,  0.0f + z,  0.0f, 0.0f,
 	};
 
 	GLuint VBO, VAO;

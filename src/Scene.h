@@ -7,6 +7,8 @@
 
 typedef struct {
 	glm::vec3 position;
+	Face facing = Faces::Front;
+
 	glm::vec3 exit;
 
 	t_VAO planeVAO;

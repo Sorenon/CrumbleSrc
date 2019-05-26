@@ -225,7 +225,7 @@ float World::intbound(float s, float ds) {
 
 const Face* Faces::getFace(glm::ivec3 dir) {
 	for (const Face& face : horizontal) {
-		if (dir == face.vec) {
+		if (dir == face.normalVector) {
 			return &face;
 		}
 	}

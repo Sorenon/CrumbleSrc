@@ -105,7 +105,7 @@ Scene scene;
 std::mutex entityMutex;
 int entityIndex = 0;
 
-//BEFORE RELEASE OF ANY KIND I HAVE TO FIGURE OUT THE ISSUE WITH THE MOUSE JUMPING
+//BEFORE RELEASE OF ANY KIND I HAVE TO FIGURE OUT THE ISSUE WITH THE MOUSE JUMPING: tbh this may be my dodgy windows install or something because I have the same problem on TF2
 int main(int argc, char* argv[]) {
 	PhysicsWorld physicsWorld;
 	p_physicsWorld = &physicsWorld;
@@ -116,8 +116,9 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	scene.portal.position = glm::vec3(0, 64, -3.5f);
+	scene.portal.position = glm::vec3(0, 64, -3);
 	scene.portal.exit = glm::vec3(0, 64, -13);
+	scene.portal.facing = Faces::Right;
 
 	//subWorld.setBlock(5, 66, 5, 1);
 	scene.mainWorld.setBlock(0, 62, 0, 1);
@@ -130,7 +131,7 @@ int main(int argc, char* argv[]) {
 	subWorld.setBlock(0, 0, 0, 1);
 	subWorld.setBlock(0, 2, 0, 1);
 
-	subWorld.rotation = glm::vec3(0, 0, glm::radians(45.0f));
+	subWorld.rotation = glm::vec3(0, 0, glm::radians(-45.0f));
 	subWorld.UpdateTranslationMatrix();
 
 	FT_Library ft;
@@ -233,6 +234,8 @@ int main(int argc, char* argv[]) {
 		}
 
 		physicsWorld.dynamicsWorld->stepSimulation(1 / 60.f, 10, 1 / 120.f);
+		//scene.portal.rotation += glm::vec3(0, glm::radians(1.0f), 0);
+
 		subWorld.rotation += glm::vec3(0, 0, glm::radians(1.0f));
 		subWorld.UpdateTranslationMatrix();
 
