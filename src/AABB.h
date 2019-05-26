@@ -2,6 +2,8 @@
 #include <glm/glm.hpp>
 #include <btBulletCollisionCommon.h>
 
+#include "Faces.h"
+
 using namespace glm;
 
 class AABB {
@@ -29,4 +31,12 @@ public:
 	bool overlaps(const AABB &other);
 
 	AABB expandByVelocity(vec3 velocity);
+};
+
+class AABB2D {
+public:
+	float width;
+	float hight;
+	Face facing;
+
 };

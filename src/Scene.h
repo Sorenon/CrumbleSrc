@@ -4,6 +4,7 @@
 #include "globals.h"
 #include "World.h"
 #include "Rendering/GameRenderer.h"
+#include "Faces.h"
 
 typedef struct {
 	glm::vec3 position;

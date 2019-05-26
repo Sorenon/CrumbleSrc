@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
 
 	scene.portal.position = glm::vec3(0, 64, -3);
 	scene.portal.exit = glm::vec3(0, 64, -13);
-	scene.portal.facing = Faces::Right;
+	scene.portal.facing = Faces::Front;
 
 	//subWorld.setBlock(5, 66, 5, 1);
 	scene.mainWorld.setBlock(0, 62, 0, 1);

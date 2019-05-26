@@ -58,6 +58,7 @@ void GameRenderer::doRender(float t) {
 		{
 			texturedProgram.activate();
 
+			//Calculate clipping plane
 			glm::vec3 normal = scene.portal.facing.normalVector;
 			glm::vec3 dist1 = -normal * scene.portal.exit;
 			float dist = dist1.z;
@@ -110,8 +111,8 @@ void GameRenderer::renderPortalStencil() {
 	texColourProgram.activate();
 	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(projMatrix));
 	glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-	//glUniform4f(colourIDTexCol, 0.2f, 0.3f, 0.3f, 1.0f);
-	glUniform4f(colourIDTexCol, 1, 1, 0.3f, 1.0f);
+	glUniform4f(colourIDTexCol, 0.2f, 0.3f, 0.3f, 1.0f);
+	//glUniform4f(colourIDTexCol, 1, 1, 0.3f, 1.0f);
 
 	{
 		glClear(GL_STENCIL_BUFFER_BIT);

@@ -10,6 +10,7 @@
 
 #include "Chunk.h"
 #include "FMath.h"
+#include "Faces.h"
 
 chunkID World::toLong(chunkPos x, chunkPos z) {
 	return ((chunkID)x & 4294967295LL) << 32 | (chunkID)z & 4294967295LL;
