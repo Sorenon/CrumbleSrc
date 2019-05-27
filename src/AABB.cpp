@@ -218,7 +218,7 @@ void AABB2D::clipY(const AABB & other, float& move) {
 				move = max.y - other.min.y;									//If so limit how far it moves
 			}
 		}
-	}
+	}	
 }
 
 void AABB2D::clipX(const AABB & other, float& move) {
@@ -274,16 +274,26 @@ void AABB2D::portalY(const AABB & other, vec3 & moveVec, Entity * entity, vec3 p
 	const float move = moveVec.y;
 	Transform& transform = entity->transform;
 	bool teleport = false;
+	const float entityY = entity->getEyePos().y;
 
 	if (facing == Faces::Down && move < 0.0f) {
 		if (intersectsX(other) && intersectsZ(other)) {
-			if (FMath::greaterTorE(transform.position.y, yPos)) {
-				if (transform.position.y + move < yPos) {
+			if (FMath::greaterTorE(entityY, yPos)) {
+				if (entityY + move < yPos) {
 					teleport = true;
 				}
 			}
 		}
-	}
+	}	
+	//if (facing == Faces::Down && move < 0.0f) {
+	//	if (intersectsX(other) && intersectsZ(other)) {
+	//		if (FMath::greaterTorE(transform.position.y, yPos)) {
+	//			if (transform.position.y + move < yPos) {
+	//				teleport = true;
+	//			}
+	//		}
+	//	}
+	//}
 	else if (facing == Faces::Up && move > 0.0f) {
 		if (intersectsX(other) && intersectsZ(other)) {
 			if (FMath::lessThanOrE(transform.position.y, yPos)) {

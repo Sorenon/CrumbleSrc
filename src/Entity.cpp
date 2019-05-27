@@ -36,7 +36,7 @@ void Entity::Move() {
 			aabb.clipY(entityCol, move.y);
 		}
 
-		//scene.portal.collider.clipY(entityCol, move.y);
+		//portal.collider.clipY(entityCol, move.y);
 		portal.collider.portalY(entityCol, move, this, portal.exit);
 
 		if (y != move.y) {
