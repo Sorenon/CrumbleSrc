@@ -17,6 +17,7 @@
 #include "../Physics/PhysicsWorld.h"
 #include "../Pathfinder.h"
 #include "../Scene.h"
+#include "../Portal.h"
 
 GameRenderer::GameRenderer() {
 	stbi_set_flip_vertically_on_load(true);

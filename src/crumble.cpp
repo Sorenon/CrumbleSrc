@@ -37,6 +37,7 @@
 #include "Physics/PhysicsWorld.h"
 #include "Pathfinder.h"
 #include "Scene.h"
+#include "Portal.h"
 
 typedef struct _ThreadUnit {
 	int id;

@@ -278,7 +278,7 @@ void AABB2D::portalY(const AABB & other, vec3 & moveVec, Entity * entity, vec3 p
 	if (facing == Faces::Down && move < 0.0f) {
 		if (intersectsX(other) && intersectsZ(other)) {
 			if (FMath::greaterTorE(transform.position.y, yPos)) {
-				if (FMath::lessThanOrE(transform.position.y + move, yPos)) {
+				if (transform.position.y + move < yPos) {
 					teleport = true;
 				}
 			}
@@ -287,7 +287,7 @@ void AABB2D::portalY(const AABB & other, vec3 & moveVec, Entity * entity, vec3 p
 	else if (facing == Faces::Up && move > 0.0f) {
 		if (intersectsX(other) && intersectsZ(other)) {
 			if (FMath::lessThanOrE(transform.position.y, yPos)) {
-				if (FMath::greaterTorE(transform.position.y + move, yPos)) {
+				if (transform.position.y + move > yPos) {
 					teleport = true;
 				}
 			}
@@ -318,7 +318,7 @@ void AABB2D::portalZ(const AABB & other, vec3 & moveVec, Entity * entity, vec3 p
 	if (facing == Faces::Front && move < 0.0f) {
 		if (intersectsY(other) && intersectsX(other)) {
 			if (FMath::greaterTorE(transform.position.z, zPos)) {
-				if (FMath::lessThanOrE(transform.position.z + move, zPos)) {
+				if (transform.position.z + move < zPos) {
 					teleport = true;
 				}
 			}
@@ -327,7 +327,7 @@ void AABB2D::portalZ(const AABB & other, vec3 & moveVec, Entity * entity, vec3 p
 	else if (facing == Faces::Behind && move > 0.0f) {
 		if (intersectsY(other) && intersectsX(other)) {
 			if (FMath::lessThanOrE(transform.position.z, zPos)) {
-				if (FMath::greaterTorE(transform.position.z + move, zPos)) {
+				if (transform.position.z + move > zPos) {
 					teleport = true;
 				}
 			}
