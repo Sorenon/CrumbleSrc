@@ -196,9 +196,20 @@ int main(int argc, char* argv[]) {
 		scene.portals.push_back(Portal());
 		Portal& portal = scene.portals[0];
 
-		portal.position = glm::vec3(0, 64, 0);
-		portal.exit = glm::vec3(13, 70, -13);
+		portal.position = glm::vec3(0, 64, -3);
+		portal.exit = glm::vec3(0, 80, -3);
 		portal.facing = Faces::Down;
+		portal.collider = AABB2D(3, 3, portal.facing, portal.position);
+		portal.planeVAO = renderer.createPlane(0, 0, 0, 3, 3);
+	}
+
+	{
+		scene.portals.push_back(Portal());
+		Portal& portal = scene.portals[1];
+
+		portal.position = glm::vec3(0, 80, -6);
+		portal.exit = glm::vec3(0, 64, -6);
+		portal.facing = Faces::Up;
 		portal.collider = AABB2D(3, 3, portal.facing, portal.position);
 		portal.planeVAO = renderer.createPlane(0, 0, 0, 3, 3);
 	}
@@ -277,8 +288,10 @@ int main(int argc, char* argv[]) {
 		}
 
 		if (input.kbDoThing.executeOnce()) {//Debug key
-			entityFoo.transform.position = vec3(0.5f, 64, 0.5f);
+			//entityFoo.transform.position = vec3(0.5f, 64, 0.5f);
 			//entityFoo.destination = glm::floor(player.transform.position);
+
+			renderer.renderPortalDebugOutline = !renderer.renderPortalDebugOutline;
 		}
 		entityFoo.destination = glm::floor(player.transform.position);
 

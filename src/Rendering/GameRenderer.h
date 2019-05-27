@@ -26,6 +26,8 @@ public:
 	glm::mat4 viewMatrix;
 	glm::mat4 projMatrix;
 
+	bool renderPortalDebugOutline = true;
+
 public:
 	GameRenderer();
 	~GameRenderer();

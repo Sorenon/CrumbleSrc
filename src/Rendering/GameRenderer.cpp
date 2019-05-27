@@ -88,14 +88,13 @@ void GameRenderer::renderPortal(Portal& portal, float t) {
 		{
 			texturedProgram.activate();
 
-			//Calculate clipping plane THIS METHOD NEEDS SERIOUS IMPROVMENT
+			//Calculate clipping plane
 			glm::vec3 normal = portal.facing.normalVector;
-			glm::vec3 dist1 = -normal * portal.exit;
-			float dist = dist1.z;
-			glm::vec4 plane(normal, dist);
+			glm::vec3 dist = -normal * portal.exit;
+			glm::vec4 plane(normal, dist.x + dist.y + dist.z);
 
 			glUniform4fv(texturedProgram.clipPlaneID, 1, glm::value_ptr(plane));
-			//glEnable(GL_CLIP_DISTANCE0);
+			glEnable(GL_CLIP_DISTANCE0);
 
 			renderScene(t);//TODO: render this to a framebuffer to allow for aftereffects
 
@@ -135,13 +134,15 @@ void GameRenderer::renderPortalStencil(Portal& portal) {
 		glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, portal.planeVAO.count);
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glUniform4f(colourIDTexCol, 0, 0, 0, 1);
-		glLineWidth(5);
+		if (renderPortalDebugOutline) {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			glUniform4f(colourIDTexCol, 0, 0, 0, 1);
+			glLineWidth(5);
 
-		glDrawArrays(GL_TRIANGLES, 0, portal.planeVAO.count);
+			glDrawArrays(GL_TRIANGLES, 0, portal.planeVAO.count);
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		}
 	}
 
 	glStencilFunc(GL_EQUAL, 0x01, 0xFF);
