@@ -125,11 +125,3 @@ void Player::Accelerate(vec3 wishDir, float wishSpeed, float acceleration) {
 
 	velocity += (wishDir * accelSpeed);
 }
-
-vec3 Player::getEyePos(float t) {
-	return transform.getInterpPos(t) + eyeHeight;
-}
-
-vec3 Player::getEyePos() {
-	return transform.position + eyeHeight;
-}

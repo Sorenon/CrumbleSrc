@@ -11,6 +11,8 @@ class GameRenderer;
 
 class Entity {
 public:
+	vec3 eyeHeight = vec3(0.0f, 1.8f, 0.0f);
+
 	Transform transform;
 	vec3 velocity; //Velocity in m/s
 	AABB collider = AABB(0,0,0,0,0,0);
@@ -41,6 +43,9 @@ public:
 
 	AABB getLocalBoundingBox();
 	void Move();
+
+	vec3 getEyePos(float t);
+	vec3 getEyePos();
 
 	virtual void Render(float t, GameRenderer* renderer) {}
 };

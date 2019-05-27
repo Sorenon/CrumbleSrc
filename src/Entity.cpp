@@ -8,6 +8,7 @@
 #include "AABB.h"
 #include "Scene.h"
 #include "FMath.h"
+#include "Portal.h"
 
 Entity::Entity() {
 }
@@ -26,6 +27,8 @@ void Entity::Move() {
 
 	std::vector<AABB> worldColliders = scene.mainWorld.getOverlappingBlocks(entityCol.expandByVelocity(velocity)); //Find all blocks (as AABBs) the entity may collide with
 
+	Portal& portal = scene.portals[0];
+
 	{//Collide along y axis
 		const float y = move.y;
 
@@ -34,7 +37,7 @@ void Entity::Move() {
 		}
 
 		//scene.portal.collider.clipY(entityCol, move.y);
-		scene.portal.collider.portalY(entityCol, move, this, scene.portal.exit);
+		portal.collider.portalY(entityCol, move, this, portal.exit);
 
 		if (y != move.y) {
 			velocity.y = 0;
@@ -60,7 +63,7 @@ void Entity::Move() {
 		for (AABB aabb : worldColliders) {
 			aabb.clipX(entityCol, move.x);
 		}
-		scene.portal.collider.clipX(entityCol, move.x);
+		portal.collider.clipX(entityCol, move.x);
 
 		if (x != move.x) {
 			velocity.x = 0;
@@ -86,4 +89,12 @@ void Entity::Move() {
 
 		transform.position.z += move.z;
 	}
+}
+
+vec3 Entity::getEyePos(float t) {
+	return transform.getInterpPos(t) + eyeHeight;
+}
+
+vec3 Entity::getEyePos() {
+	return transform.position + eyeHeight;
 }

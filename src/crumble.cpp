@@ -117,12 +117,6 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-
-	scene.portal.position = glm::vec3(0, 64, 0);
-	scene.portal.exit = glm::vec3(13, 65, -13);
-	scene.portal.facing = Faces::Down;
-	scene.portal.collider = AABB2D(3, 3, scene.portal.facing, scene.portal.position);
-
 	//subWorld.setBlock(5, 66, 5, 1);
 	scene.mainWorld.setBlock(0, 62, 0, 1);
 
@@ -198,7 +192,16 @@ int main(int argc, char* argv[]) {
 	GameRenderer renderer;
 	p_gameRenderer = &renderer;
 
-	scene.portal.planeVAO = renderer.createPlane(0, 0, 0, 3, 3);
+	{
+		scene.portals.push_back(Portal());
+		Portal& portal = scene.portals[0];
+
+		portal.position = glm::vec3(0, 64, 0);
+		portal.exit = glm::vec3(13, 70, -13);
+		portal.facing = Faces::Down;
+		portal.collider = AABB2D(3, 3, portal.facing, portal.position);
+		portal.planeVAO = renderer.createPlane(0, 0, 0, 3, 3);
+	}
 
 	Pathfinder pathfinder;
 	p_pathfinder = &pathfinder;

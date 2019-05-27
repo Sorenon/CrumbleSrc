@@ -11,9 +11,6 @@ using namespace glm;
 
 class Player : public Entity {
 public:
-	vec3 eyeHeight = vec3(0.0f, 1.8f, 0.0f);
-	//vec3 eyeHeight = vec3(0.0f, 1.8f * 2, 0.0f);
-
 	bool noClip = false;
 	bool sprinting = false;
 
@@ -28,8 +25,5 @@ public:
 	void WalkGround(vec3 wishVel);
 	void WalkAir(vec3 wishVel);
 	void Accelerate(vec3 wishDir, float wishSpeed, float acceleration);
-
-	vec3 getEyePos(float t);
-	vec3 getEyePos();
 };
 

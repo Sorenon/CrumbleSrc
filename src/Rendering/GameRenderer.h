@@ -8,6 +8,7 @@
 #include "ShaderConstructor.h"
 #include "../FileUtil.h"
 #include "../World.h"
+#include "../Portal.h"
 
 class GameRenderer {
 public:
@@ -43,7 +44,8 @@ public:
 	void doRender(float t);
 	void renderScene(float t);
 
-	void renderPortalStencil();
+	void renderPortal(Portal& portal, float t);
+	void renderPortalStencil(Portal& portal);
 
 	void debugDrawPath();
 	void debugDrawColliders();
