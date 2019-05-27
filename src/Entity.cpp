@@ -33,7 +33,8 @@ void Entity::Move() {
 			aabb.clipY(entityCol, move.y);
 		}
 
-		scene.portal.collider.clipY(entityCol, move.y);
+		//scene.portal.collider.clipY(entityCol, move.y);
+		scene.portal.collider.portalY(entityCol, move, this, scene.portal.exit);
 
 		if (y != move.y) {
 			velocity.y = 0;
@@ -81,7 +82,7 @@ void Entity::Move() {
 			velocity.z = 0;
 		}
 
-		scene.portal.collider.portalZ(entityCol, move.z, this, scene.portal.exit);
+		//scene.portal.collider.portalZ(entityCol, move, this, scene.portal.exit);
 
 		transform.position.z += move.z;
 	}

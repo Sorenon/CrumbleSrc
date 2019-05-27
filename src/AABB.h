@@ -40,7 +40,7 @@ private:
 	float width;
 	float height;
 	Face facing;
-	vec3 pos;
+	vec3 squarePos;
 
 	vec3 min;
 	vec3 max;
@@ -57,5 +57,6 @@ public:
 	void clipY(const AABB& other, float& move);
 	void clipZ(const AABB& other, float& move);
 
-	void portalZ(const AABB& other, float& move, Entity* entity, glm::vec3 portalExit);
+	void portalY(const AABB& other, vec3& moveVec, Entity* entity, vec3 portalExit);
+	void portalZ(const AABB& other, vec3& moveVec, Entity* entity, vec3 portalExit);
 };

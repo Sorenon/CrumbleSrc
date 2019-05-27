@@ -58,14 +58,14 @@ void GameRenderer::doRender(float t) {
 		{
 			texturedProgram.activate();
 
-			//Calculate clipping plane
+			//Calculate clipping plane THIS METHOD NEEDS SERIOUS IMPROVMENT
 			glm::vec3 normal = scene.portal.facing.normalVector;
 			glm::vec3 dist1 = -normal * scene.portal.exit;
 			float dist = dist1.z;
 			glm::vec4 plane(normal, dist);
 
 			glUniform4fv(texturedProgram.clipPlaneID, 1, glm::value_ptr(plane));
-			glEnable(GL_CLIP_DISTANCE0);
+			//glEnable(GL_CLIP_DISTANCE0);
 
 			renderScene(t);//TODO: render this to a framebuffer to allow for aftereffects
 
@@ -122,7 +122,8 @@ void GameRenderer::renderPortalStencil() {
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, scene.portal.position);
-		model = glm::rotate(model, scene.portal.facing.angle, glm::vec3(0, 1, 0));
+		model = glm::rotate(model, scene.portal.facing.angle.y, glm::vec3(0, 1, 0));
+		model = glm::rotate(model, scene.portal.facing.angle.x, glm::vec3(1, 0, 0));
 
 		glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, scene.portal.planeVAO.count);
@@ -350,7 +351,8 @@ void GameRenderer::debugDrawPath() {
 		}
 
 		if (node->face != nullptr) {
-			model = glm::rotate(model, glm::radians(node->face->angle), glm::vec3(0, 1, 0));
+			model = glm::rotate(model, glm::radians(node->face->angle.y), glm::vec3(0, 1, 0));
+			model = glm::rotate(model, glm::radians(node->face->angle.x), glm::vec3(1, 0, 0));
 			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
 		}
 		else {

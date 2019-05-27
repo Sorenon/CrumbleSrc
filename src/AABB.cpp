@@ -159,9 +159,20 @@ AABB2D::AABB2D(float widthIn, float heightIn, Face facingIn, vec3 posIn)
 	width = widthIn;
 	height = heightIn;
 	facing = facingIn;
-	pos = posIn;
+	squarePos = posIn;
 
-	vec3 vec1 = posIn + glm::cross(glm::vec3(facing.normalVector), Vectors::UP) * widthIn + glm::vec3(0, height, 0);
+	vec3 vec1;
+	if (facing.normalVector.y == 0) {
+		vec1 = posIn + glm::cross(glm::vec3(facing.normalVector), Vectors::UP) * widthIn + glm::vec3(0, height, 0);
+	}
+	else {
+		if (facing == Faces::Down) {//Im too lazy to implement a proper method for this yet
+			vec1 = posIn + glm::vec3(width, 0, -height);
+		}
+		else {
+			vec1 = posIn + glm::vec3(width, 0, height);
+		}
+	}
 
 	min.x = std::fmin(vec1.x, posIn.x);
 	min.y = std::fmin(vec1.y, posIn.y);
@@ -174,7 +185,7 @@ AABB2D::AABB2D(float widthIn, float heightIn, Face facingIn, vec3 posIn)
 
 AABB2D AABB2D::operator+(const vec3 & vec)
 {
-	return AABB2D(width, height, facing, pos + vec);
+	return AABB2D(width, height, facing, squarePos + vec);
 }
 
 bool AABB2D::intersectsX(const AABB & other) {
@@ -196,7 +207,18 @@ bool AABB2D::intersectsZ(const AABB & other) {
 }
 
 void AABB2D::clipY(const AABB & other, float& move) {
-
+	if (intersectsX(other) && intersectsZ(other)) {
+		if (move > 0.0f && FMath::greaterTorE(min.y, other.max.y)) {		//Is other rising and bellow AABB?
+			if (other.max.y + move > min.y) {								//Would it rise above or inside?
+				move = min.y - other.max.y;									//If so limit how far it moves
+			}
+		}
+		else if (move < 0.0f && FMath::greaterTorE(other.min.y, max.y)) {	//Is other decending and above AABB?
+			if (other.min.y + move < max.y) {								//Would it move bellow or inside?
+				move = max.y - other.min.y;									//If so limit how far it moves
+			}
+		}
+	}
 }
 
 void AABB2D::clipX(const AABB & other, float& move) {
@@ -247,30 +269,83 @@ void AABB2D::clipZ(const AABB & other, float& move) {
 	}
 }
 
-void AABB2D::portalZ(const AABB & other, float& move, Entity * entity, glm::vec3 portalExit) {
-	if (facing == Faces::Front) {
-		if (intersectsY(other) && intersectsX(other)) {
-			Transform& transform = entity->transform;
+void AABB2D::portalY(const AABB & other, vec3 & moveVec, Entity * entity, vec3 portalExit) {
+	const float yPos = squarePos.y;
+	const float move = moveVec.y;
+	Transform& transform = entity->transform;
+	bool teleport = false;
 
-			float zPos = max.z;
-
-			if (FMath::greaterTorE(transform.position.z, zPos)) {
-				if (FMath::lessThanOrE(transform.position.z + move, zPos)) {
-					const float diffFromPortal = zPos - transform.position.z;
-
-					transform.position.z = portalExit.z - diffFromPortal;
-					transform.prevPosition.z = transform.position.z;
+	if (facing == Faces::Down && move < 0.0f) {
+		if (intersectsX(other) && intersectsZ(other)) {
+			if (FMath::greaterTorE(transform.position.y, yPos)) {
+				if (FMath::lessThanOrE(transform.position.y + move, yPos)) {
+					teleport = true;
 				}
 			}
 		}
 	}
-	else if (facing == Faces::Behind) {
-		//if (intersectsY(other) && intersectsX(other)) {
-		//	if (move > 0.0f && FMath::greaterTorE(min.z, other.max.z)) {
-		//		if (other.max.z + move > min.z) {
-		//			move = min.z - other.max.z;
-		//		}
-		//	}
-		//}
+	else if (facing == Faces::Up && move > 0.0f) {
+		if (intersectsX(other) && intersectsZ(other)) {
+			if (FMath::lessThanOrE(transform.position.y, yPos)) {
+				if (FMath::greaterTorE(transform.position.y + move, yPos)) {
+					teleport = true;
+				}
+			}
+		}
+	}
+
+	if (teleport) {
+		const vec3 differenceFromPortal = transform.position - squarePos;
+
+		transform.position.z = differenceFromPortal.z + portalExit.z;
+		transform.prevPosition.z = transform.position.z - moveVec.z;
+
+		transform.position.x = differenceFromPortal.x + portalExit.x;
+		transform.prevPosition.x = transform.position.x - moveVec.x;
+
+		transform.position.y = differenceFromPortal.y + portalExit.y;
+		transform.prevPosition.y = transform.position.y;
+	}
+}
+
+
+void AABB2D::portalZ(const AABB & other, vec3 & moveVec, Entity * entity, vec3 portalExit) {
+	const float zPos = squarePos.z;
+	const float move = moveVec.z;
+	Transform& transform = entity->transform;
+	bool teleport = false;
+
+	if (facing == Faces::Front && move < 0.0f) {
+		if (intersectsY(other) && intersectsX(other)) {
+			if (FMath::greaterTorE(transform.position.z, zPos)) {
+				if (FMath::lessThanOrE(transform.position.z + move, zPos)) {
+					teleport = true;
+				}
+			}
+		}
+	}
+	else if (facing == Faces::Behind && move > 0.0f) {
+		if (intersectsY(other) && intersectsX(other)) {
+			if (FMath::lessThanOrE(transform.position.z, zPos)) {
+				if (FMath::greaterTorE(transform.position.z + move, zPos)) {
+					teleport = true;
+				}
+			}
+		}
+	}
+
+	if (teleport) {
+		const vec3 differenceFromPortal = transform.position - squarePos;
+
+		transform.position.z = differenceFromPortal.z + portalExit.z;
+		transform.prevPosition.z = transform.position.z;
+
+		transform.position.x = differenceFromPortal.x + portalExit.x;
+		transform.prevPosition.x = transform.position.x - moveVec.x;
+
+
+		transform.position.y = differenceFromPortal.y + portalExit.y;
+		transform.prevPosition.y = transform.position.y - moveVec.y;
+
 	}
 }
