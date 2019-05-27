@@ -116,9 +116,11 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
+
 	scene.portal.position = glm::vec3(0, 64, -3);
 	scene.portal.exit = glm::vec3(0, 64, -13);
 	scene.portal.facing = Faces::Front;
+	scene.portal.collider = AABB2D(3, 3, scene.portal.facing, scene.portal.position);
 
 	//subWorld.setBlock(5, 66, 5, 1);
 	scene.mainWorld.setBlock(0, 62, 0, 1);

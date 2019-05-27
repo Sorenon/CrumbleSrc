@@ -33,10 +33,29 @@ public:
 	AABB expandByVelocity(vec3 velocity);
 };
 
-class AABB2D {
-public:
-	float width;
-	float hight;
-	Face facing;
+class Entity;
 
+class AABB2D {
+private:
+	float width;
+	float height;
+	Face facing;
+	vec3 pos;
+
+	vec3 min;
+	vec3 max;
+public:
+	AABB2D(float width, float height, Face facing, vec3 pos);
+
+	AABB2D operator+(const vec3& vec);
+
+	bool intersectsX(const AABB& other);
+	bool intersectsY(const AABB& other);
+	bool intersectsZ(const AABB& other);
+
+	void clipX(const AABB& other, float& move);
+	void clipY(const AABB& other, float& move);
+	void clipZ(const AABB& other, float& move);
+
+	void portalZ(const AABB& other, float& move, Entity* entity, glm::vec3 portalExit);
 };

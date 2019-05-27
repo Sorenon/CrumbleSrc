@@ -9,6 +9,7 @@
 typedef struct {
 	glm::vec3 position;
 	Face facing = Faces::Front;
+	AABB2D collider = AABB2D(0, 0, Faces::Front, {0,0,0});
 
 	glm::vec3 exit;
 

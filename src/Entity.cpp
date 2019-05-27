@@ -32,6 +32,8 @@ void Entity::Move() {
 		for (AABB aabb : worldColliders) {
 			aabb.clipY(entityCol, move.y);
 		}
+		
+		scene.portal.collider.clipY(entityCol, move.y);
 
 		if (y != move.y) {
 			velocity.y = 0;
@@ -55,6 +57,7 @@ void Entity::Move() {
 		for (AABB aabb : worldColliders) {
 			aabb.clipX(entityCol, move.x);
 		}
+		scene.portal.collider.clipX(entityCol, move.x);
 
 		if (x != move.x) {
 			velocity.x = 0;
@@ -70,34 +73,37 @@ void Entity::Move() {
 		for (AABB aabb : worldColliders) {
 			aabb.clipZ(entityCol, move.z);
 		}
+		//scene.portal.collider.clipZ(entityCol, move.z);
 
 		if (z != move.z) {
 			velocity.z = 0;
 		}
 
+		scene.portal.collider.portalZ(entityCol, move.z, this, scene.portal.exit);
+
 		const float oldZPos = transform.position.z;
 
-		if (/*false && */FMath::greaterTorE(transform.position.z, scene.portal.position.z) && FMath::lessThanOrE(transform.position.z + move.z, scene.portal.position.z)) {
-			const float diffZ = scene.portal.position.z - transform.position.z;
-			//std::cout << diffZ - move.z << std::endl;
+		//if (false && FMath::greaterTorE(transform.position.z, scene.portal.position.z) && FMath::lessThanOrE(transform.position.z + move.z, scene.portal.position.z)) {
+		//	const float diffZ = scene.portal.position.z - transform.position.z;
+		//	//std::cout << diffZ - move.z << std::endl;
 
-			//When i make this more abstract (e.g. allow rotatable portals) it may be more effective to use matrixes to translate the entity
-			transform.position.z = scene.portal.exit.z - (diffZ - move.z);
-			transform.prevPosition.z = transform.position.z - move.z;
+		//	//When i make this more abstract (e.g. allow rotatable portals) it may be more effective to use matrixes to translate the entity
+		//	transform.position.z = scene.portal.exit.z - (diffZ - move.z);
+		//	transform.prevPosition.z = transform.position.z - move.z;
 
-			{
-				transform.position.x = (transform.position.x - scene.portal.position.x) + scene.portal.exit.x;
-				transform.prevPosition.x = transform.position.x - move.x;
-			}
+		//	{
+		//		transform.position.x = (transform.position.x - scene.portal.position.x) + scene.portal.exit.x;
+		//		transform.prevPosition.x = transform.position.x - move.x;
+		//	}
 
-			{
-				transform.position.y = (transform.position.y - scene.portal.position.y) + scene.portal.exit.y;
-				transform.prevPosition.y = transform.position.y - move.y;
-			}
-		}
-		else {
+		//	{
+		//		transform.position.y = (transform.position.y - scene.portal.position.y) + scene.portal.exit.y;
+		//		transform.prevPosition.y = transform.position.y - move.y;
+		//	}
+		//}
+		//else {
 			transform.position.z += move.z;
-		}
+		//}
 
 		const float newZPos = transform.position.z;
 		//std::cout << oldZPos - newZPos << std::endl;

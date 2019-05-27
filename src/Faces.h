@@ -4,6 +4,10 @@
 typedef struct _Face {
 	glm::ivec3 normalVector;
 	float angle;
+	
+	bool operator==(const _Face other) {
+		return angle == other.angle;
+	}
 } Face;
 
 namespace Faces {
