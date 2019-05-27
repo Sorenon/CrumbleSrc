@@ -250,39 +250,18 @@ void AABB2D::clipZ(const AABB & other, float& move) {
 void AABB2D::portalZ(const AABB & other, float& move, Entity * entity, glm::vec3 portalExit) {
 	if (facing == Faces::Front) {
 		if (intersectsY(other) && intersectsX(other)) {
-			//if (move < 0.0f && FMath::greaterTorE(other.min.z, max.z)) {
-			//	if (other.min.z + move < max.z) {
 			Transform& transform = entity->transform;
 
-			if (FMath::greaterTorE(transform.position.z, max.z)) {
-				if (FMath::lessThanOrE(transform.position.z + move, max.z)) {
-					const float diffFromPortal = max.z - transform.position.z;
+			float zPos = max.z;
 
-					transform.position.z = portalExit.z - (diffFromPortal - move);
-					transform.prevPosition.z = transform.position.z - move;
+			if (FMath::greaterTorE(transform.position.z, zPos)) {
+				if (FMath::lessThanOrE(transform.position.z + move, zPos)) {
+					const float diffFromPortal = zPos - transform.position.z;
 
-					move = 0;
+					transform.position.z = portalExit.z - diffFromPortal;
+					transform.prevPosition.z = transform.position.z;
 				}
 			}
-
-
-
-			//const float diffZ = scene.portal.position.z - transform.position.z;
-			////std::cout << diffZ - move.z << std::endl;
-
-			////When i make this more abstract (e.g. allow rotatable portals) it may be more effective to use matrixes to translate the entity
-			//transform.position.z = scene.portal.exit.z - (diffZ - move.z);
-			//transform.prevPosition.z = transform.position.z - move.z;
-
-			//{
-			//	transform.position.x = (transform.position.x - scene.portal.position.x) + scene.portal.exit.x;
-			//	transform.prevPosition.x = transform.position.x - move.x;
-			//}
-
-			//{
-			//	transform.position.y = (transform.position.y - scene.portal.position.y) + scene.portal.exit.y;
-			//	transform.prevPosition.y = transform.position.y - move.y;
-			//}
 		}
 	}
 	else if (facing == Faces::Behind) {
