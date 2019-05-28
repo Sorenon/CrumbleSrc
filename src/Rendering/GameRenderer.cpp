@@ -90,9 +90,19 @@ void GameRenderer::renderPortal(Portal& portal, float t) {
 
 			//Calculate clipping plane
 			glm::vec3 normal = portal.facing.normalVector;
-			glm::vec3 dist = -normal * portal.exit;
-			glm::vec4 plane(normal, dist.x + dist.y + dist.z);
+			glm::vec3 distVec = -normal * portal.exit;
 
+			float distance = glm::length(distVec);
+			for (int i = 0; i < 3; i++) {
+				const float& f = distVec[i];
+
+				if (f != 0) {
+					distance *= sign(f);
+				}
+			}
+
+			glm::vec4 plane(normal, distance);
+			
 			glUniform4fv(texturedProgram.clipPlaneID, 1, glm::value_ptr(plane));
 			glEnable(GL_CLIP_DISTANCE0);
 

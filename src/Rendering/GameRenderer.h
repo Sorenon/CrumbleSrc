@@ -27,6 +27,9 @@ public:
 	glm::mat4 projMatrix;
 
 	bool renderPortalDebugOutline = true;
+	
+	int portalDepth = 0;
+	int maxPortalDepth = 2;
 
 public:
 	GameRenderer();
