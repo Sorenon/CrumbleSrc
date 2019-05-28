@@ -4,6 +4,7 @@
 
 #include "Transform.h"
 #include "AABB.h"
+#include "Portal.h"
 
 using namespace glm;
 
@@ -43,6 +44,10 @@ public:
 
 	AABB getLocalBoundingBox();
 	void Move();
+
+	//Prevents the AABB from intersecting with colliders behind the portal, if the entity is in it
+	//vec3 move: how far the entity is planning to move
+	AABB trimColliderForPortal(AABB entityCol, Portal& portal, vec3 move);
 
 	vec3 getEyePos(float t);
 	vec3 getEyePos();

@@ -49,6 +49,7 @@ public:
 
 	AABB2D operator+(const vec3& vec);
 
+	//Does other overlap me
 	bool intersectsX(const AABB& other);
 	bool intersectsY(const AABB& other);
 	bool intersectsZ(const AABB& other);
@@ -57,6 +58,11 @@ public:
 	bool intersectsEpsilonX(const AABB& other);
 	bool intersectsEpsilonY(const AABB& other);
 	bool intersectsEpsilonZ(const AABB& other);
+
+	//Is other fully contained within me
+	bool surroundsX(const AABB& other);
+	bool surroundsY(const AABB& other);
+	bool surroundsZ(const AABB& other);
 
 	void clipX(const AABB& other, float& move);
 	void clipY(const AABB& other, float& move);

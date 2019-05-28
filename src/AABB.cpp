@@ -189,19 +189,19 @@ AABB2D AABB2D::operator+(const vec3 & vec)
 }
 
 bool AABB2D::intersectsX(const AABB & other) {
-	return other.max.x > min.x&& other.min.x < max.x;
+	return other.max.x > min.x && other.min.x < max.x;
 
 	//return FMath::greaterTorE(other.max.x, min.x) && FMath::lessThan(other.min.x, max.x);
 }
 
 bool AABB2D::intersectsY(const AABB & other) {
-	return other.max.y > min.y&& other.min.y < max.y;
+	return other.max.y > min.y && other.min.y < max.y;
 
 	//return FMath::greaterTorE(other.max.y, min.y) && FMath::lessThan(other.min.y, max.y);
 }
 
 bool AABB2D::intersectsZ(const AABB & other) {
-	return other.max.z > min.z&& other.min.z < max.z;
+	return other.max.z > min.z && other.min.z < max.z;
 
 	//return FMath::greaterTorE(other.max.z, min.z) && FMath::lessThan(other.min.z, max.z);
 }
@@ -223,6 +223,16 @@ void AABB2D::clipY(const AABB & other, float& move) {
 			}
 		}
 	}
+}
+
+bool AABB2D::surroundsX(const AABB& other) {
+	return intersectsX(other) && 
+		FMath::lessThanOrE(other.max.x, max.x) && FMath::greaterTorE(other.min.x, min.x);
+}
+
+bool AABB2D::surroundsZ(const AABB& other) {
+	return intersectsZ(other) &&
+		FMath::lessThanOrE(other.max.z, max.z) && FMath::greaterTorE(other.min.z, min.z);
 }
 
 void AABB2D::clipX(const AABB & other, float& move) {

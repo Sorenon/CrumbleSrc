@@ -25,20 +25,13 @@ void Entity::Move() {
 	glm::vec3 move = velocity * CrumbleGlobals::FIXED_TIMESTEP;	//How far the entity expects to move 
 	AABB entityCol = getLocalBoundingBox();
 
-	std::vector<AABB> worldColliders = scene.mainWorld.getOverlappingBlocks(entityCol.expandByVelocity(velocity)); //Find all blocks (as AABBs) the entity may collide with
-
 	Portal& portal = scene.portals[0];
+	std::vector<AABB> worldColliders = scene.mainWorld.getOverlappingBlocks(trimColliderForPortal(entityCol.expandByVelocity(velocity), portal, glm::vec3(0.0f))); //Find all blocks (as AABBs) the entity may collide with
 
 	{//Collide along y axis
 		const float moveY = move.y;
 
-		if (portal.collider.intersectsX(entityCol) && portal.collider.intersectsZ(entityCol)) {//Stop the player from colliding with AABBs behind the portal
-			AABB expandedCol = entityCol.expandByVelocity(move);
-
-			if (portal.collider.intersectsEpsilonY(expandedCol)) {
-				entityCol.min.y = portal.position.y - (moveY + copysignf(0.01f, moveY));//This only works with the bottom portal atm
-			}
-		}
+		entityCol = trimColliderForPortal(entityCol, portal, glm::vec3(0.0f, moveY, 0.0f));
 
 		for (AABB aabb : worldColliders) {
 			aabb.clipY(entityCol, move.y);
@@ -48,10 +41,6 @@ void Entity::Move() {
 		portal.collider.portalY(entityCol, move, this, portal.exit);
 
 		if (moveY != move.y) {
-			if (portal.collider.intersectsX(entityCol) && portal.collider.intersectsZ(entityCol)) {
-				std::cout << "as\n";
-			}
-
 			velocity.y = 0;
 
 			if (moveY < 0.0f) {
@@ -73,6 +62,8 @@ void Entity::Move() {
 	{//Collide along x axis
 		const float x = move.x;
 
+		entityCol = trimColliderForPortal(entityCol, portal, glm::vec3(x, 0.0f, 0.0f));
+
 		for (AABB aabb : worldColliders) {
 			aabb.clipX(entityCol, move.x);
 		}
@@ -88,14 +79,16 @@ void Entity::Move() {
 	}
 
 	{//Collide along z axis
-		const float z = move.z;
+		const float moveZ = move.z;
+
+		entityCol = trimColliderForPortal(entityCol, portal, glm::vec3(0.0f, 0.0f, moveZ));
 
 		for (AABB aabb : worldColliders) {
 			aabb.clipZ(entityCol, move.z);
 		}
 		//scene.portal.collider.clipZ(entityCol, move.z);
 
-		if (z != move.z) {
+		if (moveZ != move.z) {
 			velocity.z = 0;
 		}
 
@@ -104,6 +97,23 @@ void Entity::Move() {
 		transform.prevPosition.z = transform.position.z;
 		transform.position.z += move.z;
 	}
+}
+
+AABB Entity::trimColliderForPortal(AABB entityCol, Portal& portal, vec3 move) {
+	const float epsilon = 0.01f;
+
+	if (portal.facing == Faces::Down) {
+		if (portal.collider.surroundsX(entityCol) && portal.collider.surroundsZ(entityCol)) {//Is entity inline with the portal
+			AABB expandedCol = entityCol;
+			expandedCol.min.y += move.y;
+
+			if (portal.collider.intersectsEpsilonY(expandedCol)) {//Is entity in the portal
+				entityCol.min.y = portal.position.y - move.y + epsilon;
+			}
+		}
+	}
+
+	return entityCol;
 }
 
 vec3 Entity::getEyePos(float t) {
