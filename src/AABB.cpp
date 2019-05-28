@@ -68,7 +68,7 @@ void AABB::clipY(const AABB & other, float& move) {
 				move = max.y - other.min.y;									//If so limit how far it moves
 			}
 		}
-	}
+	}	
 }
 
 void AABB::clipX(const AABB & other, float& move) {
@@ -206,7 +206,7 @@ bool AABB2D::intersectsZ(const AABB & other) {
 	//return FMath::greaterTorE(other.max.z, min.z) && FMath::lessThan(other.min.z, max.z);
 }
 
-bool AABB2D::intersectsYportal(const AABB & other) { 
+bool AABB2D::intersectsEpsilonY(const AABB & other) { 
 	return FMath::greaterTorE(other.max.y, min.y) && FMath::lessThanOrE(other.min.y, max.y);
 }
 

@@ -53,10 +53,10 @@ public:
 	bool intersectsY(const AABB& other);
 	bool intersectsZ(const AABB& other);
 
-	//Allows intersection detection with the portal even when it is inline with walls
-	bool intersectsXportal(const AABB& other);
-	bool intersectsYportal(const AABB& other);
-	bool intersectsZportal(const AABB& other);
+	//Allows intersection detection with portals even when it is inline with walls
+	bool intersectsEpsilonX(const AABB& other);
+	bool intersectsEpsilonY(const AABB& other);
+	bool intersectsEpsilonZ(const AABB& other);
 
 	void clipX(const AABB& other, float& move);
 	void clipY(const AABB& other, float& move);

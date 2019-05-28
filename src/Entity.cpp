@@ -30,9 +30,15 @@ void Entity::Move() {
 	Portal& portal = scene.portals[0];
 
 	{//Collide along y axis
-		const float y = move.y;
+		const float moveY = move.y;
 
-		std::cout << portal.collider.intersectsYportal(entityCol) << std::endl;
+		if (portal.collider.intersectsX(entityCol) && portal.collider.intersectsZ(entityCol)) {//Stop the player from colliding with AABBs behind the portal
+			AABB expandedCol = entityCol.expandByVelocity(move);
+
+			if (portal.collider.intersectsEpsilonY(expandedCol)) {
+				entityCol.min.y = portal.position.y - (moveY + copysignf(0.01f, moveY));//This only works with the bottom portal atm
+			}
+		}
 
 		for (AABB aabb : worldColliders) {
 			aabb.clipY(entityCol, move.y);
@@ -41,10 +47,14 @@ void Entity::Move() {
 		//portal.collider.clipY(entityCol, move.y);
 		portal.collider.portalY(entityCol, move, this, portal.exit);
 
-		if (y != move.y) {
+		if (moveY != move.y) {
+			if (portal.collider.intersectsX(entityCol) && portal.collider.intersectsZ(entityCol)) {
+				std::cout << "as\n";
+			}
+
 			velocity.y = 0;
 
-			if (y < 0.0f) {
+			if (moveY < 0.0f) {
 				onGround = true;
 			}
 			else {
