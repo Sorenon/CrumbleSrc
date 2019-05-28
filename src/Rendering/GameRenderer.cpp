@@ -127,6 +127,8 @@ void GameRenderer::renderPortalStencil(Portal& portal) {
 	texColourProgram.activate();
 	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(projMatrix));
 	glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(glm::scale(projMatrix, glm::vec3(1, 1, 0.999f))));//Emulating a slightly lower FOV
+
 	glUniform4f(colourIDTexCol, 0.2f, 0.3f, 0.3f, 1.0f);
 	//glUniform4f(colourIDTexCol, 1, 1, 0.3f, 1.0f);
 
@@ -172,6 +174,8 @@ void GameRenderer::renderPortalStencil(Portal& portal) {
 	}
 
 	glDisable(GL_DEPTH_CLAMP);
+
+	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(projMatrix));//Emulating a slightly lower FOV
 }
 
 void GameRenderer::updateWorld(World * world) {//Remake VAOs

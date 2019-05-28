@@ -206,6 +206,10 @@ bool AABB2D::intersectsZ(const AABB & other) {
 	//return FMath::greaterTorE(other.max.z, min.z) && FMath::lessThan(other.min.z, max.z);
 }
 
+bool AABB2D::intersectsYportal(const AABB & other) { 
+	return FMath::greaterTorE(other.max.y, min.y) && FMath::lessThanOrE(other.min.y, max.y);
+}
+
 void AABB2D::clipY(const AABB & other, float& move) {
 	if (intersectsX(other) && intersectsZ(other)) {
 		if (move > 0.0f && FMath::greaterTorE(min.y, other.max.y)) {		//Is other rising and bellow AABB?
@@ -218,7 +222,7 @@ void AABB2D::clipY(const AABB & other, float& move) {
 				move = max.y - other.min.y;									//If so limit how far it moves
 			}
 		}
-	}	
+	}
 }
 
 void AABB2D::clipX(const AABB & other, float& move) {
@@ -272,9 +276,10 @@ void AABB2D::clipZ(const AABB & other, float& move) {
 void AABB2D::portalY(const AABB & other, vec3 & moveVec, Entity * entity, vec3 portalExit) {
 	const float yPos = squarePos.y;
 	const float move = moveVec.y;
+	const float entityY = entity->getEyePos().y;
+
 	Transform& transform = entity->transform;
 	bool teleport = false;
-	const float entityY = entity->getEyePos().y;
 
 	if (facing == Faces::Down && move < 0.0f) {
 		if (intersectsX(other) && intersectsZ(other)) {
@@ -284,16 +289,7 @@ void AABB2D::portalY(const AABB & other, vec3 & moveVec, Entity * entity, vec3 p
 				}
 			}
 		}
-	}	
-	//if (facing == Faces::Down && move < 0.0f) {
-	//	if (intersectsX(other) && intersectsZ(other)) {
-	//		if (FMath::greaterTorE(transform.position.y, yPos)) {
-	//			if (transform.position.y + move < yPos) {
-	//				teleport = true;
-	//			}
-	//		}
-	//	}
-	//}
+	}
 	else if (facing == Faces::Up && move > 0.0f) {
 		if (intersectsX(other) && intersectsZ(other)) {
 			if (FMath::lessThanOrE(transform.position.y, yPos)) {
@@ -307,14 +303,9 @@ void AABB2D::portalY(const AABB & other, vec3 & moveVec, Entity * entity, vec3 p
 	if (teleport) {
 		const vec3 differenceFromPortal = transform.position - squarePos;
 
-		transform.position.z = differenceFromPortal.z + portalExit.z;
-		transform.prevPosition.z = transform.position.z - moveVec.z;
-
 		transform.position.x = differenceFromPortal.x + portalExit.x;
-		transform.prevPosition.x = transform.position.x - moveVec.x;
-
 		transform.position.y = differenceFromPortal.y + portalExit.y;
-		transform.prevPosition.y = transform.position.y;
+		transform.position.z = differenceFromPortal.z + portalExit.z;
 	}
 }
 

@@ -32,6 +32,8 @@ void Entity::Move() {
 	{//Collide along y axis
 		const float y = move.y;
 
+		std::cout << portal.collider.intersectsYportal(entityCol) << std::endl;
+
 		for (AABB aabb : worldColliders) {
 			aabb.clipY(entityCol, move.y);
 		}
@@ -53,6 +55,7 @@ void Entity::Move() {
 			onGround = false;
 		}
 
+		transform.prevPosition.y = transform.position.y;
 		transform.position.y += move.y;
 		entityCol = getLocalBoundingBox();
 	}
@@ -69,6 +72,7 @@ void Entity::Move() {
 			velocity.x = 0;
 		}
 
+		transform.prevPosition.x = transform.position.x;
 		transform.position.x += move.x;
 		entityCol = getLocalBoundingBox();
 	}
@@ -87,6 +91,7 @@ void Entity::Move() {
 
 		//scene.portal.collider.portalZ(entityCol, move, this, scene.portal.exit);
 
+		transform.prevPosition.z = transform.position.z;
 		transform.position.z += move.z;
 	}
 }
