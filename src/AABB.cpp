@@ -68,7 +68,7 @@ void AABB::clipY(const AABB & other, float& move) {
 				move = max.y - other.min.y;									//If so limit how far it moves
 			}
 		}
-	}	
+	}
 }
 
 void AABB::clipX(const AABB & other, float& move) {
@@ -189,24 +189,24 @@ AABB2D AABB2D::operator+(const vec3 & vec)
 }
 
 bool AABB2D::intersectsX(const AABB & other) {
-	return other.max.x > min.x && other.min.x < max.x;
+	return other.max.x > min.x&& other.min.x < max.x;
 
 	//return FMath::greaterTorE(other.max.x, min.x) && FMath::lessThan(other.min.x, max.x);
 }
 
 bool AABB2D::intersectsY(const AABB & other) {
-	return other.max.y > min.y && other.min.y < max.y;
+	return other.max.y > min.y&& other.min.y < max.y;
 
 	//return FMath::greaterTorE(other.max.y, min.y) && FMath::lessThan(other.min.y, max.y);
 }
 
 bool AABB2D::intersectsZ(const AABB & other) {
-	return other.max.z > min.z && other.min.z < max.z;
+	return other.max.z > min.z&& other.min.z < max.z;
 
 	//return FMath::greaterTorE(other.max.z, min.z) && FMath::lessThan(other.min.z, max.z);
 }
 
-bool AABB2D::intersectsEpsilonY(const AABB & other) { 
+bool AABB2D::intersectsEpsilonY(const AABB & other) {
 	return FMath::greaterTorE(other.max.y, min.y) && FMath::lessThanOrE(other.min.y, max.y);
 }
 
@@ -225,58 +225,63 @@ void AABB2D::clipY(const AABB & other, float& move) {
 	}
 }
 
-bool AABB2D::surroundsX(const AABB& other) {
-	return intersectsX(other) && 
+bool AABB2D::surroundsX(const AABB & other) {
+	return intersectsX(other) &&
 		FMath::lessThanOrE(other.max.x, max.x) && FMath::greaterTorE(other.min.x, min.x);
 }
 
-bool AABB2D::surroundsZ(const AABB& other) {
+bool AABB2D::surroundsZ(const AABB & other) {
 	return intersectsZ(other) &&
 		FMath::lessThanOrE(other.max.z, max.z) && FMath::greaterTorE(other.min.z, min.z);
 }
 
 void AABB2D::clipX(const AABB & other, float& move) {
-	if (facing == Faces::Right || facing == Faces::Left) {
-		if (intersectsY(other) && intersectsZ(other)) {
-			if (move > 0.0f && FMath::greaterTorE(min.x, other.max.x)) {
-				if (other.max.x + move > min.x) {
-					move = min.x - other.max.x;
-				}
-			}
-			else if (move < 0.0f && FMath::greaterTorE(other.min.x, max.x)) {
-				if (other.min.x + move < max.x) {
-					move = max.x - other.min.x;
-				}
-			}
+	//if (facing == Faces::Right || facing == Faces::Left) {
+	//	if (intersectsY(other) && intersectsZ(other)) {
+	//		if (move > 0.0f && FMath::greaterTorE(min.x, other.max.x)) {
+	//			if (other.max.x + move > min.x) {
+	//				move = min.x - other.max.x;
+	//			}
+	//		}
+	//		else if (move < 0.0f && FMath::greaterTorE(other.min.x, max.x)) {
+	//			if (other.min.x + move < max.x) {
+	//				move = max.x - other.min.x;
+	//			}
+	//		}
+	//	}
+	//}
 
-			//if (move > 0.0f && FMath::greaterTorE(min.x, other.max.x)) {
-			//	if (FMath::greaterTorE(other.max.x + move, min.x)) {
-			//		move = min.x - other.max.x;
-			//	}
-			//} else if (move < 0.0f && FMath::greaterTorE(other.min.x, max.x)) {
-			//	if (FMath::lessThan(other.min.x + move, max.x)) {
-			//		move = max.x - other.min.x;
-			//	}
-			//}
+	if (move != 0) {
+		if (facing == Faces::Down || facing == Faces::Up) {
+			if (intersectsY(other) && surroundsX(other) && surroundsZ(other)) {//Is entity inside the portal
+				if (move < 0) {
+					if (other.min.x + move < min.x) {
+						move = min.x - other.min.x;
+					}
+				}
+				else {
+					if (other.max.x + move > max.x) {
+						move = max.x - other.max.x;
+					}
+				}
+			}
 		}
 	}
 }
 
 void AABB2D::clipZ(const AABB & other, float& move) {
-	if (facing == Faces::Front) {
-		if (intersectsY(other) && intersectsX(other)) {
-			if (move < 0.0f && FMath::greaterTorE(other.min.z, max.z)) {
-				if (other.min.z + move < max.z) {
-					move = max.z - other.min.z;
+	if (move != 0) {
+		if (facing == Faces::Down || facing == Faces::Up) {
+			if (intersectsY(other) && surroundsX(other) && surroundsZ(other)) {//Is entity inside the portal
+				if (move < 0) {
+					if (other.min.z + move < min.z) {
+						move = min.z - other.min.z;
+					}
 				}
-			}
-		}
-	}
-	else if (facing == Faces::Behind) {
-		if (intersectsY(other) && intersectsX(other)) {
-			if (move > 0.0f && FMath::greaterTorE(min.z, other.max.z)) {
-				if (other.max.z + move > min.z) {
-					move = min.z - other.max.z;
+				else {
+					if (other.max.z + move > max.z) {
+						move = max.z - other.max.z;
+					}
 				}
 			}
 		}

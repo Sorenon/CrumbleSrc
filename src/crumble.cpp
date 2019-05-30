@@ -175,7 +175,7 @@ int main(int argc, char* argv[]) {
 
 	EntityFoo entityFoo;
 	entityFoo.transform.position = vec3(0, 90, 0);
-	///entities.push_back(&entityFoo);
+	scene.entities.push_back(&entityFoo);
 
 	//EntityFoo entityFoo2;
 	//entityFoo2.transform.position = vec3(2, 90, 0);
@@ -274,17 +274,17 @@ int main(int argc, char* argv[]) {
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_GRAVE_ACCENT) == GLFW_PRESS) {//Reset physics
-			btTransform trans;
-			trans.setIdentity();
-			trans.setOrigin(btVector3(5, 70, 5));
+			//btTransform trans;
+			//trans.setIdentity();
+			//trans.setOrigin(btVector3(5, 70, 5));
 
-			physicsWorld.rbCube->activate();
-			physicsWorld.rbCube->setWorldTransform(trans);
+			//physicsWorld.rbCube->activate();
+			//physicsWorld.rbCube->setWorldTransform(trans);
 
-			physicsWorld.rbCube->setLinearVelocity(btVector3(0, 0, 0));
-			physicsWorld.rbCube->setAngularVelocity(btVector3(0, 0, 0));
+			//physicsWorld.rbCube->setLinearVelocity(btVector3(0, 0, 0));
+			//physicsWorld.rbCube->setAngularVelocity(btVector3(0, 0, 0));
 
-			entityFoo.transform.position = vec3(0, 70, 0);
+			entityFoo.transform.position = player.transform.position;
 		}
 
 		if (input.kbDoThing.executeOnce()) {//Debug key

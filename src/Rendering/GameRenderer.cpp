@@ -42,8 +42,6 @@ void GameRenderer::doRender(float t) {
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//std::cout << p_player->getEyePos(t).z << std::endl;
-
 	texturedProgram.activate();
 
 	renderScene(t);
@@ -76,7 +74,7 @@ void GameRenderer::renderScene(float t) {
 	renderEntities(t);
 }
 
-void GameRenderer::renderPortal(Portal& portal, float t) {
+void GameRenderer::renderPortal(Portal & portal, float t) {
 	{//Render portal
 		glEnable(GL_STENCIL_TEST);
 
@@ -102,7 +100,7 @@ void GameRenderer::renderPortal(Portal& portal, float t) {
 			}
 
 			glm::vec4 plane(normal, distance);
-			
+
 			glUniform4fv(texturedProgram.clipPlaneID, 1, glm::value_ptr(plane));
 			glEnable(GL_CLIP_DISTANCE0);
 
@@ -117,17 +115,17 @@ void GameRenderer::renderPortal(Portal& portal, float t) {
 	}
 }
 
-void GameRenderer::renderPortalStencil(Portal& portal) {
+void GameRenderer::renderPortalStencil(Portal & portal) {
 	glEnable(GL_DEPTH_CLAMP);//Allows the camera to be right next to the plane and still it
 
 	glStencilFunc(GL_ALWAYS, 0x01, 0xFF);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-	glStencilMask(0x01);
+	glStencilMask(0xFF);
 
 	texColourProgram.activate();
 	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(projMatrix));
 	glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(glm::scale(projMatrix, glm::vec3(1, 1, 0.999f))));//Emulating a slightly lower FOV
+	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(glm::scale(projMatrix, glm::vec3(0.999f, 0.999f, 0.999f))));//Emulating a slightly lower FOV
 
 	glUniform4f(colourIDTexCol, 0.2f, 0.3f, 0.3f, 1.0f);
 	//glUniform4f(colourIDTexCol, 1, 1, 0.3f, 1.0f);
@@ -314,30 +312,32 @@ void GameRenderer::renderUI(float t) {
 	glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(view));
 	glUniform4f(colourIDTexCol, 0, 0, 0, 0.4f);
 
-	RayTraceResult result = scene.RayTraceAllWorlds(t);
-	if (result.hasHit) {//Draw block selection box
-		glDisable(GL_CULL_FACE);
-		glLineWidth(2.5f);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(glm::scale(projection, glm::vec3(1, 1, 0.999f))));//Emulating a slightly lower FOV
+	if (renderPortalDebugOutline) {
+		RayTraceResult result = scene.RayTraceAllWorlds(t);
+		if (result.hasHit) {//Draw block selection box
+			glDisable(GL_CULL_FACE);
+			glLineWidth(2.5f);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(glm::scale(projection, glm::vec3(1, 1, 0.999f))));//Emulating a slightly lower FOV
 
-		glBindVertexArray(blockLineVAO.id);
+			glBindVertexArray(blockLineVAO.id);
 
-		glm::mat4 model = glm::mat4(1.0f);
-		if (result.world->isSubWorld) {
-			SubWorld& subWorld = *(SubWorld*)result.world;
-			model = glm::translate(model, subWorld.offset);
-			model = model * glm::toMat4(glm::quat(subWorld.rotation));
-			model = glm::translate(model, glm::vec3(result.hitPos));
-			model = glm::translate(model, -subWorld.centerOfMassOffset);
+			glm::mat4 model = glm::mat4(1.0f);
+			if (result.world->isSubWorld) {
+				SubWorld& subWorld = *(SubWorld*)result.world;
+				model = glm::translate(model, subWorld.offset);
+				model = model * glm::toMat4(glm::quat(subWorld.rotation));
+				model = glm::translate(model, glm::vec3(result.hitPos));
+				model = glm::translate(model, -subWorld.centerOfMassOffset);
+			}
+			else {
+				model = glm::translate(model, glm::vec3(result.hitPos));
+			}
+
+			glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
+			glDrawArrays(GL_LINES, 0, blockLineVAO.count);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
-		else {
-			model = glm::translate(model, glm::vec3(result.hitPos));
-		}
-
-		glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
-		glDrawArrays(GL_LINES, 0, blockLineVAO.count);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(projection));
 

@@ -13,6 +13,8 @@
 EntityFoo::EntityFoo() {
 	//collider = AABB(vec3(-0.25f, 0, -0.25f), vec3(0.25f, 0.5f, 0.25f));
 	collider = AABB(vec3(-0.49f, 0, -0.49f), vec3(0.49f, 1, 0.49f));
+	
+	eyeHeight = glm::vec3(0, 0.5f, 0);
 }
 
 
@@ -29,71 +31,68 @@ void EntityFoo::UpdateMultiThread() {
 	velocity.y -= 20 * CrumbleGlobals::FIXED_TIMESTEP;	//Apply gravity
 	velocity.y *= 0.98f;
 
-	velocity.x = 0;
-	velocity.z = 0;
+	//velocity.x = 0;
+	//velocity.z = 0;
 
-	Pathfinder& pathfinder = *p_pathfinder;
+	//Pathfinder& pathfinder = *p_pathfinder;
 
-	if (shouldRebuildPath()) {
-		pathfinder.FindPath(glm::floor(transform.position), destination, 16);
-	}
+	//if (shouldRebuildPath()) {
+	//	pathfinder.FindPath(glm::floor(transform.position), destination, 16);
+	//}
 
-	if (!pathfinder.path.empty()) {
-		const float speed = onGround ? 2.5f : 1.0f;
+	//if (!pathfinder.path.empty()) {
+	//	const float speed = onGround ? 2.5f : 1.0f;
 
-		PathNode* destinationNode = pathfinder.path[pathfinder.currentNodeIndex];
+	//	PathNode* destinationNode = pathfinder.path[pathfinder.currentNodeIndex];
 
-		if (pathfinder.currentNodeIndex != 0) {//Find the next path node
-			//if (glm::distance(destinationNode->getWorldPos(), transform.position) == 0.0f) {
-			//	destinationNode = pathfinder.path[--pathfinder.currentNodeIndex];
-			//}
+	//	if (pathfinder.currentNodeIndex != 0) {//Find the next path node
+	//		//if (glm::distance(destinationNode->getWorldPos(), transform.position) == 0.0f) {
+	//		//	destinationNode = pathfinder.path[--pathfinder.currentNodeIndex];
+	//		//}
 
-			int nextYChange = 0;
-			for (int i = pathfinder.currentNodeIndex; i >= 0; i--) {
-				if (pathfinder.path[i]->pos.y != std::floor(transform.position.y)) {
-					nextYChange = i;
-					break;
-				}
-			}
+	//		int nextYChange = 0;
+	//		for (int i = pathfinder.currentNodeIndex; i >= 0; i--) {
+	//			if (pathfinder.path[i]->pos.y != std::floor(transform.position.y)) {
+	//				nextYChange = i;
+	//				break;
+	//			}
+	//		}
 
-			//float maxRadius = collider.max.x > (0.75f / 2) ? collider.max.x : 0.75f - collider.max.x;
-			float maxRadius = collider.max.x;
-			vec3 difference = transform.position - destinationNode->getWorldPos();
+	//		//float maxRadius = collider.max.x > (0.75f / 2) ? collider.max.x : 0.75f - collider.max.x;
+	//		float maxRadius = collider.max.x;
+	//		vec3 difference = transform.position - destinationNode->getWorldPos();
 
-			if (std::abs(difference.x) < maxRadius && std::abs(difference.z) < maxRadius && std::abs(difference.y) < 1) {
-				destinationNode = pathfinder.path[--pathfinder.currentNodeIndex];
-			}
-		}
+	//		if (std::abs(difference.x) < maxRadius && std::abs(difference.z) < maxRadius && std::abs(difference.y) < 1) {
+	//			destinationNode = pathfinder.path[--pathfinder.currentNodeIndex];
+	//		}
+	//	}
 
-		glm::vec3 distanceToNode = destinationNode->getWorldPos() - transform.position;
-		if (onGround && distanceToNode.y > 0) {
-			velocity.y += 8.0f;
-		}
-		distanceToNode.y = 0;
+	//	glm::vec3 distanceToNode = destinationNode->getWorldPos() - transform.position;
+	//	if (onGround && distanceToNode.y > 0) {
+	//		velocity.y += 8.0f;
+	//	}
+	//	distanceToNode.y = 0;
 
-		glm::vec3 directionToNode(0, 0, 0);
+	//	glm::vec3 directionToNode(0, 0, 0);
 
-		if (!glm::all(glm::equal(distanceToNode, Vectors::ZERO))) {
-			directionToNode = glm::normalize(distanceToNode) * speed;
-		}
+	//	if (!glm::all(glm::equal(distanceToNode, Vectors::ZERO))) {
+	//		directionToNode = glm::normalize(distanceToNode) * speed;
+	//	}
 
-		if (distanceToNode.x != 0) {
-			distanceToNode.x /= CrumbleGlobals::FIXED_TIMESTEP;
-		}
+	//	if (distanceToNode.x != 0) {
+	//		distanceToNode.x /= CrumbleGlobals::FIXED_TIMESTEP;
+	//	}
 
-		if (distanceToNode.z != 0) {
-			distanceToNode.z /= CrumbleGlobals::FIXED_TIMESTEP;
-		}
+	//	if (distanceToNode.z != 0) {
+	//		distanceToNode.z /= CrumbleGlobals::FIXED_TIMESTEP;
+	//	}
 
-		velocity.x = fabsf(distanceToNode.x) < fabsf(directionToNode.x) ? distanceToNode.x : directionToNode.x;
-		velocity.z = fabsf(distanceToNode.z) < fabsf(directionToNode.z) ? distanceToNode.z : directionToNode.z;
-	}
-	else {
-		//transform.rotation.y += glm::radians(5.0f);
-	}
-
-	//std::cout << velocity.x << std::endl;
-
+	//	velocity.x = fabsf(distanceToNode.x) < fabsf(directionToNode.x) ? distanceToNode.x : directionToNode.x;
+	//	velocity.z = fabsf(distanceToNode.z) < fabsf(directionToNode.z) ? distanceToNode.z : directionToNode.z;
+	//}
+	//else {
+	//	//transform.rotation.y += glm::radians(5.0f);
+	//}
 
 	Move();
 }

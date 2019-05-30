@@ -24,17 +24,19 @@ AABB Entity::getLocalBoundingBox() {
 void Entity::Move() {
 	glm::vec3 move = velocity * CrumbleGlobals::FIXED_TIMESTEP;	//How far the entity expects to move 
 	AABB entityCol = getLocalBoundingBox();
+	AABB clippedCol = entityCol;
 
 	Portal& portal = scene.portals[0];
-	std::vector<AABB> worldColliders = scene.mainWorld.getOverlappingBlocks(trimColliderForPortal(entityCol.expandByVelocity(velocity), portal, glm::vec3(0.0f))); //Find all blocks (as AABBs) the entity may collide with
+	std::vector<AABB> worldColliders = scene.mainWorld.getOverlappingBlocks(trimColliderForPortal(entityCol.expandByVelocity(move), portal, glm::vec3(0.0f))); //Find all blocks (as AABBs) the entity may collide with
 
 	{//Collide along y axis
 		const float moveY = move.y;
 
-		entityCol = trimColliderForPortal(entityCol, portal, glm::vec3(0.0f, moveY, 0.0f));
+		entityCol = getLocalBoundingBox();
+		clippedCol = trimColliderForPortal(entityCol, portal, glm::vec3(0.0f, moveY, 0.0f));
 
 		for (AABB aabb : worldColliders) {
-			aabb.clipY(entityCol, move.y);
+			aabb.clipY(clippedCol, move.y);
 		}
 
 		//portal.collider.clipY(entityCol, move.y);
@@ -56,16 +58,16 @@ void Entity::Move() {
 
 		transform.prevPosition.y = transform.position.y;
 		transform.position.y += move.y;
-		entityCol = getLocalBoundingBox();
 	}
 
 	{//Collide along x axis
 		const float x = move.x;
 
-		entityCol = trimColliderForPortal(entityCol, portal, glm::vec3(x, 0.0f, 0.0f));
+		entityCol = getLocalBoundingBox();
+		clippedCol = trimColliderForPortal(entityCol, portal, glm::vec3(x, 0.0f, 0.0f));
 
 		for (AABB aabb : worldColliders) {
-			aabb.clipX(entityCol, move.x);
+			aabb.clipX(clippedCol, move.x);
 		}
 		portal.collider.clipX(entityCol, move.x);
 
@@ -75,18 +77,18 @@ void Entity::Move() {
 
 		transform.prevPosition.x = transform.position.x;
 		transform.position.x += move.x;
-		entityCol = getLocalBoundingBox();
 	}
 
 	{//Collide along z axis
 		const float moveZ = move.z;
 
-		entityCol = trimColliderForPortal(entityCol, portal, glm::vec3(0.0f, 0.0f, moveZ));
+		entityCol = getLocalBoundingBox();
+		clippedCol = trimColliderForPortal(entityCol, portal, glm::vec3(0.0f, 0.0f, moveZ));
 
 		for (AABB aabb : worldColliders) {
-			aabb.clipZ(entityCol, move.z);
+			aabb.clipZ(clippedCol, move.z);
 		}
-		//scene.portal.collider.clipZ(entityCol, move.z);
+		portal.collider.clipZ(entityCol, move.z);
 
 		if (moveZ != move.z) {
 			velocity.z = 0;

@@ -1,0 +1,32 @@
+3 collision objects (all linked)
+
+1: Outside of portal -> trimmed to not collide with behind it
+
+	#############
+	#			#
+	#			#
+	#			#
+----.-----------.-----
+	.			.
+	.............
+	
+2: Inside portal -> only collides with the edge of the portal (possibly just use the normal collider for this)
+
+	#############
+	#			#
+	#			#
+	#			#
+#---#-----------#----#
+	#			#
+	#############
+	
+	
+3: Outside the second portal -> trimmed to not collide with behind it
+
+	.............
+	.			.
+	.			.
+	.			.
+----.-----------.-----
+	#			#
+	#############
