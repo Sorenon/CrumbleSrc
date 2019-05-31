@@ -35,7 +35,7 @@ public:
 
 class Entity;
 
-class AABB2D {
+class AABB2D {//Should just be called portalPlane or something
 private:
 	float width;
 	float height;
@@ -64,6 +64,7 @@ public:
 	bool surroundsY(const AABB& other);
 	bool surroundsZ(const AABB& other);
 
+	//Keep the player inside the edges of the portal
 	void clipX(const AABB& other, float& move);
 	void clipY(const AABB& other, float& move);
 	void clipZ(const AABB& other, float& move);

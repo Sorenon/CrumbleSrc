@@ -42,7 +42,17 @@ PhysicsWorld::PhysicsWorld() {
 	//}
 
 	{
-		btCollisionShape* boxCollisionShape = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
+		//btCollisionShape* boxCollisionShape = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
+
+		btConvexHullShape* boxCollisionShape = new btConvexHullShape();
+		boxCollisionShape->addPoint(btVector3(-0.5f, -0.5f, -0.5f));
+		boxCollisionShape->addPoint(btVector3(-0.5f, -0.5f,  0.5f));
+		boxCollisionShape->addPoint(btVector3(-0.5f,  0.5f, -0.5f));
+		boxCollisionShape->addPoint(btVector3(-0.5f,  0.5f,  0.5f));
+		boxCollisionShape->addPoint(btVector3( 0.5f, -0.5f, -0.5f));
+		boxCollisionShape->addPoint(btVector3( 0.5f, -0.5f,  0.5f));
+		boxCollisionShape->addPoint(btVector3( 0.5f,  0.5f, -0.5f));
+		boxCollisionShape->addPoint(btVector3( 0.5f,  0.5f,  0.5f));
 
 		btTransform trans;
 		trans.setIdentity();
@@ -60,6 +70,8 @@ PhysicsWorld::PhysicsWorld() {
 		//rbCube->setActivationState(DISABLE_DEACTIVATION);
 
 		dynamicsWorld->addRigidBody(rbCube);
+
+		//rbCube->setAngularFactor(0);
 	}
 }
 

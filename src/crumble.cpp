@@ -17,6 +17,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <btBulletDynamicsCommon.h>
+#include <BulletCollision/NarrowPhaseCollision/btPolyhedralContactClipping.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H  
 
@@ -106,8 +107,31 @@ Scene scene;
 std::mutex entityMutex;
 int entityIndex = 0;
 
-//BEFORE RELEASE OF ANY KIND I HAVE TO FIGURE OUT THE ISSUE WITH THE MOUSE JUMPING: tbh this may be my dodgy windows install or something because I have the same problem on TF2
+//BEFORE RELEASE OF ANY KIND I HAVE TO FIGURE OUT THE ISSUE WITH THE MOUSE JUMPING: this may just be a dodgy OS install or a hardware issue because I have the same problem on TF2
 int main(int argc, char* argv[]) {
+	//btVertexArray inputVectors;
+	//btVertexArray outputVectors;
+
+	//inputVectors.push_back(btVector3(1.0f, 1.0f, 0.0f));
+	//inputVectors.push_back(btVector3(0.0f, 1.0f, 0.0f));
+	//inputVectors.push_back(btVector3(0.0f, 0.0f, 0.0f));
+	//inputVectors.push_back(btVector3(1.0f, -1.0f, 0.0f));
+
+	//btPolyhedralContactClipping::clipFace(inputVectors, outputVectors, btVector3(0, -1, 0), 0.5f);//Call once for each triangle/quad
+
+	//for (int i = 0; i < outputVectors.size(); i++) {
+	//	btVector3& vec = outputVectors[i];
+
+	//	std::cout << glm::to_string(FMath::convertVector(vec)) << std::endl;
+	//}
+
+	//std::cout << "end of the line";
+
+	//std::cin.ignore();
+
+	////###########################################################################
+	//if (true) return 0;
+
 	PhysicsWorld physicsWorld;
 	p_physicsWorld = &physicsWorld;
 
@@ -237,7 +261,7 @@ int main(int argc, char* argv[]) {
 
 		ticksThisFrame = 0;
 		while (accumulator > CrumbleGlobals::FIXED_TIMESTEP) {
-			//dynamicsWorld->stepSimulation(CrumbleGlobals::FIXED_TIMESTEP, 10, 1 / 120.f);
+			//physicsWorld.dynamicsWorld->stepSimulation(CrumbleGlobals::FIXED_TIMESTEP, 1, CrumbleGlobals::FIXED_TIMESTEP);
 
 			input.processInput();
 
@@ -250,7 +274,8 @@ int main(int argc, char* argv[]) {
 			ticksThisFrame++;
 		}
 
-		physicsWorld.dynamicsWorld->stepSimulation(1 / 60.f, 10, 1 / 120.f);
+		physicsWorld.dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
+		physicsWorld.dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
 		//scene.portal.rotation += glm::vec3(0, glm::radians(1.0f), 0);
 
 		subWorld.rotation += glm::vec3(0, 0, glm::radians(1.0f));
@@ -274,17 +299,17 @@ int main(int argc, char* argv[]) {
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_GRAVE_ACCENT) == GLFW_PRESS) {//Reset physics
-			//btTransform trans;
-			//trans.setIdentity();
-			//trans.setOrigin(btVector3(5, 70, 5));
+			btTransform trans;
+			trans.setIdentity();
+			trans.setOrigin(FMath::convertVector(player.transform.position + glm::vec3(0, 0.5f, 0)));
 
-			//physicsWorld.rbCube->activate();
-			//physicsWorld.rbCube->setWorldTransform(trans);
+			physicsWorld.rbCube->activate();
+			physicsWorld.rbCube->setWorldTransform(trans);
 
-			//physicsWorld.rbCube->setLinearVelocity(btVector3(0, 0, 0));
-			//physicsWorld.rbCube->setAngularVelocity(btVector3(0, 0, 0));
+			physicsWorld.rbCube->setLinearVelocity(btVector3(0, 0, 0));
+			physicsWorld.rbCube->setAngularVelocity(btVector3(0, 0, 0));
 
-			entityFoo.transform.position = player.transform.position;
+			//entityFoo.transform.position = player.transform.position;
 		}
 
 		if (input.kbDoThing.executeOnce()) {//Debug key

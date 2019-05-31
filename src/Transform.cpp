@@ -34,8 +34,8 @@ vec3 Transform::getLook(float t) {
 }
 
 void Transform::step() {
-	prevPosition = vec3(position);
-	prevRotation = vec3(rotation);
+	prevPosition = position;
+	prevRotation = rotation;
 }
 
 vec3 Transform::getInterpRot(float t) {
