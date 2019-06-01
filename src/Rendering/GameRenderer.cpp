@@ -45,6 +45,7 @@ void GameRenderer::doRender(float t) {
 	texturedProgram.activate();
 
 	renderScene(t);
+	debugDrawBulletDebug();
 
 	for (Portal& portal : scene.portals) {
 		renderPortal(portal, t);
@@ -288,7 +289,7 @@ void GameRenderer::renderEntities(float t) {
 		model = glm::translate(model, -glm::vec3(0.5f, 0.5f, 0.5f));
 		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
-		glDrawArrays(GL_TRIANGLES, 0, cubeVAO.count);
+	//	glDrawArrays(GL_TRIANGLES, 0, cubeVAO.count);
 	}
 
 	for (Entity* entity : scene.entities) {//Render all entities
@@ -415,39 +416,40 @@ void GameRenderer::debugDrawColliders() {
 }
 
 void GameRenderer::debugDrawBulletDebug() {
-	//{//Draw bullet debug
-	//	dynamicsWorld->debugDrawWorld();
-	//	std::vector<float> &vertices = debugDraw->vertices;
-	//	if (!vertices.empty()) {
-	//		GLuint VBO, VAO;
-	//		glGenVertexArrays(1, &VAO);
-	//		glGenBuffers(1, &VBO);
+	{//Draw bullet debug
+		p_physicsWorld->dynamicsWorld->debugDrawWorld();
+		std::vector<float> &vertices = p_physicsWorld->debugDraw->vertices;
+		if (!vertices.empty()) {
+			GLuint VBO, VAO;
+			glGenVertexArrays(1, &VAO);
+			glGenBuffers(1, &VBO);
 
-	//		glBindVertexArray(VAO);
+			glBindVertexArray(VAO);
 
-	//		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	//		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+			glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
 
 
-	//		// position attribute
-	//		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	//		glEnableVertexAttribArray(0);
-	//		// texture coord attribute
-	//		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	//		glEnableVertexAttribArray(1);
+			// position attribute
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+			glEnableVertexAttribArray(0);
+			// texture coord attribute
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+			glEnableVertexAttribArray(1);
 
-	//		glm::mat4 model = glm::mat4(1.0f);
-	//		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
+			glm::mat4 model = glm::mat4(1.0f);
+			glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
-	//		glDrawArrays(GL_LINES, 0, debugDraw->count);
+			glLineWidth(10.0f);
+			glDrawArrays(GL_LINES, 0, p_physicsWorld->debugDraw->count);
 
-	//		glDeleteVertexArrays(1, &VAO);
-	//		glDeleteBuffers(1, &VBO);
+			glDeleteVertexArrays(1, &VAO);
+			glDeleteBuffers(1, &VBO);
 
-	//		vertices.clear();
-	//		debugDraw->count = 0;
-	//	}
-	//}
+			vertices.clear();
+			p_physicsWorld->debugDraw->count = 0;
+		}
+	}
 }
 
 t_VAO GameRenderer::createCubeVAO() {

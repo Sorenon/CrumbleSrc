@@ -1,6 +1,7 @@
 #include "PhysicsWorld.h"
 
 #include <btBulletDynamicsCommon.h>
+#include <BulletCollision/NarrowPhaseCollision/btPolyhedralContactClipping.h>
 
 #include "bcSimpleBroadphase.h"
 
@@ -10,12 +11,13 @@ PhysicsWorld::PhysicsWorld() {
 	collisionConfiguration = new btDefaultCollisionConfiguration();
 	dispatcher = new btCollisionDispatcher(collisionConfiguration);
 	solver = new btSequentialImpulseConstraintSolver;
-	//debugDraw = new bcDebugDrawer();
 
 	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
 	dynamicsWorld->setGravity(btVector3(0, -9.81f, 0));
-	//dynamicsWorld->setDebugDrawer(debugDraw);
-	//debugDraw->setDebugMode(debugDraw->DBG_DrawAabb);
+
+	debugDraw = new bcDebugDrawer();
+	dynamicsWorld->setDebugDrawer(debugDraw);
+	debugDraw->setDebugMode(debugDraw->DBG_DrawWireframe);
 
 	{
 		((bcSimpleBroadphase*)overlappingPairCache)->collisionWorld = dynamicsWorld;
@@ -43,16 +45,67 @@ PhysicsWorld::PhysicsWorld() {
 
 	{
 		//btCollisionShape* boxCollisionShape = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
+		btVertexArray outputVectors;
+
+		{
+			btVertexArray inputVectors;
+
+			const btVector3 verticies[] = {//I know this is a mess (TODO: delete this monstrosity)
+		btVector3(0.0f, 0.0f, 0.0f),//Front
+		btVector3(1.0f, 0.0f, 0.0f),
+		btVector3(1.0f, 1.0f, 0.0f),
+		btVector3(0.0f, 1.0f, 0.0f),
+		btVector3(0.0f, 0.0f, 0.0f),
+
+		btVector3(0.0f, 0.0f, 0.0f),//Left
+		btVector3(0.0f, 0.0f, 1.0f),
+		btVector3(0.0f, 1.0f, 1.0f),
+		btVector3(0.0f, 1.0f, 0.0f),
+		btVector3(0.0f, 0.0f, 0.0f),
+
+		btVector3(0.0f, 0.0f, 0.0f),//Bottom
+		btVector3(0.0f, 0.0f, 1.0f),
+		btVector3(1.0f, 0.0f, 1.0f),
+		btVector3(1.0f, 0.0f, 0.0f),
+		btVector3(0.0f, 0.0f, 0.0f),
+
+		btVector3(0.0f, 0.0f, 1.0f),//0,0,0 to 1,1,1
+		btVector3(0.0f, 1.0f, 1.0f),
+		btVector3(1.0f, 1.0f, 1.0f),
+
+		btVector3(1.0f, 1.0f, 1.0f),//Back
+		btVector3(1.0f, 0.0f, 1.0f),
+		btVector3(1.0f, 1.0f, 1.0f),
+		btVector3(0.0f, 1.0f, 1.0f),
+		btVector3(1.0f, 1.0f, 1.0f),
+
+		btVector3(1.0f, 1.0f, 1.0f),//Right
+		btVector3(1.0f, 0.0f, 1.0f),
+		btVector3(1.0f, 1.0f, 1.0f),
+		btVector3(1.0f, 1.0f, 0.0f),
+		btVector3(1.0f, 1.0f, 1.0f),
+
+		btVector3(1.0f, 1.0f, 1.0f),
+		btVector3(0.0f, 1.0f, 1.0f),
+		btVector3(0.0f, 0.0f, 1.0f),//1,1,1 to 0,0,0
+			};
+
+			for (const btVector3& vec : verticies) {
+				inputVectors.push_back(vec - btVector3(0.5f, 0.5f, 0.5f));
+			}
+
+			btVector3 normal = btVector3(0.5f, -0.5f, 0).normalize();
+
+			//outputVectors = inputVectors;
+			btPolyhedralContactClipping::clipFace(inputVectors, outputVectors, normal, 0.5f);//Call once for each triangle/quad
+		}
 
 		btConvexHullShape* boxCollisionShape = new btConvexHullShape();
-		boxCollisionShape->addPoint(btVector3(-0.5f, -0.5f, -0.5f));
-		boxCollisionShape->addPoint(btVector3(-0.5f, -0.5f,  0.5f));
-		boxCollisionShape->addPoint(btVector3(-0.5f,  0.5f, -0.5f));
-		boxCollisionShape->addPoint(btVector3(-0.5f,  0.5f,  0.5f));
-		boxCollisionShape->addPoint(btVector3( 0.5f, -0.5f, -0.5f));
-		boxCollisionShape->addPoint(btVector3( 0.5f, -0.5f,  0.5f));
-		boxCollisionShape->addPoint(btVector3( 0.5f,  0.5f, -0.5f));
-		boxCollisionShape->addPoint(btVector3( 0.5f,  0.5f,  0.5f));
+
+		for (int i = 0; i < outputVectors.size(); i++) {
+			btVector3& vec = outputVectors[i];
+			boxCollisionShape->addPoint(vec);
+		}
 
 		btTransform trans;
 		trans.setIdentity();
@@ -72,6 +125,7 @@ PhysicsWorld::PhysicsWorld() {
 		dynamicsWorld->addRigidBody(rbCube);
 
 		//rbCube->setAngularFactor(0);
+		//rbCube->setLinearFactor({ 0, 0, 0 });
 	}
 }
 
