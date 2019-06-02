@@ -50,11 +50,15 @@ public:
 	btDiscreteDynamicsWorld*                dynamicsWorld;
 	bcDebugDrawer* debugDraw;
 
-	btAlignedObjectArray<btCollisionShape*> collisionShapes;
+	std::vector<btCollisionShape*> collisionShapes;
 	btRigidBody* rbCube;
 
+	std::vector<btCollisionShape*> tmpCollisionShapes;//Deleted at the begining of each physics tick
 public:
 	PhysicsWorld();
 	~PhysicsWorld();
+
+	static void preTickStatic(btDynamicsWorld* world, btScalar timeStep);
+	void preTick(btDynamicsWorld* world, btScalar timeStep);
 };
 

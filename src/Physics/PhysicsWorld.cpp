@@ -4,6 +4,7 @@
 #include <BulletCollision/NarrowPhaseCollision/btPolyhedralContactClipping.h>
 
 #include "bcSimpleBroadphase.h"
+#include "../globals.h"
 
 PhysicsWorld::PhysicsWorld() {
 	overlappingPairCache = new bcSimpleBroadphase();
@@ -14,6 +15,7 @@ PhysicsWorld::PhysicsWorld() {
 
 	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
 	dynamicsWorld->setGravity(btVector3(0, -9.81f, 0));
+	dynamicsWorld->setInternalTickCallback(preTickStatic, 0, true);
 
 	debugDraw = new bcDebugDrawer();
 	dynamicsWorld->setDebugDrawer(debugDraw);
@@ -45,11 +47,9 @@ PhysicsWorld::PhysicsWorld() {
 
 	{
 		//btCollisionShape* boxCollisionShape = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
-		btVertexArray outputVectors;
+		btVertexArray finalVerticies;
 
 		{
-			btVertexArray inputVectors;
-
 			const btVector3 front[] = {
 				btVector3(0.0f, 0.0f, 0.0f),
 				btVector3(1.0f, 0.0f, 0.0f),
@@ -102,19 +102,36 @@ PhysicsWorld::PhysicsWorld() {
 			};
 
 			for (const btVector3* side : sides) {
+				btVertexArray inputVerticies;
+				btVertexArray outputVerticies;
+
 				for (int i = 0; i < 4; i++) {
-					inputVectors.push_back(side[i] - btVector3(0.5f, 0.5f, 0.5f));
+					inputVerticies.push_back(side[i] - btVector3(0.5f, 0.5f, 0.5f));
+				}
+
+				btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, btVector3(0, -1, 0), -0.5f);//Each side is cut individually (this may be a waste of resources but I don't fully understand the Sutherland-Hodgman algorithm)
+
+				for (int i = 0; i < outputVerticies.size(); i++) {
+					btVector3& newVertex = outputVerticies[i];
+
+					for (int i2 = 0; i2 < finalVerticies.size(); i2++) {//Only add new verticies
+						btVector3& existingVertex = finalVerticies[i2];
+
+						if (newVertex == existingVertex) {
+							goto skip;
+						}
+					}
+
+					finalVerticies.push_back(newVertex);
+				skip:;
 				}
 			}
-
-			btPolyhedralContactClipping::clipFace(inputVectors, outputVectors, btVector3(0, -1, 0), 0.0f);//TODO: Call once for each side
 		}
 
 		btConvexHullShape* boxCollisionShape = new btConvexHullShape();
 
-		for (int i = 0; i < outputVectors.size(); i++) {
-			btVector3& vec = outputVectors[i];
-			boxCollisionShape->addPoint(vec);
+		for (int i = 0; i < finalVerticies.size(); i++) {
+			boxCollisionShape->addPoint(finalVerticies[i], i == finalVerticies.size() - 1);
 		}
 
 		btTransform trans;
@@ -151,9 +168,8 @@ PhysicsWorld::~PhysicsWorld() {
 		delete obj;
 	}
 
-	for (int j = 0; j < collisionShapes.size(); j++) {
-		btCollisionShape* shape = collisionShapes[j];
-		collisionShapes[j] = 0;
+	for (btCollisionShape*& shape : collisionShapes) {
+		shape = nullptr;
 		delete shape;
 	}
 
@@ -162,4 +178,16 @@ PhysicsWorld::~PhysicsWorld() {
 	delete overlappingPairCache;
 	delete dispatcher;
 	delete collisionConfiguration;
+}
+
+void PhysicsWorld::preTickStatic(btDynamicsWorld* world, btScalar timeStep) {
+	p_physicsWorld->preTick(world, timeStep);
+}
+
+void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep) {
+	for (btCollisionShape* shape : tmpCollisionShapes) {
+		delete shape;
+	}
+
+	
 }

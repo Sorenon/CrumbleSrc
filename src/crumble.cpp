@@ -109,38 +109,6 @@ int entityIndex = 0;
 
 //BEFORE RELEASE OF ANY KIND I HAVE TO FIGURE OUT THE ISSUE WITH THE MOUSE JUMPING: this may just be a dodgy OS install or a hardware issue because I have the same problem on TF2
 int main(int argc, char* argv[]) {
-	//btVertexArray inputVectors;
-	//btVertexArray outputVectors;
-
-	////inputVectors.push_back(btVector3(1.0f, 1.0f, 0.0f));
-	////inputVectors.push_back(btVector3(0.0f, 1.0f, 0.0f));
-	////inputVectors.push_back(btVector3(0.0f, 0.0f, 0.0f));
-	////inputVectors.push_back(btVector3(1.0f, -1.0f, 0.0f));
-
-	//inputVectors.push_back(btVector3(-0.5f, -0.5f, -0.5f));
-	//inputVectors.push_back(btVector3(-0.5f, -0.5f, 0.5f));
-	//inputVectors.push_back(btVector3(-0.5f, 0.5f, -0.5f));
-	//inputVectors.push_back(btVector3(-0.5f, 0.5f, 0.5f));
-	//inputVectors.push_back(btVector3(0.5f, -0.5f, -0.5f));
-	//inputVectors.push_back(btVector3(0.5f, -0.5f, 0.5f));
-	//inputVectors.push_back(btVector3(0.5f, 0.5f, -0.5f));
-	//inputVectors.push_back(btVector3(0.5f, 0.5f, 0.5f));
-
-	//btPolyhedralContactClipping::clipFace(inputVectors, outputVectors, btVector3(0, -1, 0), 0.25f);//Call once for each triangle/quad
-
-	//for (int i = 0; i < outputVectors.size(); i++) {
-	//	btVector3& vec = outputVectors[i];
-
-	//	std::cout << glm::to_string(FMath::convertVector(vec)) << std::endl;
-	//}
-
-	//std::cout << "end of the line";
-
-	//std::cin.ignore();
-
-	////###########################################################################
-	//if (true) return 0;
-
 	PhysicsWorld physicsWorld;
 	p_physicsWorld = &physicsWorld;
 
