@@ -50,54 +50,64 @@ PhysicsWorld::PhysicsWorld() {
 		{
 			btVertexArray inputVectors;
 
-			const btVector3 verticies[] = {//I know this is a mess (TODO: delete this monstrosity)
-		btVector3(0.0f, 0.0f, 0.0f),//Front
-		btVector3(1.0f, 0.0f, 0.0f),
-		btVector3(1.0f, 1.0f, 0.0f),
-		btVector3(0.0f, 1.0f, 0.0f),
-		btVector3(0.0f, 0.0f, 0.0f),
-
-		btVector3(0.0f, 0.0f, 0.0f),//Left
-		btVector3(0.0f, 0.0f, 1.0f),
-		btVector3(0.0f, 1.0f, 1.0f),
-		btVector3(0.0f, 1.0f, 0.0f),
-		btVector3(0.0f, 0.0f, 0.0f),
-
-		btVector3(0.0f, 0.0f, 0.0f),//Bottom
-		btVector3(0.0f, 0.0f, 1.0f),
-		btVector3(1.0f, 0.0f, 1.0f),
-		btVector3(1.0f, 0.0f, 0.0f),
-		btVector3(0.0f, 0.0f, 0.0f),
-
-		btVector3(0.0f, 0.0f, 1.0f),//0,0,0 to 1,1,1
-		btVector3(0.0f, 1.0f, 1.0f),
-		btVector3(1.0f, 1.0f, 1.0f),
-
-		btVector3(1.0f, 1.0f, 1.0f),//Back
-		btVector3(1.0f, 0.0f, 1.0f),
-		btVector3(1.0f, 1.0f, 1.0f),
-		btVector3(0.0f, 1.0f, 1.0f),
-		btVector3(1.0f, 1.0f, 1.0f),
-
-		btVector3(1.0f, 1.0f, 1.0f),//Right
-		btVector3(1.0f, 0.0f, 1.0f),
-		btVector3(1.0f, 1.0f, 1.0f),
-		btVector3(1.0f, 1.0f, 0.0f),
-		btVector3(1.0f, 1.0f, 1.0f),
-
-		btVector3(1.0f, 1.0f, 1.0f),
-		btVector3(0.0f, 1.0f, 1.0f),
-		btVector3(0.0f, 0.0f, 1.0f),//1,1,1 to 0,0,0
+			const btVector3 front[] = {
+				btVector3(0.0f, 0.0f, 0.0f),
+				btVector3(1.0f, 0.0f, 0.0f),
+				btVector3(1.0f, 1.0f, 0.0f),
+				btVector3(0.0f, 1.0f, 0.0f),
 			};
 
-			for (const btVector3& vec : verticies) {
-				inputVectors.push_back(vec - btVector3(0.5f, 0.5f, 0.5f));
+			const btVector3 left[] = {
+				btVector3(0.0f, 0.0f, 0.0f),
+				btVector3(0.0f, 0.0f, 1.0f),
+				btVector3(0.0f, 1.0f, 1.0f),
+				btVector3(0.0f, 1.0f, 0.0f),
+			};
+
+			const btVector3 bottom[] = {
+				btVector3(0.0f, 0.0f, 0.0f),
+				btVector3(0.0f, 0.0f, 1.0f),
+				btVector3(1.0f, 0.0f, 1.0f),
+				btVector3(1.0f, 0.0f, 0.0f),
+			};
+
+			const btVector3 back[] = {
+				btVector3(0.0f, 0.0f, 1.0f),
+				btVector3(1.0f, 0.0f, 1.0f),
+				btVector3(1.0f, 1.0f, 1.0f),
+				btVector3(0.0f, 1.0f, 1.0f),
+			};
+
+			const btVector3 right[] = {
+				btVector3(1.0f, 0.0f, 0.0f),
+				btVector3(1.0f, 0.0f, 1.0f),
+				btVector3(1.0f, 1.0f, 1.0f),
+				btVector3(1.0f, 1.0f, 0.0f),
+			};
+
+			const btVector3 top[] = {
+				btVector3(0.0f, 1.0f, 0.0f),
+				btVector3(0.0f, 1.0f, 1.0f),
+				btVector3(1.0f, 1.0f, 1.0f),
+				btVector3(1.0f, 1.0f, 0.0f),
+			};
+
+			const btVector3* sides[] = {
+				front,
+				left,
+				bottom,
+				back,
+				right,
+				top,
+			};
+
+			for (const btVector3* side : sides) {
+				for (int i = 0; i < 4; i++) {
+					inputVectors.push_back(side[i] - btVector3(0.5f, 0.5f, 0.5f));
+				}
 			}
 
-			btVector3 normal = btVector3(0.5f, -0.5f, 0).normalize();
-
-			//outputVectors = inputVectors;
-			btPolyhedralContactClipping::clipFace(inputVectors, outputVectors, normal, 0.5f);//Call once for each triangle/quad
+			btPolyhedralContactClipping::clipFace(inputVectors, outputVectors, btVector3(0, -1, 0), 0.0f);//TODO: Call once for each side
 		}
 
 		btConvexHullShape* boxCollisionShape = new btConvexHullShape();
