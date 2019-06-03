@@ -278,7 +278,8 @@ int main(int argc, char* argv[]) {
 		if (glfwGetKey(window, GLFW_KEY_GRAVE_ACCENT) == GLFW_PRESS) {//Reset physics
 			btTransform trans;
 			trans.setIdentity();
-			trans.setOrigin(FMath::convertVector(player.transform.position + glm::vec3(0, 0.5f, 0)));
+			//trans.setOrigin(FMath::convertVector(player.transform.position + glm::vec3(0, 0.5f, 0)));
+			trans.setOrigin(FMath::convertVector(glm::vec3(4, 70.5f, 4)));
 
 			physicsWorld.rbCube->activate();
 			physicsWorld.rbCube->setWorldTransform(trans);

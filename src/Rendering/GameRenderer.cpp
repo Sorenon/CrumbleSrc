@@ -45,7 +45,6 @@ void GameRenderer::doRender(float t) {
 	texturedProgram.activate();
 
 	renderScene(t);
-	debugDrawBulletDebug();
 
 	for (Portal& portal : scene.portals) {
 		renderPortal(portal, t);
@@ -73,6 +72,8 @@ void GameRenderer::renderScene(float t) {
 		renderWorld(subWorld);
 	}
 	renderEntities(t);
+
+	debugDrawBulletDebug();
 }
 
 void GameRenderer::renderPortal(Portal & portal, float t) {
@@ -440,7 +441,7 @@ void GameRenderer::debugDrawBulletDebug() {
 			glm::mat4 model = glm::mat4(1.0f);
 			glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
-			glLineWidth(10.0f);
+			glLineWidth(5.0f);
 			glDrawArrays(GL_LINES, 0, p_physicsWorld->debugDraw->count);
 
 			glDeleteVertexArrays(1, &VAO);

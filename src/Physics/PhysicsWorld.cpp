@@ -5,6 +5,9 @@
 
 #include "bcSimpleBroadphase.h"
 #include "../globals.h"
+#include "../Scene.h"
+#include "../Portal.h"
+#include "../FMath.h"
 
 PhysicsWorld::PhysicsWorld() {
 	overlappingPairCache = new bcSimpleBroadphase();
@@ -46,93 +49,8 @@ PhysicsWorld::PhysicsWorld() {
 	//}
 
 	{
-		//btCollisionShape* boxCollisionShape = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
-		btVertexArray finalVerticies;
-
-		{
-			const btVector3 front[] = {
-				btVector3(0.0f, 0.0f, 0.0f),
-				btVector3(1.0f, 0.0f, 0.0f),
-				btVector3(1.0f, 1.0f, 0.0f),
-				btVector3(0.0f, 1.0f, 0.0f),
-			};
-
-			const btVector3 left[] = {
-				btVector3(0.0f, 0.0f, 0.0f),
-				btVector3(0.0f, 0.0f, 1.0f),
-				btVector3(0.0f, 1.0f, 1.0f),
-				btVector3(0.0f, 1.0f, 0.0f),
-			};
-
-			const btVector3 bottom[] = {
-				btVector3(0.0f, 0.0f, 0.0f),
-				btVector3(0.0f, 0.0f, 1.0f),
-				btVector3(1.0f, 0.0f, 1.0f),
-				btVector3(1.0f, 0.0f, 0.0f),
-			};
-
-			const btVector3 back[] = {
-				btVector3(0.0f, 0.0f, 1.0f),
-				btVector3(1.0f, 0.0f, 1.0f),
-				btVector3(1.0f, 1.0f, 1.0f),
-				btVector3(0.0f, 1.0f, 1.0f),
-			};
-
-			const btVector3 right[] = {
-				btVector3(1.0f, 0.0f, 0.0f),
-				btVector3(1.0f, 0.0f, 1.0f),
-				btVector3(1.0f, 1.0f, 1.0f),
-				btVector3(1.0f, 1.0f, 0.0f),
-			};
-
-			const btVector3 top[] = {
-				btVector3(0.0f, 1.0f, 0.0f),
-				btVector3(0.0f, 1.0f, 1.0f),
-				btVector3(1.0f, 1.0f, 1.0f),
-				btVector3(1.0f, 1.0f, 0.0f),
-			};
-
-			const btVector3* sides[] = {
-				front,
-				left,
-				bottom,
-				back,
-				right,
-				top,
-			};
-
-			for (const btVector3* side : sides) {
-				btVertexArray inputVerticies;
-				btVertexArray outputVerticies;
-
-				for (int i = 0; i < 4; i++) {
-					inputVerticies.push_back(side[i] - btVector3(0.5f, 0.5f, 0.5f));
-				}
-
-				btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, btVector3(0, -1, 0), -0.5f);//Each side is cut individually (this may be a waste of resources but I don't fully understand the Sutherland-Hodgman algorithm)
-
-				for (int i = 0; i < outputVerticies.size(); i++) {
-					btVector3& newVertex = outputVerticies[i];
-
-					for (int i2 = 0; i2 < finalVerticies.size(); i2++) {//Only add new verticies
-						btVector3& existingVertex = finalVerticies[i2];
-
-						if (newVertex == existingVertex) {
-							goto skip;
-						}
-					}
-
-					finalVerticies.push_back(newVertex);
-				skip:;
-				}
-			}
-		}
-
-		btConvexHullShape* boxCollisionShape = new btConvexHullShape();
-
-		for (int i = 0; i < finalVerticies.size(); i++) {
-			boxCollisionShape->addPoint(finalVerticies[i], i == finalVerticies.size() - 1);
-		}
+		btCollisionShape* boxCollisionShape = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
+		collisionShapes.push_back(boxCollisionShape);
 
 		btTransform trans;
 		trans.setIdentity();
@@ -151,7 +69,7 @@ PhysicsWorld::PhysicsWorld() {
 
 		dynamicsWorld->addRigidBody(rbCube);
 
-		//rbCube->setAngularFactor(0);
+		rbCube->setAngularFactor(0);
 		//rbCube->setLinearFactor({ 0, 0, 0 });
 	}
 }
@@ -173,6 +91,11 @@ PhysicsWorld::~PhysicsWorld() {
 		delete shape;
 	}
 
+	for (btCollisionShape*& shape : tmpCollisionShapes) {
+		shape = nullptr;
+		delete shape;
+	}
+
 	delete dynamicsWorld;
 	delete solver;
 	delete overlappingPairCache;
@@ -188,6 +111,109 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep) {
 	for (btCollisionShape* shape : tmpCollisionShapes) {
 		delete shape;
 	}
+	tmpCollisionShapes.clear();
 
-	
+	btVertexArray finalVerticies;
+	{
+		const btVector3 front[] = {
+			btVector3(0.0f, 0.0f, 0.0f),
+			btVector3(1.0f, 0.0f, 0.0f),
+			btVector3(1.0f, 1.0f, 0.0f),
+			btVector3(0.0f, 1.0f, 0.0f),
+		};
+
+		const btVector3 left[] = {
+			btVector3(0.0f, 0.0f, 0.0f),
+			btVector3(0.0f, 0.0f, 1.0f),
+			btVector3(0.0f, 1.0f, 1.0f),
+			btVector3(0.0f, 1.0f, 0.0f),
+		};
+
+		const btVector3 bottom[] = {
+			btVector3(0.0f, 0.0f, 0.0f),
+			btVector3(0.0f, 0.0f, 1.0f),
+			btVector3(1.0f, 0.0f, 1.0f),
+			btVector3(1.0f, 0.0f, 0.0f),
+		};
+
+		const btVector3 back[] = {
+			btVector3(0.0f, 0.0f, 1.0f),
+			btVector3(1.0f, 0.0f, 1.0f),
+			btVector3(1.0f, 1.0f, 1.0f),
+			btVector3(0.0f, 1.0f, 1.0f),
+		};
+
+		const btVector3 right[] = {
+			btVector3(1.0f, 0.0f, 0.0f),
+			btVector3(1.0f, 0.0f, 1.0f),
+			btVector3(1.0f, 1.0f, 1.0f),
+			btVector3(1.0f, 1.0f, 0.0f),
+		};
+
+		const btVector3 top[] = {
+			btVector3(0.0f, 1.0f, 0.0f),
+			btVector3(0.0f, 1.0f, 1.0f),
+			btVector3(1.0f, 1.0f, 1.0f),
+			btVector3(1.0f, 1.0f, 0.0f),
+		};
+
+		const btVector3* sides[] = {
+			front,
+			left,
+			bottom,
+			back,
+			right,
+			top,
+		};
+
+		for (const btVector3* side : sides) {
+			btVertexArray inputVerticies;
+			btVertexArray outputVerticies;
+
+			for (int i = 0; i < 4; i++) {
+				inputVerticies.push_back(side[i] - btVector3(0.5f, 0.5f, 0.5f));
+			}
+
+			Portal& portal = scene.portals[0];
+			btVector3 rbPos = rbCube->getWorldTransform().getOrigin();
+			btVector3 portalPos = FMath::convertVector(portal.position);
+			
+			btVector3 relitivePos = portalPos - rbPos;
+
+			btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, btVector3(0, -1, 0), relitivePos.getY() + 0.04f);//Each side is cut individually (this may be a waste of cpu time but I don't fully understand the Sutherland-Hodgman algorithm)
+
+			for (int i = 0; i < outputVerticies.size(); i++) {
+				btVector3& newVertex = outputVerticies[i];
+
+				for (int i2 = 0; i2 < finalVerticies.size(); i2++) {//Only add new verticies
+					btVector3& existingVertex = finalVerticies[i2];
+
+					if (newVertex == existingVertex) {
+						goto skip;
+					}
+				}
+
+				finalVerticies.push_back(newVertex);
+			skip:;
+			}
+		}
+	}
+
+	if (finalVerticies.size() != 0) {
+		btConvexHullShape* boxCollisionShape = new btConvexHullShape();
+		//boxCollisionShape->setMargin(0.0f);//btBoxShape doesnt have an outward margin
+		boxCollisionShape->setMargin(0.02f);
+
+		for (int i = 0; i < finalVerticies.size(); i++) {
+			boxCollisionShape->addPoint(finalVerticies[i], i == finalVerticies.size() - 1);
+		}
+
+		rbCube->setCollisionShape(boxCollisionShape);
+
+		tmpCollisionShapes.push_back(boxCollisionShape);
+	}
+	else {
+		rbCube->setCollisionShape(&emptyShape);
+	}
+
 }

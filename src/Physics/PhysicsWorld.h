@@ -50,10 +50,12 @@ public:
 	btDiscreteDynamicsWorld*                dynamicsWorld;
 	bcDebugDrawer* debugDraw;
 
-	std::vector<btCollisionShape*> collisionShapes;
 	btRigidBody* rbCube;
 
+	std::vector<btCollisionShape*> collisionShapes;
 	std::vector<btCollisionShape*> tmpCollisionShapes;//Deleted at the begining of each physics tick
+	btEmptyShape emptyShape = btEmptyShape();
+
 public:
 	PhysicsWorld();
 	~PhysicsWorld();
