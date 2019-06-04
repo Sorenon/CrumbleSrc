@@ -84,14 +84,14 @@ void GameRenderer::renderPortal(Portal & portal, float t) {
 
 		glm::mat4 oldViewMatrix = viewMatrix;
 
-		viewMatrix = glm::translate(viewMatrix, -(portal.getExit() - portal.getPosition()));//Get the difference from the output of the portal and the input to find the proper perspective
+		viewMatrix = glm::translate(viewMatrix, -portal.getExit() + portal.getPosition());//Get the difference from the output of the portal and the stencil quad to find the proper perspective
 		{
 			texturedProgram.activate();
 
 			glUniform4fv(texturedProgram.clipPlaneID, 1, glm::value_ptr(portal.getPlane().asVector()));
 			glEnable(GL_CLIP_DISTANCE0);
 
-			renderScene(t);//TODO: render this to a framebuffer to allow for aftereffects
+			renderScene(t);//TODO: possibly render this to a framebuffer to allow for aftereffects
 
 			glDisable(GL_CLIP_DISTANCE0);
 		}
@@ -112,7 +112,7 @@ void GameRenderer::renderPortalStencil(Portal & portal) {
 	texColourProgram.activate();
 	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(projMatrix));
 	glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(glm::scale(projMatrix, glm::vec3(0.999f, 0.999f, 0.999f))));//Emulating a slightly lower FOV
+	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(glm::scale(projMatrix, glm::vec3(0.999f, 0.999f, 0.999f))));//Emulating a slightly lower FOV (this allows for the quad to be drawn over fragments it would usually zfight with)
 
 	glUniform4f(colourIDTexCol, 0.2f, 0.3f, 0.3f, 1.0f);
 	//glUniform4f(colourIDTexCol, 1, 1, 0.3f, 1.0f);
@@ -146,9 +146,9 @@ void GameRenderer::renderPortalStencil(Portal & portal) {
 	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 	glStencilMask(0x00);
 
-	{//This has to be done after the stencil is made because glDepthFunc(GL_ALWAYS) would allow the quad to be seen through walls
+	{//This has to be done after the stencil because glDepthFunc(GL_ALWAYS) would allow the quad to be seen through walls
 		glDepthFunc(GL_ALWAYS);
-		glDepthRange(1, 1); //Clear the depth buffer where the plane is drawn by making all the fragments be drawn at gl_fragDepth=1
+		glDepthRange(1, 1); //Clear the depth buffer where the quad is drawn by making all the fragments be drawn at gl_fragDepth=1
 		glColorMask(false, false, false, false);
 
 		glDrawArrays(GL_TRIANGLES, 0, portal.getVAO().count);//Uniforms and texture is already set
@@ -160,7 +160,7 @@ void GameRenderer::renderPortalStencil(Portal & portal) {
 
 	glDisable(GL_DEPTH_CLAMP);
 
-	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(projMatrix));//Emulating a slightly lower FOV
+	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(projMatrix));
 }
 
 void GameRenderer::updateWorld(World * world) {//Remake VAOs
@@ -541,7 +541,7 @@ t_VAO  GameRenderer::createLineCubeVAO() {
 	return { VAO, VBO, 8 * 2 + 4 * 2 };
 }
 
-t_VAO GameRenderer::createPlane() {
+t_VAO GameRenderer::createQuad() {
 	float* side = createZFace(-0.5f, -0.5f, 0, false);
 
 	GLuint VBO, VAO;
@@ -566,7 +566,7 @@ t_VAO GameRenderer::createPlane() {
 	return { VAO, VBO, 6 * 6 };
 }
 
-t_VAO GameRenderer::createPlane(float x, float y, float z, float height, float width) {
+t_VAO GameRenderer::createQuad(float x, float y, float z, float height, float width) {
 	const float face[] = {
 			0.0f + x, 0.0f + y,  0.0f + z,  0.0f, 0.0f,
 			width + x, 0.0f + y,  0.0f + z,  1.0f, 0.0f,

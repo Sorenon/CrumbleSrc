@@ -40,12 +40,12 @@ private:
 	float width;
 	float height;
 	Face facing;
-	vec3 squarePos;
+	vec3 centerPos;
 
 	vec3 min;
 	vec3 max;
 public:
-	AABB2D(float width, float height, Face facing, vec3 pos);
+	AABB2D(float halfWidth, float halfHeight, Face facing, vec3 centerPos);
 
 	AABB2D operator+(const vec3& vec);
 

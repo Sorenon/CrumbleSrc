@@ -193,9 +193,8 @@ int main(int argc, char* argv[]) {
 	GameRenderer renderer;
 	p_gameRenderer = &renderer;
 
-	{
-		scene.portals.push_back(Portal(glm::vec3(0, 64, -3), glm::vec2(6, 6), Faces::Down, glm::vec3(0, 80, -3)));
-	}
+	scene.portals.push_back(Portal(glm::vec3(0, 64, -6), glm::vec2(3, 3), Faces::Down, glm::vec3(0, 80, -6)));
+	scene.portals.push_back(Portal(glm::vec3(0, 80, -6), glm::vec2(3, 3), Faces::Up, glm::vec3(0, 64, -6)));
 
 	//{
 	//	scene.portals.push_back(Portal());
@@ -304,13 +303,13 @@ int main(int argc, char* argv[]) {
 	return 0;
 }
 
-void framebuffer_size_callback(GLFWwindow * window, int width, int height) {
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 	wWidth = width;
 	wHeight = height;
 }
 
-void updateEntities(ThreadPool & pool, ThreadUnit & threadData) {
+void updateEntities(ThreadPool& pool, ThreadUnit& threadData) {
 	int ticks = 0;
 	Entity* entity = nullptr;
 
@@ -344,7 +343,7 @@ void updateEntities(ThreadPool & pool, ThreadUnit & threadData) {
 	}
 }
 
-void interactWithWorlds(Input & input, float t) {
+void interactWithWorlds(Input& input, float t) {
 	while (input.kbPlace.execute()) {
 		RayTraceResult& result = scene.RayTraceAllWorlds(t);
 		if (result.hasHit) {

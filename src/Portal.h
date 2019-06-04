@@ -10,7 +10,7 @@
 class Portal {
 private:
 	glm::vec3 position;
-	glm::vec2 size;
+	glm::vec2 halfExtents;
 	glm::vec3 exit;
 
 	Face facing;
@@ -19,7 +19,7 @@ private:
 	t_VAO quadVAO;
 	Plane plane;
 public:
-	Portal(glm::vec3 position, glm::vec2 size, Face facing, glm::vec3 exit);
+	Portal(glm::vec3 position, glm::vec2 halfExtents, Face facing, glm::vec3 exit);
 	
 	const AABB2D& getCollider();
 	const glm::vec3& getPosition();

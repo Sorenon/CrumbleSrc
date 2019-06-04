@@ -5,13 +5,13 @@
 #include "globals.h"
 #include "Rendering/GameRenderer.h"
 
-Portal::Portal(glm::vec3 positionIn, glm::vec2 sizeIn, Face facingIn, glm::vec3 exitIn) : collider(6, 6, facingIn, positionIn),	plane(positionIn, glm::vec3(facingIn.angle, 0)){
+Portal::Portal(glm::vec3 positionIn, glm::vec2 halfExtentsIn, Face facingIn, glm::vec3 exitIn) : collider(halfExtentsIn.x, halfExtentsIn.y, facingIn, positionIn), plane(positionIn, glm::vec3(facingIn.angle, 0)) {
 	position = positionIn;
-	size = sizeIn;
+	halfExtents = halfExtentsIn;
 	facing = facingIn;
 	exit = exitIn;
 
-	quadVAO = p_gameRenderer->createPlane(0, 0, 0, 6, 6);
+	quadVAO = p_gameRenderer->createQuad(-halfExtentsIn.x, -halfExtentsIn.y, 0, halfExtentsIn.x * 2, halfExtentsIn.y * 2);
 }
 
 const AABB2D& Portal::getCollider() {

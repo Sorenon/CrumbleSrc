@@ -2,14 +2,17 @@
 #include <math.h>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 #include "FMath.h"
 
-Plane::Plane(glm::vec3 positionIn, glm::vec3 rotationIn) {
+Plane::Plane(glm::vec3 positionIn, glm::vec3 rotationIn) : Plane(positionIn, FMath::createQuaternion(rotationIn)) { }
+
+Plane::Plane(glm::vec3 positionIn, glm::quat rotationIn) {
 	position = positionIn;
 	rotation = rotationIn;
 
-	normal = FMath::getNormal(rotationIn);
+	normal = glm::vec3(0, 0, -1) * rotationIn;
 	glm::vec3 distVec = -normal * positionIn;
 
 	offset = glm::length(distVec);
