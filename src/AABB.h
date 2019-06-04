@@ -50,25 +50,25 @@ public:
 	AABB2D operator+(const vec3& vec);
 
 	//Does other overlap me
-	bool intersectsX(const AABB& other);
-	bool intersectsY(const AABB& other);
-	bool intersectsZ(const AABB& other);
+	bool intersectsX(const AABB& other) const;
+	bool intersectsY(const AABB& other) const;
+	bool intersectsZ(const AABB& other) const;
 
 	//Allows intersection detection with portals even when it is inline with walls
-	bool intersectsEpsilonX(const AABB& other);
-	bool intersectsEpsilonY(const AABB& other);
-	bool intersectsEpsilonZ(const AABB& other);
+	bool intersectsEpsilonX(const AABB& other) const;
+	bool intersectsEpsilonY(const AABB& other) const;
+	bool intersectsEpsilonZ(const AABB& other) const;
 
 	//Is other fully contained within me
-	bool surroundsX(const AABB& other);
-	bool surroundsY(const AABB& other);
-	bool surroundsZ(const AABB& other);
+	bool surroundsX(const AABB& other) const;
+	bool surroundsY(const AABB& other) const;
+	bool surroundsZ(const AABB& other) const;
 
 	//Keep the player inside the edges of the portal
-	void clipX(const AABB& other, float& move);
-	void clipY(const AABB& other, float& move);
-	void clipZ(const AABB& other, float& move);
+	void clipX(const AABB& other, float& move) const;
+	void clipY(const AABB& other, float& move) const;
+	void clipZ(const AABB& other, float& move) const;
 
-	void portalY(const AABB& other, vec3& moveVec, Entity* entity, vec3 portalExit);
-	void portalZ(const AABB& other, vec3& moveVec, Entity* entity, vec3 portalExit);
+	void portalY(const AABB& other, vec3& moveVec, Entity* entity, vec3 portalExit) const;
+	void portalZ(const AABB& other, vec3& moveVec, Entity* entity, vec3 portalExit) const;
 };

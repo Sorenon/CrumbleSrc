@@ -5,7 +5,7 @@ typedef struct _Face {
 	glm::ivec3 normalVector;
 	glm::vec2 angle;
 
-	bool operator==(const _Face other) {
+	bool operator==(const _Face other) const {
 		return angle == other.angle;
 	}
 } Face;

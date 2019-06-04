@@ -16,8 +16,6 @@ public:
 
 public:
 	vec3 getForward();
-
-	static vec3 getLook(vec3 mixedRotation);
 	vec3 getLook(float t = 1.0f);
 
 	void step();

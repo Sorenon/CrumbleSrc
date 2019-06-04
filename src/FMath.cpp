@@ -35,4 +35,15 @@ glm::quat FMath::createQuaternion(glm::vec3 rotation) {
 	// possibly faulty expliantion -> //x (yaw) is around world axis while y & z (yaw & roll) is around local axis
 }
 
+glm::vec3 FMath::getNormal(glm::vec3 rotation) {
+	glm::vec3 front;
+	float pitch = rotation.x;
+	float yaw = rotation.y;
+
+	front.x = sin(yaw) * cos(pitch);
+	front.y = -sin(pitch);
+	front.z = -(cos(yaw) * cos(pitch));
+	return glm::normalize(front);
+}
+
 

@@ -5,19 +5,27 @@
 #include "Faces.h"
 #include "Chunk.h"
 #include "AABB.h"
+#include "Plane.h"
 
 class Portal {
-public:
+private:
 	glm::vec3 position;
-	Face facing = Faces::Front;
-	AABB2D collider = AABB2D(0, 0, Faces::Front, { 0,0,0 });
-
+	glm::vec2 size;
 	glm::vec3 exit;
 
-	t_VAO planeVAO;
+	Face facing;
+	AABB2D collider;
 
+	t_VAO quadVAO;
+	Plane plane;
 public:
-	Portal();
-	~Portal();
+	Portal(glm::vec3 position, glm::vec2 size, Face facing, glm::vec3 exit);
+	
+	const AABB2D& getCollider();
+	const glm::vec3& getPosition();
+	const glm::vec3& getExit();
+	const Plane& getPlane();
+	const Face& getFacing();
+	const t_VAO& getVAO();
 };
 

@@ -40,7 +40,7 @@ void Entity::Move() {
 		}
 
 		//portal.collider.clipY(entityCol, move.y);
-		portal.collider.portalY(entityCol, move, this, portal.exit);
+		portal.getCollider().portalY(entityCol, move, this, portal.getExit());
 
 		if (moveY != move.y) {
 			velocity.y = 0;
@@ -69,7 +69,7 @@ void Entity::Move() {
 		for (AABB aabb : worldColliders) {
 			aabb.clipX(clippedCol, move.x);
 		}
-		portal.collider.clipX(entityCol, move.x);
+		portal.getCollider().clipX(entityCol, move.x);
 
 		if (x != move.x) {
 			velocity.x = 0;
@@ -88,7 +88,7 @@ void Entity::Move() {
 		for (AABB aabb : worldColliders) {
 			aabb.clipZ(clippedCol, move.z);
 		}
-		portal.collider.clipZ(entityCol, move.z);
+		portal.getCollider().clipZ(entityCol, move.z);
 
 		if (moveZ != move.z) {
 			velocity.z = 0;
@@ -104,13 +104,13 @@ void Entity::Move() {
 AABB Entity::trimColliderForPortal(AABB entityCol, Portal& portal, vec3 move) {
 	const float epsilon = 0.01f;
 
-	if (portal.facing == Faces::Down) {
-		if (portal.collider.surroundsX(entityCol) && portal.collider.surroundsZ(entityCol)) {//Is entity inline with the portal
+	if (portal.getFacing() == Faces::Down) {
+		if (portal.getCollider().surroundsX(entityCol) && portal.getCollider().surroundsZ(entityCol)) {//Is entity inline with the portal
 			AABB expandedCol = entityCol;
 			expandedCol.min.y += move.y;
 
-			if (portal.collider.intersectsEpsilonY(expandedCol)) {//Is entity in the portal
-				entityCol.min.y = portal.position.y - move.y + epsilon;
+			if (portal.getCollider().intersectsEpsilonY(expandedCol)) {//Is entity in the portal
+				entityCol.min.y = portal.getPosition().y - move.y + epsilon;
 			}
 		}
 	}

@@ -188,29 +188,29 @@ AABB2D AABB2D::operator+(const vec3 & vec)
 	return AABB2D(width, height, facing, squarePos + vec);
 }
 
-bool AABB2D::intersectsX(const AABB & other) {
+bool AABB2D::intersectsX(const AABB & other) const {
 	return other.max.x > min.x&& other.min.x < max.x;
 
 	//return FMath::greaterTorE(other.max.x, min.x) && FMath::lessThan(other.min.x, max.x);
 }
 
-bool AABB2D::intersectsY(const AABB & other) {
+bool AABB2D::intersectsY(const AABB & other) const {
 	return other.max.y > min.y&& other.min.y < max.y;
 
 	//return FMath::greaterTorE(other.max.y, min.y) && FMath::lessThan(other.min.y, max.y);
 }
 
-bool AABB2D::intersectsZ(const AABB & other) {
+bool AABB2D::intersectsZ(const AABB & other) const {
 	return other.max.z > min.z&& other.min.z < max.z;
 
 	//return FMath::greaterTorE(other.max.z, min.z) && FMath::lessThan(other.min.z, max.z);
 }
 
-bool AABB2D::intersectsEpsilonY(const AABB & other) {
+bool AABB2D::intersectsEpsilonY(const AABB & other) const {
 	return FMath::greaterTorE(other.max.y, min.y) && FMath::lessThanOrE(other.min.y, max.y);
 }
 
-void AABB2D::clipY(const AABB & other, float& move) {
+void AABB2D::clipY(const AABB & other, float& move) const {
 	if (intersectsX(other) && intersectsZ(other)) {
 		if (move > 0.0f && FMath::greaterTorE(min.y, other.max.y)) {		//Is other rising and bellow AABB?
 			if (other.max.y + move > min.y) {								//Would it rise above or inside?
@@ -225,17 +225,17 @@ void AABB2D::clipY(const AABB & other, float& move) {
 	}
 }
 
-bool AABB2D::surroundsX(const AABB & other) {
+bool AABB2D::surroundsX(const AABB & other) const {
 	return intersectsX(other) &&
 		FMath::lessThanOrE(other.max.x, max.x) && FMath::greaterTorE(other.min.x, min.x);
 }
 
-bool AABB2D::surroundsZ(const AABB & other) {
+bool AABB2D::surroundsZ(const AABB & other) const {
 	return intersectsZ(other) &&
 		FMath::lessThanOrE(other.max.z, max.z) && FMath::greaterTorE(other.min.z, min.z);
 }
 
-void AABB2D::clipX(const AABB & other, float& move) {
+void AABB2D::clipX(const AABB & other, float& move) const {
 	//if (facing == Faces::Right || facing == Faces::Left) {
 	//	if (intersectsY(other) && intersectsZ(other)) {
 	//		if (move > 0.0f && FMath::greaterTorE(min.x, other.max.x)) {
@@ -269,7 +269,7 @@ void AABB2D::clipX(const AABB & other, float& move) {
 	}
 }
 
-void AABB2D::clipZ(const AABB & other, float& move) {
+void AABB2D::clipZ(const AABB & other, float& move) const {
 	if (move != 0) {
 		if (facing == Faces::Down || facing == Faces::Up) {
 			if (intersectsY(other) && surroundsX(other) && surroundsZ(other)) {//Is entity inside the portal
@@ -288,7 +288,7 @@ void AABB2D::clipZ(const AABB & other, float& move) {
 	}
 }
 
-void AABB2D::portalY(const AABB & other, vec3 & moveVec, Entity * entity, vec3 portalExit) {
+void AABB2D::portalY(const AABB & other, vec3 & moveVec, Entity * entity, vec3 portalExit) const {
 	const float yPos = squarePos.y;
 	const float move = moveVec.y;
 	const float entityY = entity->getEyePos().y;
@@ -325,7 +325,7 @@ void AABB2D::portalY(const AABB & other, vec3 & moveVec, Entity * entity, vec3 p
 }
 
 
-void AABB2D::portalZ(const AABB & other, vec3 & moveVec, Entity * entity, vec3 portalExit) {
+void AABB2D::portalZ(const AABB & other, vec3 & moveVec, Entity * entity, vec3 portalExit) const {
 	const float zPos = squarePos.z;
 	const float move = moveVec.z;
 	Transform& transform = entity->transform;

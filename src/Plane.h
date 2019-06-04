@@ -4,14 +4,17 @@
 
 class Plane
 {
-public:
+private:
 	glm::vec3 position;
-	glm::vec3 size;
+	glm::vec3 rotation;
 
+	glm::vec3 normal;
+	float offset;
 public:
-	Plane();
-	~Plane();
+	Plane(glm::vec3 position, glm::vec3 rotation);
 
-
+	glm::vec4 asVector() const;
+	const glm::vec3& getNormal() const;
+	float getOffset() const;
 };
 

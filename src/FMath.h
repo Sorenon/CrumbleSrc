@@ -21,5 +21,7 @@ namespace FMath {
 	glm::quat convertQuaternion(btQuaternion quat);
 
 	glm::quat createQuaternion(glm::vec3 rotation);
+
+	glm::vec3 getNormal(glm::vec3 rotation);
 };
 

@@ -5,6 +5,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "FMath.h"
+
 using namespace glm;
 
 vec3 Transform::getForward() {
@@ -17,20 +19,8 @@ vec3 Transform::getForward() {
 	return glm::normalize(forward);
 }
 
-//Static
-vec3 Transform::getLook(vec3 mixedRotation) {
-	vec3 front;
-	float pitch = mixedRotation.x;
-	float yaw = mixedRotation.y;
-
-	front.x = sin(yaw) * cos(pitch);
-	front.y = -sin(pitch);
-	front.z = -(cos(yaw) * cos(pitch));
-	return glm::normalize(front);
-}
-
 vec3 Transform::getLook(float t) {
-	return getLook(getInterpRot(t));
+	return FMath::getNormal(getInterpRot(t));
 }
 
 void Transform::step() {

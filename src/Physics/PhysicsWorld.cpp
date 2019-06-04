@@ -113,6 +113,8 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep) {
 	}
 	tmpCollisionShapes.clear();
 
+	//btCompoundShape* combinedShape = new btCompoundShape();
+
 	btVertexArray finalVerticies;
 	{
 		const btVector3 front[] = {
@@ -176,11 +178,11 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep) {
 
 			Portal& portal = scene.portals[0];
 			btVector3 rbPos = rbCube->getWorldTransform().getOrigin();
-			btVector3 portalPos = FMath::convertVector(portal.position);
+			btVector3 portalPos = FMath::convertVector(portal.getPosition());
 			
 			btVector3 relitivePos = portalPos - rbPos;
 
-			btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, btVector3(0, -1, 0), relitivePos.getY() + 0.04f);//Each side is cut individually (this may be a waste of cpu time but I don't fully understand the Sutherland-Hodgman algorithm)
+			btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, btVector3(0, -1, 0), relitivePos.getY() + 0.04f);//Each side is cut individually for a more simple final mesh
 
 			for (int i = 0; i < outputVerticies.size(); i++) {
 				btVector3& newVertex = outputVerticies[i];
@@ -200,20 +202,18 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep) {
 	}
 
 	if (finalVerticies.size() != 0) {
-		btConvexHullShape* boxCollisionShape = new btConvexHullShape();
+		btConvexHullShape* cutBoxShape = new btConvexHullShape();
 		//boxCollisionShape->setMargin(0.0f);//btBoxShape doesnt have an outward margin
-		boxCollisionShape->setMargin(0.02f);
+		cutBoxShape->setMargin(0.02f);
 
 		for (int i = 0; i < finalVerticies.size(); i++) {
-			boxCollisionShape->addPoint(finalVerticies[i], i == finalVerticies.size() - 1);
+			cutBoxShape->addPoint(finalVerticies[i], i == finalVerticies.size() - 1);
 		}
 
-		rbCube->setCollisionShape(boxCollisionShape);
-
-		tmpCollisionShapes.push_back(boxCollisionShape);
+		rbCube->setCollisionShape(cutBoxShape);
+		tmpCollisionShapes.push_back(cutBoxShape);
 	}
 	else {
 		rbCube->setCollisionShape(&emptyShape);
 	}
-
 }
