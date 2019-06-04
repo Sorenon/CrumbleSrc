@@ -194,18 +194,7 @@ int main(int argc, char* argv[]) {
 	p_gameRenderer = &renderer;
 
 	scene.portals.push_back(Portal(glm::vec3(0, 64, -6), glm::vec2(3, 3), Faces::Down, glm::vec3(0, 80, -6)));
-	scene.portals.push_back(Portal(glm::vec3(0, 80, -6), glm::vec2(3, 3), Faces::Up, glm::vec3(0, 64, -6)));
-
-	//{
-	//	scene.portals.push_back(Portal());
-	//	Portal& portal = scene.portals[1];
-
-	//	portal.position = glm::vec3(0, 80, -9);
-	//	portal.exit = glm::vec3(0, 64, -9);
-	//	portal.facing = Faces::Up;
-	//	portal.collider = AABB2D(6, 6, portal.facing, portal.position);
-	//	portal.planeVAO = renderer.createPlane(0, 0, 0, 6, 6);
-	//}
+	//scene.portals.push_back(Portal(glm::vec3(0, 80, -6), glm::vec2(3, 3), Faces::Up, glm::vec3(0, 64, -6)));
 
 	Pathfinder pathfinder;
 	p_pathfinder = &pathfinder;

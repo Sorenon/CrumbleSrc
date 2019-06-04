@@ -89,6 +89,7 @@ void GameRenderer::renderPortal(Portal & portal, float t) {
 			texturedProgram.activate();
 
 			glUniform4fv(texturedProgram.clipPlaneID, 1, glm::value_ptr(portal.getPlane().asVector()));
+			//glUniform4fv(texturedProgram.clipPlaneID, 1, glm::value_ptr(glm::vec4(0.0f, -1.0f, 0.0f, 80.0f)));
 			glEnable(GL_CLIP_DISTANCE0);
 
 			renderScene(t);//TODO: possibly render this to a framebuffer to allow for aftereffects

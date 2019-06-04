@@ -1,4 +1,5 @@
 #include "PhysicsWorld.h"
+#include <cmath>
 
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/NarrowPhaseCollision/btPolyhedralContactClipping.h>
@@ -8,6 +9,7 @@
 #include "../Scene.h"
 #include "../Portal.h"
 #include "../FMath.h"
+#include "../Plane.h"
 
 PhysicsWorld::PhysicsWorld() {
 	overlappingPairCache = new bcSimpleBroadphase();
@@ -182,7 +184,9 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep) {
 			
 			btVector3 relitivePos = portalPos - rbPos;
 
-			btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, btVector3(0, -1, 0), relitivePos.getY() + 0.04f);//Each side is cut individually for a more simple final mesh
+			Plane plane = Plane(FMath::convertVector(relitivePos), FMath::createQuaternion(glm::vec3(portal.getFacing().angle, 0.0f)));
+
+			btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, FMath::convertVector(plane.asVector()), plane.getOffset() + 0.04f);//Each side is cut individually for a more simple final mesh
 
 			for (int i = 0; i < outputVerticies.size(); i++) {
 				btVector3& newVertex = outputVerticies[i];

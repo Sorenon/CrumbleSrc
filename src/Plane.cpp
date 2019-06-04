@@ -4,25 +4,16 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-#include "FMath.h"
+Plane::Plane(glm::vec3 positionIn, glm::quat rotationIn) : Plane(positionIn, rotationIn* glm::vec3(0, 0, -1)) { }
 
-Plane::Plane(glm::vec3 positionIn, glm::vec3 rotationIn) : Plane(positionIn, FMath::createQuaternion(rotationIn)) { }
-
-Plane::Plane(glm::vec3 positionIn, glm::quat rotationIn) {
+Plane::Plane(glm::vec3 positionIn, glm::vec3 normalIn) {
 	position = positionIn;
-	rotation = rotationIn;
+	normal = normalIn;
 
-	normal = glm::vec3(0, 0, -1) * rotationIn;
 	glm::vec3 distVec = -normal * positionIn;
 
 	offset = glm::length(distVec);
-	for (int i = 0; i < 3; i++) {
-		const float& f = distVec[i];
-
-		if (f != 0) {
-			offset *= glm::sign(f);
-		}
-	}
+	offset *= getSignFromVector(distVec);
 }
 
 glm::vec4 Plane::asVector() const {
@@ -31,6 +22,19 @@ glm::vec4 Plane::asVector() const {
 
 float Plane::getOffset() const {
 	return offset;
+}
+
+int Plane::getSignFromVector(glm::vec3 vec) {
+	int sign = 1;
+
+	for (int i = 0; i < 3; i++) {
+		const float& f = vec[i];
+
+		if (fabsf(f) >= 0.01f) {
+			sign *= glm::sign(f);
+		}
+	}
+	return sign;
 }
 
 const glm::vec3& Plane::getNormal() const {

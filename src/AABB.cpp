@@ -172,7 +172,7 @@ AABB2D::AABB2D(float halfWidth, float halfHeight, Face facingIn, vec3 centerPosI
 	//		vec1 = posIn + glm::vec3(width, 0, height);
 	//	}
 	//}	
-	vec3 mod = glm::vec3(halfWidth, 0, -halfHeight);
+	vec3 mod = glm::vec3(halfWidth, 0, halfHeight);//tmp method
 
 	vec3 vec1 = centerPos + mod;
 	vec3 vec2 = centerPos - mod;
