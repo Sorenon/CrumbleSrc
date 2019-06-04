@@ -186,7 +186,7 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep) {
 
 			Plane plane = Plane(FMath::convertVector(relitivePos), FMath::createQuaternion(glm::vec3(portal.getFacing().angle, 0.0f)));
 
-			btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, FMath::convertVector(plane.asVector()), plane.getOffset() + 0.04f);//Each side is cut individually for a more simple final mesh
+			btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, FMath::convertVector(plane.getNormal()), plane.getOffset() + 0.04f);//Each side is cut individually for a more simple final mesh
 
 			for (int i = 0; i < outputVerticies.size(); i++) {
 				btVector3& newVertex = outputVerticies[i];
