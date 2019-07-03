@@ -9,7 +9,6 @@
 #include <glm/gtx/quaternion.hpp>
 #include <stb_image.h>
 
-#include "../Player.h"
 #include "../Entity.h"
 #include "../EntityFoo.h"
 #include "../globals.h"
@@ -33,8 +32,8 @@ GameRenderer::~GameRenderer() {
 
 void GameRenderer::doRender(float t) {
 	{
-		auto& trans = registry.get<components::transform>(player);
-		auto& rb = registry.get<components::kinematic_ridgedbody>(player);
+		auto& trans = registry.get<components::transform>(localplayer);
+		auto& rb = registry.get<components::kinematic_ridgedbody>(localplayer);
 
 		viewMatrix = glm::mat4(1.0f);
 		viewMatrix = viewMatrix * glm::toMat4(FMath::createQuaternion(trans.rotation));
@@ -312,8 +311,8 @@ void GameRenderer::renderUI(float t) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	auto& trans = registry.get<components::transform>(player);
-	auto& rb = registry.get<components::kinematic_ridgedbody>(player);
+	auto& trans = registry.get<components::transform>(localplayer);
+	auto& rb = registry.get<components::kinematic_ridgedbody>(localplayer);
 
 	glm::mat4 view = glm::mat4(1.0f);
 	view = view * glm::toMat4(FMath::createQuaternion(trans.rotation));

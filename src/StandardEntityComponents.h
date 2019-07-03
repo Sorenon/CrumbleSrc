@@ -2,8 +2,11 @@
 #include <glm/glm.hpp>
 
 #include "AABB.h"
+#include "Pathfinder.h"
 
 using namespace glm;
+
+class Scene;
 
 namespace components {
 	struct transform {
@@ -13,9 +16,11 @@ namespace components {
 		vec3 position;
 		vec3 rotation;
 
+		Scene* scene = nullptr;
+
 	public:
 		vec3 getInterpPos(float t);
-		vec3 getInterpRot(float t); //No need to call this for player because player rotation is updated every frame
+		vec3 getInterpRot(float t); //No need to call this for localplayer because localplayer rotation is updated every frame
 	};
 
 	struct kinematic_ridgedbody {
@@ -42,5 +47,15 @@ namespace components {
 		static void ApplyFriction(vec3& velocity, float friction);
 		static void Walk(vec3& velocity, vec3 wishVel, float acceleration);
 		static void Accelerate(vec3& velocity, vec3 wishDir, float wishSpeed, float acceleration);
+	};
+
+	struct pathfinder {
+		ivec3 destination;
+		Pathfinder pathfinder;
+		int pathRefreshCooldown = 30.0f;
+	};
+
+	struct pathfinding_movement {
+
 	};
 };

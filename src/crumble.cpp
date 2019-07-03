@@ -22,7 +22,6 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H  
 
-#include "Player.h"
 #include "Entity.h"
 #include "EntityFoo.h"
 #include "Chunk.h"
@@ -41,6 +40,7 @@
 #include "Scene.h"
 #include "Portal.h"
 #include "StandardEntityComponents.h"
+#include "StandardEntitySystems.h"
 
 typedef struct _ThreadUnit {
 	int id;
@@ -100,12 +100,12 @@ const int windowStartHeight = 480;
 int wWidth = windowStartWidth;
 int wHeight = windowStartHeight;
 
-entt::registry::entity_type player;
+entt::registry::entity_type localplayer;
 PhysicsWorld* p_physicsWorld;
 GameRenderer* p_gameRenderer;
 Pathfinder* p_pathfinder;
 Scene scene;
-entt::registry registry;
+entt::registry registry;//Question: use one register for all entities or use one register per entity
 
 std::mutex entityMutex;
 int entityIndex = 0;
@@ -134,19 +134,6 @@ int main(int argc, char* argv[]) {
 	subWorld.rotation = glm::vec3(0, 0, glm::radians(-45.0f));
 	subWorld.UpdateTranslationMatrix();
 
-	FT_Library ft;
-	if (FT_Init_FreeType(&ft))
-		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
-
-	FT_Face face;
-	if (FT_New_Face(ft, "C:/Windows/Fonts/arial.ttf", 0, &face))
-		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
-
-	FT_Set_Pixel_Sizes(face, 0, 48);
-
-	if (FT_Load_Char(face, 'X', FT_LOAD_RENDER))
-		std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
-
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -170,45 +157,37 @@ int main(int argc, char* argv[]) {
 	Input& input = Input::INSTANCE;
 	input.init(window);
 
-	//Player player;
-	//p_player = &player;
-	//player.transform.rotation.x = glm::radians(180.0f);
-
-	//scene.entities.push_back(p_player);
-
-	player = registry.create();
+	localplayer = registry.create();
 	{
 		components::transform trans;
 		trans.position = glm::vec3(0, 90, 0);
 		trans.rotation.x = glm::radians(180.0f);
+		trans.scene = &scene;
 
 		components::kinematic_ridgedbody rb;
 		rb.collider = AABB(vec3(-0.4, 0, -0.4), vec3(0.4, 1.9, 0.4));
 		rb.eyeHeight = 1.8f;
 		rb.gravity = 28.0f;
 
-		registry.assign<components::transform>(player, trans);
-		registry.assign<components::kinematic_ridgedbody>(player, rb);
-		registry.assign<components::player_movement>(player, components::player_movement());
+		registry.assign<components::transform>(localplayer, trans);
+		registry.assign<components::kinematic_ridgedbody>(localplayer, rb);
+		registry.assign<components::player_movement>(localplayer, components::player_movement());
 	}
 
-	//EntityFoo entityFoo;
-	//entityFoo.transform.position = vec3(0, 90, 0);
-	//scene.entities.push_back(&entityFoo);
+	auto entityFoo = registry.create();
+	{
+		components::transform trans;
+		trans.position = glm::vec3(0, 90, 0);
+		trans.scene = &scene;
 
-	//auto entityFoo = registry.create();
-	//{
-	//	components::transform trans;
-	//	trans.position = glm::vec3(0, 90, 0);
+		components::kinematic_ridgedbody rb;
+		rb.collider = AABB(vec3(-0.49f, 0, -0.49f), vec3(0.49f, 1, 0.49f));
+		rb.eyeHeight = 0.5f;
 
-	//	components::kinematic_ridgedbody rb;
-	//	rb.collider = AABB(vec3(-0.49f, 0, -0.49f), vec3(0.49f, 1, 0.49f));
-	//	rb.eyeHeight = 0.5f;
-
-	//	registry.assign<components::transform>(entityFoo, trans);
-	//	registry.assign<components::kinematic_ridgedbody>(entityFoo, rb);
-	//	registry.assign<components::renderable>(entityFoo, components::renderable());
-	//}
+		registry.assign<components::transform>(entityFoo, trans);
+		registry.assign<components::kinematic_ridgedbody>(entityFoo, rb);
+		registry.assign<components::renderable>(entityFoo, components::renderable());
+	}
 
 
 	double lastFrame = glfwGetTime();
@@ -242,143 +221,8 @@ int main(int argc, char* argv[]) {
 
 			input.processInput();
 
-			auto view2 = registry.view<components::transform, components::kinematic_ridgedbody, components::player_movement>();
-			for (auto entity : view2) {
-				auto& trans = view2.get<components::transform>(entity);
-				auto& rb = view2.get<components::kinematic_ridgedbody>(entity);
-				auto& pm = view2.get<components::player_movement>(entity);
-
-				vec3 forward = FMath::getForward(trans.rotation.y);
-				vec3 right = glm::cross(forward, Vectors::UP);
-				vec3 wishVel;
-
-				Input& input = Input::INSTANCE;
-
-				if (input.kbJump.executeOnce()) {
-					if (rb.onGround) {
-						rb.velocity.y += 9.0f;
-					}
-				}
-
-				if (input.kbNoClip.executeOnce()) {
-					rb.noClip = !rb.noClip;
-
-					if (rb.noClip) {
-						rb.gravity = 0.0f;
-						rb.drag = 1.0f;
-					}
-					else {
-						rb.gravity = 28.0f;
-						rb.drag = 0.98f;
-					}
-				}
-
-				const float moveSpeed = rb.noClip ? pm.noClipSpeed : pm.walkSpeed;
-
-				wishVel += forward * (input.axForward.getModifier() * moveSpeed);
-				wishVel += right * (input.axRight.getModifier() * moveSpeed);
-				wishVel += glm::vec3(0.0f, input.axUp.getModifier() * moveSpeed, 0.0f);
-
-				if (rb.noClip) {
-					rb.velocity = wishVel;
-				}
-				else {
-					if (rb.onGround) {
-						components::player_movement::ApplyFriction(rb.velocity, 10.0f);
-						components::player_movement::Walk(rb.velocity, wishVel, 15.0f);
-					}
-					else {
-						components::player_movement::ApplyFriction(rb.velocity, 1.5f);
-						components::player_movement::Walk(rb.velocity, wishVel, 3.0f);
-					}
-				}
-			}
-
-			auto view = registry.view<components::transform, components::kinematic_ridgedbody>();
-			for (auto entity : view) {
-				auto& trans = view.get<components::transform>(entity);
-				auto& rb = view.get<components::kinematic_ridgedbody>(entity);
-
-				rb.velocity.y -= rb.gravity * CrumbleGlobals::FIXED_TIMESTEP;
-				rb.velocity *= rb.drag;
-
-				glm::vec3 move = rb.velocity * CrumbleGlobals::FIXED_TIMESTEP;	//How far the entity expects to move 
-
-				std::cout << glm::to_string(move) << std::endl;
-
-				if (rb.noClip) {
-					trans.prevPosition = trans.position;
-					trans.position += move;
-				}
-				else {
-					AABB entityCol = rb.collider + trans.position;
-					AABB clippedCol = entityCol;
-
-					std::vector<AABB> worldColliders = scene.mainWorld.getOverlappingBlocks(entityCol.expandByVelocity(move)); //Find all blocks (as AABBs) the entity may collide with
-
-					{//Collide along y axis
-						const float moveY = move.y;
-
-						entityCol = rb.collider + trans.position;
-
-						for (AABB aabb : worldColliders) {
-							aabb.clipY(entityCol, move.y);
-						}
-
-						if (moveY != move.y) {
-							rb.velocity.y = 0;
-
-							if (moveY < 0.0f) {
-								rb.onGround = true;
-							}
-							else {
-								rb.onGround = false;
-							}
-						}
-						else {
-							rb.onGround = false;
-						}
-
-						trans.prevPosition.y = trans.position.y;
-						trans.position.y += move.y;
-					}
-
-					{//Collide along x axis
-						const float x = move.x;
-
-						entityCol = rb.collider + trans.position;
-
-						for (AABB aabb : worldColliders) {
-							aabb.clipX(entityCol, move.x);
-						}
-
-						if (x != move.x) {
-							rb.velocity.x = 0;
-						}
-
-						trans.prevPosition.x = trans.position.x;
-						trans.position.x += move.x;
-					}
-
-					{//Collide along z axis
-						const float moveZ = move.z;
-
-						entityCol = rb.collider + trans.position;
-
-						for (AABB aabb : worldColliders) {
-							aabb.clipZ(entityCol, move.z);
-						}
-
-						if (moveZ != move.z) {
-							rb.velocity.z = 0;
-						}
-
-						trans.prevPosition.z = trans.position.z;
-						trans.position.z += move.z;
-					}
-				}
-
-			}
+			standard_entity_systems::do_player_movement(registry);
+			standard_entity_systems::move_kinematic_ridgedbodies(registry);
 
 			accumulator -= CrumbleGlobals::FIXED_TIMESTEP;
 
@@ -395,7 +239,7 @@ int main(int argc, char* argv[]) {
 		{
 			float sensitivity = 0.15f;
 
-			auto& trans = registry.get<components::transform>(player);
+			auto& trans = registry.get<components::transform>(localplayer);
 			glm::vec3& rotation = trans.rotation;
 
 			rotation.x += glm::radians(input.deltaY * -sensitivity);
@@ -501,7 +345,7 @@ void interactWithWorlds(Input& input, float t) {
 		if (result.hasHit) {
 
 			glm::ivec3 placePos = result.hitPos + result.face;
-			AABB playerCol = registry.get<components::kinematic_ridgedbody>(player).collider + registry.get<components::transform>(player).position;
+			AABB playerCol = registry.get<components::kinematic_ridgedbody>(localplayer).collider + registry.get<components::transform>(localplayer).position;
 
 			if ((AABB::blockAABB + placePos).overlaps(playerCol)) { //TODO: make this work with subWorlds
 				//if (player.onGround && !(AABB::blockAABB + placePos).overlaps(playerCol + Vectors::UP) && world.getOverlappingBlocks(playerCol.expandByVelocity(glm::vec3(0, 1, 0))).empty()) {

@@ -45,8 +45,11 @@ public:
 	};
 };
 
+class Scene;
+
 class Pathfinder {
 public:
+	//Scene* scene;
 	std::vector<PathNode*> path;
 	std::vector<PathNode*> closedSet;
 	int currentNodeIndex;

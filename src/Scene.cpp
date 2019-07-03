@@ -4,7 +4,6 @@
 
 #include "globals.h"
 #include "FMath.h"
-#include "Player.h"
 #include "StandardEntityComponents.h"
 
 Scene::Scene()
@@ -45,8 +44,8 @@ RayTraceResult Scene::RayTraceAllWorlds(float t) {
 RayTraceResult Scene::RayTraceFromPlayer(float t, World& world) {
 	RayTraceResult result;
 
-	auto& trans = registry.get<components::transform>(player);
-	auto& rb = registry.get<components::kinematic_ridgedbody>(player);
+	auto& trans = registry.get<components::transform>(localplayer);
+	auto& rb = registry.get<components::kinematic_ridgedbody>(localplayer);
 
 	return world.rayTrace(trans.getInterpPos(t) + glm::vec3(0, rb.eyeHeight, 0), FMath::getNormal(trans.rotation));
 }
@@ -54,8 +53,8 @@ RayTraceResult Scene::RayTraceFromPlayer(float t, World& world) {
 RayTraceResult Scene::RayTraceFromPlayer(float t, SubWorld& world) {
 	RayTraceResult result;
 
-	auto& trans = registry.get<components::transform>(player);
-	auto& rb = registry.get<components::kinematic_ridgedbody>(player);
+	auto& trans = registry.get<components::transform>(localplayer);
+	auto& rb = registry.get<components::kinematic_ridgedbody>(localplayer);
 
 	glm::vec3 eyePos = glm::vec3(world.translationMatrix * glm::vec4(trans.getInterpPos(t) + glm::vec3(0, rb.eyeHeight, 0), 1));
 
