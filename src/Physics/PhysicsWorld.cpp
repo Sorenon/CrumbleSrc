@@ -3,6 +3,11 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/NarrowPhaseCollision/btPolyhedralContactClipping.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "bcSimpleBroadphase.h"
 #include "../globals.h"
@@ -110,6 +115,8 @@ void PhysicsWorld::preTickStatic(btDynamicsWorld* world, btScalar timeStep) {
 }
 
 void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep) {
+	using namespace FMath;
+
 	for (btCollisionShape* shape : tmpCollisionShapes) {
 		delete shape;
 	}
@@ -170,6 +177,24 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep) {
 			top,
 		};
 
+		Portal& portal = scene.portals[0];
+		btVector3 rbPos = rbCube->getWorldTransform().getOrigin();
+		btVector3 portalPos = convertVector(portal.getPosition());
+
+		btVector3 relitivePos = portalPos - rbPos;
+		relitivePos = rbCube->getWorldTransform().getBasis() * relitivePos;
+
+		//float pitch = 0;
+		//float yaw = 0;
+		//float roll = 0;
+
+		//rbCube->getWorldTransform().getRotation().getEulerZYX(yaw, pitch, roll);
+
+
+		//Plane plane = Plane(convertVector(relitivePos), createQuaternion(glm::vec3(portal.getFacing().angle, 0.0f)) * createQuaternion(glm::vec3(0, roll, 0)));
+
+		Plane plane = Plane(convertVector(relitivePos), createQuaternion(glm::vec3(portal.getFacing().angle, 0.0f)) * convertQuaternion(rbCube->getWorldTransform().getRotation()));
+
 		for (const btVector3* side : sides) {
 			btVertexArray inputVerticies;
 			btVertexArray outputVerticies;
@@ -177,14 +202,6 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep) {
 			for (int i = 0; i < 4; i++) {
 				inputVerticies.push_back(side[i] - btVector3(0.5f, 0.5f, 0.5f));
 			}
-
-			Portal& portal = scene.portals[0];
-			btVector3 rbPos = rbCube->getWorldTransform().getOrigin();
-			btVector3 portalPos = FMath::convertVector(portal.getPosition());
-			
-			btVector3 relitivePos = portalPos - rbPos;
-
-			Plane plane = Plane(FMath::convertVector(relitivePos), FMath::createQuaternion(glm::vec3(portal.getFacing().angle, 0.0f)));
 
 			btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, FMath::convertVector(plane.getNormal()), plane.getOffset() + 0.04f);//Each side is cut individually for a more simple final mesh
 

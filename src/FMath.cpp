@@ -27,7 +27,7 @@ btVector3 FMath::convertVector(glm::vec3 vec) {
 }
 
 glm::quat FMath::convertQuaternion(btQuaternion quat) {
-	return glm::quat(quat.getX(), quat.getY(), quat.getZ(), quat.getW());
+	return glm::quat(quat.getW(), quat.getX(), quat.getY(), quat.getZ());
 }
 
 glm::quat FMath::createQuaternion(glm::vec3 rotation) {

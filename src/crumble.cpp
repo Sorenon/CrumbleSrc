@@ -262,6 +262,13 @@ int main(int argc, char* argv[]) {
 			//trans.setOrigin(FMath::convertVector(player.transform.position + glm::vec3(0, 0.5f, 0)));
 			trans.setOrigin(FMath::convertVector(glm::vec3(4, 70.5f, 4)));
 
+			float pitch = glm::radians(45.0f);
+			float yaw = 0.0f;
+			float roll = 0.0f;
+			trans.setRotation(btQuaternion(yaw, pitch, roll));
+
+			glm::quat quat = FMath::createQuaternion(glm::vec3(pitch, yaw, roll));
+
 			physicsWorld.rbCube->activate();
 			physicsWorld.rbCube->setWorldTransform(trans);
 

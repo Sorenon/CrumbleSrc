@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-Plane::Plane(glm::vec3 positionIn, glm::quat rotationIn) : Plane(positionIn, rotationIn* glm::vec3(0, 0, -1)) { }
+Plane::Plane(glm::vec3 positionIn, glm::quat rotationIn) : Plane(positionIn, rotationIn * glm::vec3(0, 0, -1)) { }
 
 Plane::Plane(glm::vec3 positionIn, glm::vec3 normalIn) {
 	position = positionIn;
