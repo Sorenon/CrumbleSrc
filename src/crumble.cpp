@@ -185,29 +185,31 @@ int main(int argc, char* argv[]) {
 		components::kinematic_ridgedbody rb;
 		rb.collider = AABB(vec3(-0.4, 0, -0.4), vec3(0.4, 1.9, 0.4));
 		rb.eyeHeight = 1.8f;
+		rb.gravity = 28.0f;
 
 		registry.assign<components::transform>(player, trans);
 		registry.assign<components::kinematic_ridgedbody>(player, rb);
+		registry.assign<components::player_movement>(player, components::player_movement());
 	}
 
 	//EntityFoo entityFoo;
 	//entityFoo.transform.position = vec3(0, 90, 0);
 	//scene.entities.push_back(&entityFoo);
 
-	auto entityFoo = registry.create();
-	{
-		components::transform trans;
-		trans.position = glm::vec3(0, 90, 0);
+	//auto entityFoo = registry.create();
+	//{
+	//	components::transform trans;
+	//	trans.position = glm::vec3(0, 90, 0);
 
-		components::kinematic_ridgedbody rb;
-		rb.collider = AABB(vec3(-0.49f, 0, -0.49f), vec3(0.49f, 1, 0.49f));
-		rb.eyeHeight = 0.5f;
+	//	components::kinematic_ridgedbody rb;
+	//	rb.collider = AABB(vec3(-0.49f, 0, -0.49f), vec3(0.49f, 1, 0.49f));
+	//	rb.eyeHeight = 0.5f;
 
-		registry.assign<components::transform>(entityFoo, trans);
-		registry.assign<components::kinematic_ridgedbody>(entityFoo, rb);
-		registry.assign<components::renderable>(entityFoo, components::renderable());
-	}
-	
+	//	registry.assign<components::transform>(entityFoo, trans);
+	//	registry.assign<components::kinematic_ridgedbody>(entityFoo, rb);
+	//	registry.assign<components::renderable>(entityFoo, components::renderable());
+	//}
+
 
 	double lastFrame = glfwGetTime();
 	float deltaTime;
@@ -227,13 +229,6 @@ int main(int argc, char* argv[]) {
 
 	//pathfinder.FindPath({ 0, 64, 0 }, { 3, 64, 3 }, 5);
 
-	int tickss = 0;
-
-	ThreadPool pool(2);
-	for (ThreadUnit& unit : pool.threads) {
-		unit.thread = std::thread(updateEntities, std::ref(pool), std::ref(unit));
-	}
-
 	while (!glfwWindowShouldClose(window)) {
 		double frameStart = glfwGetTime();
 		deltaTime = frameStart - lastFrame;
@@ -247,10 +242,56 @@ int main(int argc, char* argv[]) {
 
 			input.processInput();
 
-			//std::cout << tickss++ << " " << std::endl;
-			{//Now depricated entity update task
-				entityIndex = 0;
-				pool.Execute();
+			auto view2 = registry.view<components::transform, components::kinematic_ridgedbody, components::player_movement>();
+			for (auto entity : view2) {
+				auto& trans = view2.get<components::transform>(entity);
+				auto& rb = view2.get<components::kinematic_ridgedbody>(entity);
+				auto& pm = view2.get<components::player_movement>(entity);
+
+				vec3 forward = FMath::getForward(trans.rotation.y);
+				vec3 right = glm::cross(forward, Vectors::UP);
+				vec3 wishVel;
+
+				Input& input = Input::INSTANCE;
+
+				if (input.kbJump.executeOnce()) {
+					if (rb.onGround) {
+						rb.velocity.y += 9.0f;
+					}
+				}
+
+				if (input.kbNoClip.executeOnce()) {
+					rb.noClip = !rb.noClip;
+
+					if (rb.noClip) {
+						rb.gravity = 0.0f;
+						rb.drag = 1.0f;
+					}
+					else {
+						rb.gravity = 28.0f;
+						rb.drag = 0.98f;
+					}
+				}
+
+				const float moveSpeed = rb.noClip ? pm.noClipSpeed : pm.walkSpeed;
+
+				wishVel += forward * (input.axForward.getModifier() * moveSpeed);
+				wishVel += right * (input.axRight.getModifier() * moveSpeed);
+				wishVel += glm::vec3(0.0f, input.axUp.getModifier() * moveSpeed, 0.0f);
+
+				if (rb.noClip) {
+					rb.velocity = wishVel;
+				}
+				else {
+					if (rb.onGround) {
+						components::player_movement::ApplyFriction(rb.velocity, 10.0f);
+						components::player_movement::Walk(rb.velocity, wishVel, 15.0f);
+					}
+					else {
+						components::player_movement::ApplyFriction(rb.velocity, 1.5f);
+						components::player_movement::Walk(rb.velocity, wishVel, 3.0f);
+					}
+				}
 			}
 
 			auto view = registry.view<components::transform, components::kinematic_ridgedbody>();
@@ -262,71 +303,81 @@ int main(int argc, char* argv[]) {
 				rb.velocity *= rb.drag;
 
 				glm::vec3 move = rb.velocity * CrumbleGlobals::FIXED_TIMESTEP;	//How far the entity expects to move 
-				AABB entityCol = rb.collider + trans.position;
-				AABB clippedCol = entityCol;
 
-				std::vector<AABB> worldColliders = scene.mainWorld.getOverlappingBlocks(entityCol.expandByVelocity(move)); //Find all blocks (as AABBs) the entity may collide with
+				std::cout << glm::to_string(move) << std::endl;
 
-				{//Collide along y axis
-					const float moveY = move.y;
+				if (rb.noClip) {
+					trans.prevPosition = trans.position;
+					trans.position += move;
+				}
+				else {
+					AABB entityCol = rb.collider + trans.position;
+					AABB clippedCol = entityCol;
 
-					entityCol = rb.collider + trans.position;
+					std::vector<AABB> worldColliders = scene.mainWorld.getOverlappingBlocks(entityCol.expandByVelocity(move)); //Find all blocks (as AABBs) the entity may collide with
 
-					for (AABB aabb : worldColliders) {
-						aabb.clipY(entityCol, move.y);
-					}
+					{//Collide along y axis
+						const float moveY = move.y;
 
-					if (moveY != move.y) {
-						rb.velocity.y = 0;
+						entityCol = rb.collider + trans.position;
 
-						if (moveY < 0.0f) {
-							rb.onGround = true;
+						for (AABB aabb : worldColliders) {
+							aabb.clipY(entityCol, move.y);
+						}
+
+						if (moveY != move.y) {
+							rb.velocity.y = 0;
+
+							if (moveY < 0.0f) {
+								rb.onGround = true;
+							}
+							else {
+								rb.onGround = false;
+							}
 						}
 						else {
 							rb.onGround = false;
 						}
-					}
-					else {
-						rb.onGround = false;
+
+						trans.prevPosition.y = trans.position.y;
+						trans.position.y += move.y;
 					}
 
-					trans.prevPosition.y = trans.position.y;
-					trans.position.y += move.y;
+					{//Collide along x axis
+						const float x = move.x;
+
+						entityCol = rb.collider + trans.position;
+
+						for (AABB aabb : worldColliders) {
+							aabb.clipX(entityCol, move.x);
+						}
+
+						if (x != move.x) {
+							rb.velocity.x = 0;
+						}
+
+						trans.prevPosition.x = trans.position.x;
+						trans.position.x += move.x;
+					}
+
+					{//Collide along z axis
+						const float moveZ = move.z;
+
+						entityCol = rb.collider + trans.position;
+
+						for (AABB aabb : worldColliders) {
+							aabb.clipZ(entityCol, move.z);
+						}
+
+						if (moveZ != move.z) {
+							rb.velocity.z = 0;
+						}
+
+						trans.prevPosition.z = trans.position.z;
+						trans.position.z += move.z;
+					}
 				}
 
-				{//Collide along x axis
-					const float x = move.x;
-
-					entityCol = rb.collider + trans.position;
-
-					for (AABB aabb : worldColliders) {
-						aabb.clipX(entityCol, move.x);
-					}
-
-					if (x != move.x) {
-						rb.velocity.x = 0;
-					}
-
-					trans.prevPosition.x = trans.position.x;
-					trans.position.x += move.x;
-				}
-
-				{//Collide along z axis
-					const float moveZ = move.z;
-
-					entityCol = rb.collider + trans.position;
-
-					for (AABB aabb : worldColliders) {
-						aabb.clipZ(entityCol, move.z);
-					}
-
-					if (moveZ != move.z) {
-						rb.velocity.z = 0;
-					}
-
-					trans.prevPosition.z = trans.position.z;
-					trans.position.z += move.z;
-				}
 			}
 
 			accumulator -= CrumbleGlobals::FIXED_TIMESTEP;
@@ -410,39 +461,39 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	wHeight = height;
 }
 
-void updateEntities(ThreadPool& pool, ThreadUnit& threadData) {
-	int ticks = 0;
-	Entity* entity = nullptr;
-
-	while (true) {
-		{//pool.mtx.lock
-			std::unique_lock<std::mutex> lck(pool.mtx);
-			pool.threadLock.wait(lck, [&]() {return threadData.readyOrExecuting; });
-		}//pool.mtx.unlock
-
-
-		while (entityIndex < scene.entities.size() && !pool.done) {
-			{//entityMutex.lock
-				std::lock_guard<std::mutex> lock(entityMutex);
-				int i = entityIndex++;
-
-				if (i >= scene.entities.size()) {
-					pool.done = true; //We have reached the end of the list
-					break;
-				}
-
-				//std::cout << threadData.id << " on " << i << std::endl;
-
-				entity = scene.entities[i];
-			}//entityMutex.unlock
-
-			entity->UpdateMultiThread();
-		}
-
-		pool.done = true;
-		threadData.readyOrExecuting = false;
-	}
-}
+//void updateEntities(ThreadPool& pool, ThreadUnit& threadData) {
+//	int ticks = 0;
+//	Entity* entity = nullptr;
+//
+//	while (true) {
+//		{//pool.mtx.lock
+//			std::unique_lock<std::mutex> lck(pool.mtx);
+//			pool.threadLock.wait(lck, [&]() {return threadData.readyOrExecuting; });
+//		}//pool.mtx.unlock
+//
+//
+//		while (entityIndex < scene.entities.size() && !pool.done) {
+//			{//entityMutex.lock
+//				std::lock_guard<std::mutex> lock(entityMutex);
+//				int i = entityIndex++;
+//
+//				if (i >= scene.entities.size()) {
+//					pool.done = true; //We have reached the end of the list
+//					break;
+//				}
+//
+//				//std::cout << threadData.id << " on " << i << std::endl;
+//
+//				entity = scene.entities[i];
+//			}//entityMutex.unlock
+//
+//			entity->UpdateMultiThread();
+//		}
+//
+//		pool.done = true;
+//		threadData.readyOrExecuting = false;
+//	}
+//}
 
 void interactWithWorlds(Input& input, float t) {
 	while (input.kbPlace.execute()) {

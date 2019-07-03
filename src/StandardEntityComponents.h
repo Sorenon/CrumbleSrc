@@ -23,6 +23,7 @@ namespace components {
 		AABB collider;
 		float gravity = 20.0f; // m/s^2
 		float drag = 0.98f;
+		bool noClip = false;
 
 		vec3 velocity; //Velocity in m/s
 		bool onGround = false;
@@ -34,6 +35,12 @@ namespace components {
 	};
 
 	struct player_movement {
-		bool noClip = false;
+		float noClipSpeed = 10.0f;
+		float walkSpeed = 4.0f;
+
+	public:
+		static void ApplyFriction(vec3& velocity, float friction);
+		static void Walk(vec3& velocity, vec3 wishVel, float acceleration);
+		static void Accelerate(vec3& velocity, vec3 wishDir, float wishSpeed, float acceleration);
 	};
 };

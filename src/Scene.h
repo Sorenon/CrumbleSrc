@@ -13,8 +13,6 @@ class Scene
 public:
 	World mainWorld;
 	std::vector<SubWorld> subWorlds;
-	std::vector<Entity*> entities;//Possible TODO: Sort more expensive entites to be at the front to increase multithreaded update efficency (But may require more CPU time than it saves)
-
 	std::vector<Portal> portals;
 public:
 	Scene();

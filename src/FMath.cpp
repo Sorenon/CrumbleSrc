@@ -46,4 +46,14 @@ glm::vec3 FMath::getNormal(glm::vec3 rotation) {
 	return glm::normalize(front);
 }
 
+glm::vec3 FMath::getForward(float yaw)
+{
+	glm::vec3 forward;
+
+	forward.x = (float)(sin(yaw));
+	forward.z = (float)-(cos(yaw));
+
+	return glm::normalize(forward);
+}
+
 

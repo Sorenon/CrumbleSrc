@@ -23,5 +23,6 @@ namespace FMath {
 	glm::quat createQuaternion(glm::vec3 rotation);
 
 	glm::vec3 getNormal(glm::vec3 rotation);
+	glm::vec3 getForward(float yaw);
 };
 
