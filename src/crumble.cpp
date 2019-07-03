@@ -18,6 +18,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/NarrowPhaseCollision/btPolyhedralContactClipping.h>
+#include <entt/entity/registry.hpp>
 #include <ft2build.h>
 #include FT_FREETYPE_H  
 
@@ -39,6 +40,7 @@
 #include "Pathfinder.h"
 #include "Scene.h"
 #include "Portal.h"
+#include "StandardEntityComponents.h"
 
 typedef struct _ThreadUnit {
 	int id;
@@ -103,6 +105,7 @@ PhysicsWorld* p_physicsWorld;
 GameRenderer* p_gameRenderer;
 Pathfinder* p_pathfinder;
 Scene scene;
+entt::registry registry;
 
 std::mutex entityMutex;
 int entityIndex = 0;
@@ -174,16 +177,24 @@ int main(int argc, char* argv[]) {
 
 	scene.entities.push_back(p_player);
 
-	EntityFoo entityFoo;
-	entityFoo.transform.position = vec3(0, 90, 0);
-	scene.entities.push_back(&entityFoo);
+	//EntityFoo entityFoo;
+	//entityFoo.transform.position = vec3(0, 90, 0);
+	//scene.entities.push_back(&entityFoo);
 
-	//EntityFoo entityFoo2;
-	//entityFoo2.transform.position = vec3(2, 90, 0);
-	//entities.push_back(&entityFoo2);
-	//EntityFoo entityFoo3;
-	//entityFoo3.transform.position = vec3(4, 90, 0);
-	//entities.push_back(&entityFoo3);
+	auto entityFoo = registry.create();
+	{
+		components::transform trans;
+		trans.position = glm::vec3(0, 90, 0);
+
+		components::kinematic_ridgedbody rb;
+		rb.collider = AABB(vec3(-0.49f, 0, -0.49f), vec3(0.49f, 1, 0.49f));
+		rb.eyeHeight = 0.5f;
+
+		registry.assign<components::transform>(entityFoo, trans);
+		registry.assign<components::kinematic_ridgedbody>(entityFoo, rb);
+		registry.assign<components::renderable>(entityFoo, components::renderable());
+	}
+	
 
 	double lastFrame = glfwGetTime();
 	float deltaTime;
@@ -224,8 +235,86 @@ int main(int argc, char* argv[]) {
 			input.processInput();
 
 			//std::cout << tickss++ << " " << std::endl;
-			entityIndex = 0;
-			pool.Execute();
+			{//Now depricated entity update task
+				entityIndex = 0;
+				pool.Execute();
+			}
+
+			auto view = registry.view<components::transform, components::kinematic_ridgedbody>();
+			for (auto entity : view) {
+				auto& trans = view.get<components::transform>(entity);
+				auto& rb = view.get<components::kinematic_ridgedbody>(entity);
+
+				rb.velocity.y -= rb.gravity * CrumbleGlobals::FIXED_TIMESTEP;
+				rb.velocity *= rb.drag;
+
+				glm::vec3 move = rb.velocity * CrumbleGlobals::FIXED_TIMESTEP;	//How far the entity expects to move 
+				AABB entityCol = rb.collider + trans.position;
+				AABB clippedCol = entityCol;
+
+				std::vector<AABB> worldColliders = scene.mainWorld.getOverlappingBlocks(entityCol.expandByVelocity(move)); //Find all blocks (as AABBs) the entity may collide with
+
+				{//Collide along y axis
+					const float moveY = move.y;
+
+					entityCol = rb.collider + trans.position;
+
+					for (AABB aabb : worldColliders) {
+						aabb.clipY(entityCol, move.y);
+					}
+
+					if (moveY != move.y) {
+						rb.velocity.y = 0;
+
+						if (moveY < 0.0f) {
+							rb.onGround = true;
+						}
+						else {
+							rb.onGround = false;
+						}
+					}
+					else {
+						rb.onGround = false;
+					}
+
+					trans.prevPosition.y = trans.position.y;
+					trans.position.y += move.y;
+				}
+
+				{//Collide along x axis
+					const float x = move.x;
+
+					entityCol = rb.collider + trans.position;
+
+					for (AABB aabb : worldColliders) {
+						aabb.clipX(entityCol, move.x);
+					}
+
+					if (x != move.x) {
+						rb.velocity.x = 0;
+					}
+
+					trans.prevPosition.x = trans.position.x;
+					trans.position.x += move.x;
+				}
+
+				{//Collide along z axis
+					const float moveZ = move.z;
+
+					entityCol = rb.collider + trans.position;
+
+					for (AABB aabb : worldColliders) {
+						aabb.clipZ(entityCol, move.z);
+					}
+
+					if (moveZ != move.z) {
+						rb.velocity.z = 0;
+					}
+
+					trans.prevPosition.z = trans.position.z;
+					trans.position.z += move.z;
+				}
+			}
 
 			accumulator -= CrumbleGlobals::FIXED_TIMESTEP;
 
@@ -284,7 +373,7 @@ int main(int argc, char* argv[]) {
 
 			renderer.renderPortalDebugOutline = !renderer.renderPortalDebugOutline;
 		}
-		entityFoo.destination = glm::floor(player.transform.position);
+		//entityFoo.destination = glm::floor(player.transform.position);
 
 		float t = accumulator / CrumbleGlobals::FIXED_TIMESTEP;
 		renderer.doRender(t);

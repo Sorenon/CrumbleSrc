@@ -2,6 +2,7 @@
 #include <vector>
 
 #include <glm/glm.hpp>
+#include <entt/entity/registry.hpp>
 
 #include "World.h"
 
@@ -24,11 +25,13 @@ namespace CrumbleGlobals {
 	const float PHYSICS_TIMESTEP = 1.0f / 120.0f;
 };
 
+//TODO: delete this monstrosity
 extern Scene scene;
 extern Player* p_player;
 extern PhysicsWorld* p_physicsWorld;
 extern GameRenderer* p_gameRenderer;
 extern Pathfinder* p_pathfinder;
+extern entt::registry registry;
 
 extern int wWidth;
 extern int wHeight;

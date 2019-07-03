@@ -18,6 +18,7 @@
 #include "../Pathfinder.h"
 #include "../Scene.h"
 #include "../Portal.h"
+#include "../StandardEntityComponents.h"
 
 GameRenderer::GameRenderer() {
 	stbi_set_flip_vertically_on_load(true);
@@ -279,8 +280,24 @@ void GameRenderer::renderEntities(float t) {
 	//	glDrawArrays(GL_TRIANGLES, 0, cubeVAO.count);
 	}
 
-	for (Entity* entity : scene.entities) {//Render all entities
-		entity->Render(t, this);
+	auto view = registry.view<components::transform, components::renderable>();
+	for (auto entity : view) {
+		auto& trans = view.get<components::transform>(entity);
+
+		glBindVertexArray(cubeVAO.id);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, trans.getInterpPos(t));
+
+		model = glm::rotate(model, trans.rotation.x, Vectors::RIGHT);
+		model = glm::rotate(model, trans.rotation.y, Vectors::UP);
+		model = glm::translate(model, -glm::vec3(0.5f, 0, 0.5f));
+
+		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
+
+		glDrawArrays(GL_TRIANGLES, 0, cubeVAO.count);
 	}
 }
 

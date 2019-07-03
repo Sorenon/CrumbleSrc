@@ -14,6 +14,9 @@ public:
 	vec3 min;
 	vec3 max;
 
+	//Default constuctor
+	AABB() : AABB({0, 0, 0}, {0, 0, 0}) {};
+
 	AABB(float x1, float y1, float z1, float x2, float y2, float z2);
 	AABB(vec3 min, vec3 max);
 	AABB(btCollisionObject* collObj);

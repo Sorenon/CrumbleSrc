@@ -10,13 +10,13 @@ using namespace glm;
 
 class GameRenderer;
 
-class Entity {
+class [[deprecated]] Entity {
 public:
 	vec3 eyeHeight = vec3(0.0f, 1.8f, 0.0f);
 
 	Transform transform;
 	vec3 velocity; //Velocity in m/s
-	AABB collider = AABB(0,0,0,0,0,0);
+	AABB collider;
 
 	bool onGround = false;
 public:
