@@ -5,6 +5,7 @@
 #include "globals.h"
 #include "FMath.h"
 #include "Player.h"
+#include "StandardEntityComponents.h"
 
 Scene::Scene()
 {
@@ -44,15 +45,21 @@ RayTraceResult Scene::RayTraceAllWorlds(float t) {
 RayTraceResult Scene::RayTraceFromPlayer(float t, World& world) {
 	RayTraceResult result;
 
-	return world.rayTrace(p_player->getEyePos(t), p_player->transform.getLook(t));
+	auto& trans = registry.get<components::transform>(player);
+	auto& rb = registry.get<components::kinematic_ridgedbody>(player);
+
+	return world.rayTrace(trans.getInterpPos(t) + glm::vec3(0, rb.eyeHeight, 0), FMath::getNormal(trans.rotation));
 }
 
 RayTraceResult Scene::RayTraceFromPlayer(float t, SubWorld& world) {
 	RayTraceResult result;
 
-	glm::vec3 eyePos = glm::vec3(world.translationMatrix * glm::vec4(p_player->getEyePos(t), 1));
+	auto& trans = registry.get<components::transform>(player);
+	auto& rb = registry.get<components::kinematic_ridgedbody>(player);
 
-	glm::quat playerLook = FMath::createQuaternion(p_player->transform.getInterpRot(t));//Use quat to avoid gimbal lock
+	glm::vec3 eyePos = glm::vec3(world.translationMatrix * glm::vec4(trans.getInterpPos(t) + glm::vec3(0, rb.eyeHeight, 0), 1));
+
+	glm::quat playerLook = FMath::createQuaternion(trans.rotation);//Use quat to avoid gimbal lock
 	playerLook = playerLook * glm::quat(world.rotation);
 
 	glm::vec3 rayDir = Vectors::FORWARD * playerLook;

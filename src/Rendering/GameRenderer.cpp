@@ -33,9 +33,12 @@ GameRenderer::~GameRenderer() {
 
 void GameRenderer::doRender(float t) {
 	{
+		auto& trans = registry.get<components::transform>(player);
+		auto& rb = registry.get<components::kinematic_ridgedbody>(player);
+
 		viewMatrix = glm::mat4(1.0f);
-		viewMatrix = viewMatrix * glm::toMat4(FMath::createQuaternion(p_player->transform.getInterpRot(t)));
-		viewMatrix = glm::translate(viewMatrix, -p_player->getEyePos(t));
+		viewMatrix = viewMatrix * glm::toMat4(FMath::createQuaternion(trans.rotation));
+		viewMatrix = glm::translate(viewMatrix, -(trans.getInterpPos(t) + glm::vec3(0, rb.eyeHeight, 0)));
 
 		projMatrix = glm::perspective(glm::radians(70.0f), (float)wWidth / (float)wHeight, 0.05f, renderDistance * 16 * (float)sqrt(2));
 	}
@@ -309,9 +312,12 @@ void GameRenderer::renderUI(float t) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+	auto& trans = registry.get<components::transform>(player);
+	auto& rb = registry.get<components::kinematic_ridgedbody>(player);
+
 	glm::mat4 view = glm::mat4(1.0f);
-	view = view * glm::toMat4(FMath::createQuaternion(p_player->transform.getInterpRot(t)));
-	view = glm::translate(view, -p_player->getEyePos(t));
+	view = view * glm::toMat4(FMath::createQuaternion(trans.rotation));
+	view = glm::translate(view, -(trans.getInterpPos(t) + glm::vec3(0, rb.eyeHeight, 0)));
 	glm::mat4 projection = glm::perspective(glm::radians(70.0f), (float)wWidth / (float)wHeight, 0.05f, renderDistance * 16 * (float)sqrt(2));
 
 	glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(view));

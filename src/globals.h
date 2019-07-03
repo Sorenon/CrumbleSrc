@@ -27,7 +27,7 @@ namespace CrumbleGlobals {
 
 //TODO: delete this monstrosity
 extern Scene scene;
-extern Player* p_player;
+extern entt::registry::entity_type player;
 extern PhysicsWorld* p_physicsWorld;
 extern GameRenderer* p_gameRenderer;
 extern Pathfinder* p_pathfinder;

@@ -100,7 +100,7 @@ const int windowStartHeight = 480;
 int wWidth = windowStartWidth;
 int wHeight = windowStartHeight;
 
-Player* p_player;
+entt::registry::entity_type player;
 PhysicsWorld* p_physicsWorld;
 GameRenderer* p_gameRenderer;
 Pathfinder* p_pathfinder;
@@ -110,7 +110,6 @@ entt::registry registry;
 std::mutex entityMutex;
 int entityIndex = 0;
 
-//BEFORE RELEASE OF ANY KIND I HAVE TO FIGURE OUT THE ISSUE WITH THE MOUSE JUMPING: this may just be a dodgy OS install or a hardware issue because I have the same problem on TF2
 int main(int argc, char* argv[]) {
 	PhysicsWorld physicsWorld;
 	p_physicsWorld = &physicsWorld;
@@ -171,11 +170,25 @@ int main(int argc, char* argv[]) {
 	Input& input = Input::INSTANCE;
 	input.init(window);
 
-	Player player;
-	p_player = &player;
-	player.transform.rotation.x = glm::radians(180.0f);
+	//Player player;
+	//p_player = &player;
+	//player.transform.rotation.x = glm::radians(180.0f);
 
-	scene.entities.push_back(p_player);
+	//scene.entities.push_back(p_player);
+
+	player = registry.create();
+	{
+		components::transform trans;
+		trans.position = glm::vec3(0, 90, 0);
+		trans.rotation.x = glm::radians(180.0f);
+
+		components::kinematic_ridgedbody rb;
+		rb.collider = AABB(vec3(-0.4, 0, -0.4), vec3(0.4, 1.9, 0.4));
+		rb.eyeHeight = 1.8f;
+
+		registry.assign<components::transform>(player, trans);
+		registry.assign<components::kinematic_ridgedbody>(player, rb);
+	}
 
 	//EntityFoo entityFoo;
 	//entityFoo.transform.position = vec3(0, 90, 0);
@@ -331,7 +344,8 @@ int main(int argc, char* argv[]) {
 		{
 			float sensitivity = 0.15f;
 
-			glm::vec3& rotation = p_player->transform.rotation;
+			auto& trans = registry.get<components::transform>(player);
+			glm::vec3& rotation = trans.rotation;
 
 			rotation.x += glm::radians(input.deltaY * -sensitivity);
 			rotation.y += glm::radians(input.deltaX * sensitivity);
@@ -343,6 +357,8 @@ int main(int argc, char* argv[]) {
 
 			input.deltaX = 0;
 			input.deltaY = 0;
+
+			trans.prevRotation = rotation;//for the player entity trans.prevRotation == trans.rotation 
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_GRAVE_ACCENT) == GLFW_PRESS) {//Reset physics
@@ -434,7 +450,7 @@ void interactWithWorlds(Input& input, float t) {
 		if (result.hasHit) {
 
 			glm::ivec3 placePos = result.hitPos + result.face;
-			AABB playerCol = p_player->getLocalBoundingBox();
+			AABB playerCol = registry.get<components::kinematic_ridgedbody>(player).collider + registry.get<components::transform>(player).position;
 
 			if ((AABB::blockAABB + placePos).overlaps(playerCol)) { //TODO: make this work with subWorlds
 				//if (player.onGround && !(AABB::blockAABB + placePos).overlaps(playerCol + Vectors::UP) && world.getOverlappingBlocks(playerCol.expandByVelocity(glm::vec3(0, 1, 0))).empty()) {
