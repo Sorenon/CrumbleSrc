@@ -179,7 +179,7 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep) {
 
 		Portal& portal = scene.portals[0];
 		btVector3 rbPos = rbCube->getWorldTransform().getOrigin();
-		btVector3 portalPos = convertVector(portal.getPosition());
+		btVector3 portalPos = bullet_glm_conversion::convertVector(portal.getPosition());
 
 		btVector3 relitivePos = portalPos - rbPos;
 		relitivePos = rbCube->getWorldTransform().getBasis() * relitivePos;
@@ -193,7 +193,7 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep) {
 
 		//Plane plane = Plane(convertVector(relitivePos), createQuaternion(glm::vec3(portal.getFacing().angle, 0.0f)) * createQuaternion(glm::vec3(0, roll, 0)));
 
-		Plane plane = Plane(convertVector(relitivePos), createQuaternion(glm::vec3(portal.getFacing().angle, 0.0f)) * convertQuaternion(rbCube->getWorldTransform().getRotation()));
+		Plane plane = Plane(bullet_glm_conversion::convertVector(relitivePos), createQuaternion(glm::vec3(portal.getFacing().angle, 0.0f))/* * bullet_glm_conversion::convertQuaternion(rbCube->getWorldTransform().getRotation())*/);
 
 		for (const btVector3* side : sides) {
 			btVertexArray inputVerticies;
@@ -203,7 +203,7 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep) {
 				inputVerticies.push_back(side[i] - btVector3(0.5f, 0.5f, 0.5f));
 			}
 
-			btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, FMath::convertVector(plane.getNormal()), plane.getOffset() + 0.04f);//Each side is cut individually for a more simple final mesh
+			btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, bullet_glm_conversion::convertVector(plane.getNormal()), plane.getOffset() + 0.04f);//Each side is cut individually for a more simple final mesh
 
 			for (int i = 0; i < outputVerticies.size(); i++) {
 				btVector3& newVertex = outputVerticies[i];

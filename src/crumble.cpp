@@ -111,6 +111,32 @@ std::mutex entityMutex;
 int entityIndex = 0;
 
 int main(int argc, char* argv[]) {
+
+	//glm::quat glmquat = FMath::createQuaternion(glm::vec3(0, glm::radians(54.0f), glm::radians(76.0f)));
+	//btQuaternion btquat = btQuaternion(glm::radians(54.0f), 0, glm::radians(76.0f));
+
+	//std::cout << glmquat.x << std::endl;
+	//std::cout << glmquat.y << std::endl;
+	//std::cout << glmquat.z << std::endl;
+	//std::cout << glmquat.w << std::endl;
+
+	//std::cout << btquat.getX() << std::endl;
+	//std::cout << btquat.getY() << std::endl;
+	//std::cout << btquat.getZ() << std::endl;
+	//std::cout << btquat.getW() << std::endl;
+
+	//btQuaternion glmquat2 = bullet_glm_conversion::convertQuaternion(glmquat);
+
+	//std::cout << glmquat2.getX() << std::endl;
+	//std::cout << glmquat2.getY() << std::endl;
+	//std::cout << glmquat2.getZ() << std::endl;
+	//std::cout << glmquat2.getW() << std::endl;
+
+
+	//std::cin.ignore();
+
+	//if (true) return 0;
+
 	PhysicsWorld physicsWorld;
 	p_physicsWorld = &physicsWorld;
 
@@ -260,11 +286,11 @@ int main(int argc, char* argv[]) {
 			btTransform trans;
 			trans.setIdentity();
 			//trans.setOrigin(FMath::convertVector(player.transform.position + glm::vec3(0, 0.5f, 0)));
-			trans.setOrigin(FMath::convertVector(glm::vec3(4, 70.5f, 4)));
+			trans.setOrigin(bullet_glm_conversion::convertVector(glm::vec3(4, 70.5f, 4)));
 
-			float pitch = glm::radians(45.0f);
-			float yaw = 0.0f;
-			float roll = 0.0f;
+			const float pitch = glm::radians(45.0f);
+			const float yaw = 0.0f;
+			const float roll = 0.0f;
 			trans.setRotation(btQuaternion(yaw, pitch, roll));
 
 			glm::quat quat = FMath::createQuaternion(glm::vec3(pitch, yaw, roll));

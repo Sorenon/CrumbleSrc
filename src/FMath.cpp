@@ -18,18 +18,6 @@ bool FMath::lessThanOrE(float smaller, float larger, float epsilon) {
 	return larger >= smaller || equal(smaller, larger, epsilon);
 }
 
-glm::vec3 FMath::convertVector(btVector3 vec) {
-	return glm::vec3(vec.getX(), vec.getY(), vec.getZ());
-}
-
-btVector3 FMath::convertVector(glm::vec3 vec) {
-	return btVector3(vec.x, vec.y, vec.z);
-}
-
-glm::quat FMath::convertQuaternion(btQuaternion quat) {
-	return glm::quat(quat.getW(), quat.getX(), quat.getY(), quat.getZ());
-}
-
 glm::quat FMath::createQuaternion(glm::vec3 rotation) {
 	return glm::quat(glm::vec3(rotation.x, 0, 0)) * glm::quat(glm::vec3(0, rotation.y, 0)) * glm::quat(glm::vec3(0, 0, rotation.z));
 	// possibly faulty expliantion -> //x (yaw) is around world axis while y & z (yaw & roll) is around local axis
@@ -56,4 +44,20 @@ glm::vec3 FMath::getForward(float yaw)
 	return glm::normalize(forward);
 }
 
+glm::quat bullet_glm_conversion::convertQuaternion(btQuaternion quat)
+{
+	return glm::quat(quat.getW(), quat.getX(), quat.getY(), quat.getZ());
+}
 
+btQuaternion bullet_glm_conversion::convertQuaternion(glm::quat quat)
+{
+	return btQuaternion(quat.x, quat.y, quat.z, quat.w);
+}
+
+glm::vec3 bullet_glm_conversion::convertVector(btVector3 vec) {
+	return glm::vec3(vec.getX(), vec.getY(), vec.getZ());
+}
+
+btVector3 bullet_glm_conversion::convertVector(glm::vec3 vec) {
+	return btVector3(vec.x, vec.y, vec.z);
+}

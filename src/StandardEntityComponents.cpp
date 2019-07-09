@@ -28,7 +28,7 @@ void components::player_movement::ApplyFriction(glm::vec3& velocity, float frict
 	if (speed != 0) {
 		const float drop = speed * friction * CrumbleGlobals::FIXED_TIMESTEP;
 
-		vel = vel * (std::fmax(speed - drop, 0.0f) / speed);
+		vel *= (std::fmax(speed - drop, 0.0f) / speed);
 
 		velocity.x = vel.x;
 		velocity.z = vel.z;

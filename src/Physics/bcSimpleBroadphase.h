@@ -33,5 +33,9 @@ public:
 
 	void doWorldCollisions(btCollisionObject* obj);
 	void deletePair(btBroadphasePair& pair, btDispatcher * dispatcher);
+
+	void cleanupUncollidingPairs(btDispatcher* dispatcher);
+	void calculateOverlappingRidgedbodiesWithBlockWorld();
+	void cleanupUnusedBlockColliders();
 };
 
