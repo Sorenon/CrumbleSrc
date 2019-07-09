@@ -139,6 +139,41 @@ int main(int argc, char* argv[]) {
 
 	PhysicsWorld physicsWorld;
 	p_physicsWorld = &physicsWorld;
+	//physicsWorld.rbCube->getWorldTransform().setRotation(btQuaternion(0, glm::radians(90.0f), 0));
+
+	//glm::quat glmquat = glm::quat(glm::vec3(Faces::Down.angle, 0.0f));
+	//std::cout << "down" << std::endl;
+	//std::cout << glmquat.x << std::endl;
+	//std::cout << glmquat.y << std::endl;
+	//std::cout << glmquat.z << std::endl;
+	//std::cout << glmquat.w << std::endl << std::endl;
+
+	//btQuaternion btquat = physicsWorld.rbCube->getWorldTransform().getRotation();
+	//glm::quat btquat2 = bullet_glm_conversion::convertQuaternion(btquat);
+
+	//std::cout << "rbCube" << std::endl;
+	//std::cout << btquat2.x << std::endl;
+	//std::cout << btquat2.y << std::endl;
+	//std::cout << btquat2.z << std::endl;
+	//std::cout << btquat2.w << std::endl << std::endl;
+
+	//glm::quat glmquat2 = glmquat * btquat2;
+	//std::cout << "glmquat * btquat2" << std::endl;
+	//std::cout << glmquat2.x << std::endl;
+	//std::cout << glmquat2.y << std::endl;
+	//std::cout << glmquat2.z << std::endl;
+	//std::cout << glmquat2.w << std::endl << std::endl;
+
+	//glm::quat glmquat3 = btquat2 * glmquat;
+	//std::cout << "btquat2 * glmquat" << std::endl;
+	//std::cout << glmquat3.x << std::endl;
+	//std::cout << glmquat3.y << std::endl;
+	//std::cout << glmquat3.z << std::endl;
+	//std::cout << glmquat3.w << std::endl << std::endl;
+
+	//std::cin.ignore();
+
+	//if (true) return 0;
 
 	for (int x = -1; x <= 1; x++) {
 		for (int z = -1; z <= 1; z++) {

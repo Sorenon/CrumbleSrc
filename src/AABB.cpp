@@ -172,7 +172,7 @@ AABB2D::AABB2D(float halfWidth, float halfHeight, Face facingIn, vec3 centerPosI
 	//		vec1 = posIn + glm::vec3(width, 0, height);
 	//	}
 	//}	
-	vec3 mod = glm::vec3(halfWidth, 0, halfHeight);//tmp method
+	vec3 mod = glm::vec3(halfWidth, 0, halfHeight);//tmp method (this only works if the portal is facing up or down)
 
 	vec3 vec1 = centerPos + mod;
 	vec3 vec2 = centerPos - mod;
@@ -184,11 +184,6 @@ AABB2D::AABB2D(float halfWidth, float halfHeight, Face facingIn, vec3 centerPosI
 	max.x = std::fmax(vec1.x, vec2.x);
 	max.y = std::fmax(vec1.y, vec2.y);
 	max.z = std::fmax(vec1.z, vec2.z);
-}
-
-AABB2D AABB2D::operator+(const vec3& vec)
-{
-	return AABB2D(width, height, facing, centerPos + vec);//TODO: fix
 }
 
 bool AABB2D::intersectsX(const AABB& other) const {

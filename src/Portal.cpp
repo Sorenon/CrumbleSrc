@@ -7,7 +7,8 @@
 #include "FMath.h"
 #include "Rendering/GameRenderer.h"
 
-Portal::Portal(glm::vec3 positionIn, glm::vec2 halfExtentsIn, Face facingIn, glm::vec3 exitIn) : collider(halfExtentsIn.x, halfExtentsIn.y, facingIn, positionIn), plane(positionIn /*exitIn*/, FMath::createQuaternion(glm::vec3(facingIn.angle, 0))) {
+Portal::Portal(glm::vec3 positionIn, glm::vec2 halfExtentsIn, Face facingIn, glm::vec3 exitIn)
+	: collider(halfExtentsIn.x, halfExtentsIn.y, facingIn, positionIn), plane(exitIn, facingIn.angle) {
 	position = positionIn;
 	halfExtents = halfExtentsIn;
 	facing = facingIn;

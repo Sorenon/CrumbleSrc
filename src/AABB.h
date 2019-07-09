@@ -50,22 +50,52 @@ private:
 public:
 	AABB2D(float halfWidth, float halfHeight, Face facing, vec3 centerPos);
 
-	AABB2D operator+(const vec3& vec);
+	/**
+	Does other overlap me?
 
-	//Does other overlap me
+		[][][][][]	<--- AABB
+		[]		[]
+		[]		[]
+	----------------------	<--- me
+		[][][][][]
+		true
+
+		[][][][][]
+		[]		[]
+		[]		[]
+		[]  ---------------
+		[][][][][]
+		true
+	**/
 	bool intersectsX(const AABB& other) const;
 	bool intersectsY(const AABB& other) const;
 	bool intersectsZ(const AABB& other) const;
+
+	/**
+	Is other surrounded by me?
+
+		[][][][][]	<--- AABB
+		[]		[]
+		[]		[]
+	----------------------	<--- me
+		[][][][][]
+		true
+
+		[][][][][]
+		[]		[]
+		[]		[]
+		[]  ---------------
+		[][][][][]
+		false
+	**/
+	bool surroundsX(const AABB& other) const;
+	bool surroundsY(const AABB& other) const;
+	bool surroundsZ(const AABB& other) const;
 
 	//Allows intersection detection with portals even when it is inline with walls
 	bool intersectsEpsilonX(const AABB& other) const;
 	bool intersectsEpsilonY(const AABB& other) const;
 	bool intersectsEpsilonZ(const AABB& other) const;
-
-	//Is other fully contained within me
-	bool surroundsX(const AABB& other) const;
-	bool surroundsY(const AABB& other) const;
-	bool surroundsZ(const AABB& other) const;
 
 	//Keep the player inside the edges of the portal
 	void clipX(const AABB& other, float& move) const;

@@ -129,8 +129,7 @@ void GameRenderer::renderPortalStencil(Portal & portal) {
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, portal.getPosition());
-		model = glm::rotate(model, portal.getFacing().angle.y, glm::vec3(0, 1, 0));
-		model = glm::rotate(model, portal.getFacing().angle.x, glm::vec3(1, 0, 0));
+		model = model * glm::toMat4(portal.getFacing().angle);
 
 		glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, portal.getVAO().count);
@@ -383,8 +382,7 @@ void GameRenderer::debugDrawPath() {
 		}
 
 		if (node->face != nullptr) {
-			model = glm::rotate(model, glm::radians(node->face->angle.y), glm::vec3(0, 1, 0));
-			model = glm::rotate(model, glm::radians(node->face->angle.x), glm::vec3(1, 0, 0));
+			model = model * glm::toMat4(node->face->angle);
 			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
 		}
 		else {
