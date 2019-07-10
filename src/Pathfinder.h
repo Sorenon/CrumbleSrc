@@ -11,7 +11,8 @@
 
 using namespace glm;
 
-class PathNode {
+class PathNode
+{
 private:
 
 public:
@@ -24,11 +25,13 @@ public:
 	bool inPath = false;
 
 public:
-	PathNode(ivec3 posIn) {
+	PathNode(ivec3 posIn)
+	{
 		pos = posIn;
 	};
 
-	PathNode(ivec3 posIn, PathNode* previousIn, int accumulatedCostIn = -1, int priorityIn = -1) {
+	PathNode(ivec3 posIn, PathNode* previousIn, int accumulatedCostIn = -1, int priorityIn = -1)
+	{
 		pos = posIn;
 		previous = previousIn;
 
@@ -40,14 +43,16 @@ public:
 		priority = priorityIn;
 	};
 
-	vec3 getWorldPos() {
+	vec3 getWorldPos()
+	{
 		return vec3(pos) + glm::vec3(0.5f, 0, 0.5f);
 	};
 };
 
 class Scene;
 
-class Pathfinder {
+class Pathfinder
+{
 public:
 	//Scene* scene;
 	std::vector<PathNode*> path;
@@ -59,6 +64,6 @@ public:
 	~Pathfinder();
 
 	void FindPath(ivec3 startPos, ivec3 endPos, int radius);
-	
+
 	int ManhattanDistance(ivec3 start, ivec3 end);
 };

@@ -4,7 +4,8 @@
 
 #include "ShaderConstructor.h"
 
-class ShaderProgram {
+class ShaderProgram
+{
 public:
 	GLuint id;
 
@@ -15,7 +16,7 @@ public:
 
 
 public:
-	ShaderProgram(ShaderConstructor &vertex, ShaderConstructor &fragment);
+	ShaderProgram(ShaderConstructor& vertex, ShaderConstructor& fragment);
 	ShaderProgram(ShaderConstructor vertex, ShaderConstructor fragment);
 	~ShaderProgram();
 

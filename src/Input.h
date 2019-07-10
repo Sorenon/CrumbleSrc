@@ -4,13 +4,15 @@
 #include <GLFW/glfw3.h>
 #include <vector>
 
-enum InputType {
+enum InputType
+{
 	Key,
 	Mouse,
 	Scroll
 };
 
-class KeyBinding {
+class KeyBinding
+{
 public:
 	int keyID;
 	InputType inputType;
@@ -26,7 +28,8 @@ public:
 	bool executeOnce();
 };
 
-class InputAxis {
+class InputAxis
+{
 public:
 	KeyBinding* positive;
 	KeyBinding* negative;
@@ -37,7 +40,8 @@ public:
 	int getModifier();
 };
 
-class Input {
+class Input
+{
 public:
 	bool firstMouse = true;
 	float lastX = 0.0f;
@@ -51,18 +55,18 @@ public:
 public:
 	KeyBinding kbForward = KeyBinding(InputType::Key, GLFW_KEY_W);
 	KeyBinding kbBackward = KeyBinding(InputType::Key, GLFW_KEY_S);
-	KeyBinding kbLeft  = KeyBinding(InputType::Key, GLFW_KEY_A);
+	KeyBinding kbLeft = KeyBinding(InputType::Key, GLFW_KEY_A);
 	KeyBinding kbRight = KeyBinding(InputType::Key, GLFW_KEY_D);
 	KeyBinding kbJump = KeyBinding(InputType::Key, GLFW_KEY_SPACE);
 	KeyBinding kbCrouch = KeyBinding(InputType::Key, GLFW_KEY_LEFT_SHIFT);
 
 	KeyBinding kbAttack = KeyBinding(InputType::Mouse, GLFW_MOUSE_BUTTON_LEFT);
 	KeyBinding kbPlace = KeyBinding(InputType::Mouse, GLFW_MOUSE_BUTTON_RIGHT);
-	
+
 	KeyBinding kbNoClip = KeyBinding(InputType::Key, GLFW_KEY_F3);
 	KeyBinding kbDoThing = KeyBinding(InputType::Key, GLFW_KEY_P);
 
-	std::vector<KeyBinding*> keybinds = {&kbForward, &kbBackward, &kbLeft, &kbRight, &kbJump, &kbCrouch, &kbAttack, &kbPlace, &kbNoClip, &kbDoThing};
+	std::vector<KeyBinding*> keybinds = { &kbForward, &kbBackward, &kbLeft, &kbRight, &kbJump, &kbCrouch, &kbAttack, &kbPlace, &kbNoClip, &kbDoThing };
 
 	InputAxis axForward = InputAxis(&kbForward, &kbBackward);
 	InputAxis axRight = InputAxis(&kbRight, &kbLeft);

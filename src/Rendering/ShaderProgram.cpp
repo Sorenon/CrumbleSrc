@@ -4,7 +4,8 @@
 #include "ShaderConstructor.h"
 #include "../FileUtil.h"
 
-ShaderProgram::ShaderProgram(ShaderConstructor &vertex, ShaderConstructor &fragment) {
+ShaderProgram::ShaderProgram(ShaderConstructor& vertex, ShaderConstructor& fragment)
+{
 	id = glCreateProgram();
 	glAttachShader(id, vertex.getID());
 	glAttachShader(id, fragment.getID());
@@ -14,13 +15,15 @@ ShaderProgram::ShaderProgram(ShaderConstructor &vertex, ShaderConstructor &fragm
 	char infoLog[512];
 	glGetProgramiv(id, GL_LINK_STATUS, &success);
 
-	if (success == GL_FALSE) {
+	if (success == GL_FALSE)
+	{
 		glGetProgramInfoLog(id, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADERPROGRAM::LINK_FAILED\n" << infoLog << std::endl;
 	}
 }
 
-ShaderProgram::ShaderProgram(ShaderConstructor vertex, ShaderConstructor fragment) {
+ShaderProgram::ShaderProgram(ShaderConstructor vertex, ShaderConstructor fragment)
+{
 	id = glCreateProgram();
 	glAttachShader(id, vertex.getID());
 	glAttachShader(id, fragment.getID());
@@ -30,7 +33,8 @@ ShaderProgram::ShaderProgram(ShaderConstructor vertex, ShaderConstructor fragmen
 	char infoLog[512];
 	glGetProgramiv(id, GL_LINK_STATUS, &success);
 
-	if (success == GL_FALSE) {
+	if (success == GL_FALSE)
+	{
 		glGetProgramInfoLog(id, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADERPROGRAM::LINK_FAILED\n" << infoLog << std::endl;
 	}
@@ -41,10 +45,12 @@ ShaderProgram::ShaderProgram(ShaderConstructor vertex, ShaderConstructor fragmen
 	clipPlaneID = glGetUniformLocation(id, "clipPlane");
 }
 
-ShaderProgram::~ShaderProgram() {
+ShaderProgram::~ShaderProgram()
+{
 	glDeleteProgram(id);
 }
 
-void ShaderProgram::activate() {
+void ShaderProgram::activate()
+{
 	glUseProgram(id);
 }

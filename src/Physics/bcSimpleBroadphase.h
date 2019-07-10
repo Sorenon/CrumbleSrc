@@ -9,15 +9,17 @@
 #include "btSimpleBroadphaseCopy.h"
 #include "bcOverlappingPairCache.h"
 
-struct ColBlockData {
-	std::unordered_set<btCollisionObject*> colliding;
+struct CollisionBlockData
+{
+	std::unordered_set<btCollisionObject*> m_collidingWith;
 };
 
-class bcSimpleBroadphase : public btSimpleBroadphaseCopy {
+class bcSimpleBroadphase : public btSimpleBroadphaseCopy
+{
 public:
-	btCollisionWorld* collisionWorld;
+	btCollisionWorld* m_collisionWorld;
 
-	bcOverlappingPairCache bcPairCache;
+	bcOverlappingPairCache m_blockWorldPairCache;
 
 	btBoxShape blockShape = btBoxShape(btVector3(btScalar(0.5f), btScalar(0.5f), btScalar(0.5f)));
 public:
@@ -32,7 +34,7 @@ public:
 	void deleteBlock(btCollisionObject* blockCollider);
 
 	void doWorldCollisions(btCollisionObject* obj);
-	void deletePair(btBroadphasePair& pair, btDispatcher * dispatcher);
+	void deletePair(btBroadphasePair& pair, btDispatcher* dispatcher);
 
 	void cleanupUncollidingPairs(btDispatcher* dispatcher);
 	void calculateOverlappingRidgedbodiesWithBlockWorld();

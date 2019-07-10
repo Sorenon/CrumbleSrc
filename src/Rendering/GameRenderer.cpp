@@ -19,18 +19,21 @@
 #include "../Portal.h"
 #include "../StandardEntityComponents.h"
 
-GameRenderer::GameRenderer() {
+GameRenderer::GameRenderer()
+{
 	stbi_set_flip_vertically_on_load(true);
 	texture = generateTexture("C:/Users/Sorenon/Crumble/src/main/resources/grass.png");
 	textureArrow = generateTexture("C:/Users/Sorenon/Crumble/src/main/resources/Arrow.png");
 }
 
 
-GameRenderer::~GameRenderer() {
+GameRenderer::~GameRenderer()
+{
 	//TODO: clean up gl objects
 }
 
-void GameRenderer::doRender(float t) {
+void GameRenderer::doRender(float t)
+{
 	{
 		auto& trans = registry.get<components::transform>(localplayer);
 		auto& rb = registry.get<components::kinematic_ridgedbody>(localplayer);
@@ -49,16 +52,19 @@ void GameRenderer::doRender(float t) {
 
 	renderScene(t);
 
-	for (Portal& portal : scene.portals) {
+	for (Portal& portal : scene.portals)
+	{
 		renderPortal(portal, t);
 	}
 
 	renderUI(t);
 }
 
-void GameRenderer::renderScene(float t) {
+void GameRenderer::renderScene(float t)
+{
 	updateWorld(&scene.mainWorld);
-	for (SubWorld& subWorld : scene.subWorlds) {
+	for (SubWorld& subWorld : scene.subWorlds)
+	{
 		updateWorld(&subWorld);
 	}
 
@@ -71,7 +77,8 @@ void GameRenderer::renderScene(float t) {
 	glEnable(GL_CULL_FACE);
 
 	renderWorld(scene.mainWorld);
-	for (SubWorld& subWorld : scene.subWorlds) {
+	for (SubWorld& subWorld : scene.subWorlds)
+	{
 		renderWorld(subWorld);
 	}
 	renderEntities(t);
@@ -79,7 +86,8 @@ void GameRenderer::renderScene(float t) {
 	debugDrawBulletDebug();
 }
 
-void GameRenderer::renderPortal(Portal & portal, float t) {
+void GameRenderer::renderPortal(Portal& portal, float t)
+{
 	{//Render portal
 		glEnable(GL_STENCIL_TEST);
 
@@ -106,7 +114,8 @@ void GameRenderer::renderPortal(Portal & portal, float t) {
 	}
 }
 
-void GameRenderer::renderPortalStencil(Portal & portal) {
+void GameRenderer::renderPortalStencil(Portal& portal)
+{
 	glEnable(GL_DEPTH_CLAMP);//Allows the camera to be right next to the plane and still it
 
 	glStencilFunc(GL_ALWAYS, 0x01, 0xFF);
@@ -134,7 +143,8 @@ void GameRenderer::renderPortalStencil(Portal & portal) {
 		glUniformMatrix4fv(texColourProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, portal.getVAO().count);
 
-		if (renderPortalDebugOutline) {
+		if (renderPortalDebugOutline)
+		{
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			glUniform4f(colourIDTexCol, 0, 0, 0, 1);
 			glLineWidth(5);
@@ -166,31 +176,37 @@ void GameRenderer::renderPortalStencil(Portal & portal) {
 	glUniformMatrix4fv(texColourProgram.projID, 1, GL_FALSE, glm::value_ptr(projMatrix));
 }
 
-void GameRenderer::updateWorld(World * world) {//Remake VAOs
-	for (auto pair : world->chunks) {
+void GameRenderer::updateWorld(World* world)
+{//Remake VAOs
+	for (auto pair : world->chunks)
+	{
 		Chunk& chunk = *pair.second;
 		chunkID id = pair.first;
 		int x = id >> 32;
 		int z = (int)id;
 
-		if (chunk.needsUpdate) {
+		if (chunk.needsUpdate)
+		{
 			//std::cout << "Updating Chunk " << ++chunksUpdated << std::endl;
 
-			for (int i = 0; i < 16; i++) {
+			for (int i = 0; i < 16; i++)
+			{
 				SubChunk* subChunk = chunk.subChunks[i];
-				if (subChunk != nullptr && subChunk->needsUpdate) {
+				if (subChunk != nullptr && subChunk->needsUpdate)
+				{
 
 					SubChunk& above = i + 1 >= 16 ? SubChunk::EMPTY : chunk.getSubChunkSafe(i + 1);
-					SubChunk & below = i - 1 < 0 ? SubChunk::EMPTY : chunk.getSubChunkSafe(i - 1);
+					SubChunk& below = i - 1 < 0 ? SubChunk::EMPTY : chunk.getSubChunkSafe(i - 1);
 
-					SubChunk & right = world->getChunkSafe(x + 1, z).getSubChunkSafe(i);
-					SubChunk & left = world->getChunkSafe(x - 1, z).getSubChunkSafe(i);
+					SubChunk& right = world->getChunkSafe(x + 1, z).getSubChunkSafe(i);
+					SubChunk& left = world->getChunkSafe(x - 1, z).getSubChunkSafe(i);
 
-					SubChunk & front = world->getChunkSafe(x, z - 1).getSubChunkSafe(i);
-					SubChunk & back = world->getChunkSafe(x, z + 1).getSubChunkSafe(i);
+					SubChunk& front = world->getChunkSafe(x, z - 1).getSubChunkSafe(i);
+					SubChunk& back = world->getChunkSafe(x, z + 1).getSubChunkSafe(i);
 
 					t_VAO oldVAO = chunk.subChunkVAOs[i];
-					if (oldVAO.id != 0) {
+					if (oldVAO.id != 0)
+					{
 						glDeleteVertexArrays(1, &oldVAO.id);
 						glDeleteBuffers(1, &oldVAO.VBO);
 					}
@@ -205,17 +221,21 @@ void GameRenderer::updateWorld(World * world) {//Remake VAOs
 	}
 }
 
-void GameRenderer::renderWorld(World & world) {
-	for (auto pair : world.chunks) {
+void GameRenderer::renderWorld(World& world)
+{
+	for (auto pair : world.chunks)
+	{
 		Chunk& chunk = *pair.second;
 		chunkID id = pair.first;
 		int x = id >> 32;
 		int z = (int)id;
 
-		for (int i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++)
+		{
 			t_VAO& vao = chunk.subChunkVAOs[i];
 
-			if (vao.id != 0) {
+			if (vao.id != 0)
+			{
 				glBindVertexArray(vao.id);
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, texture);
@@ -231,17 +251,21 @@ void GameRenderer::renderWorld(World & world) {
 	}
 }
 
-void GameRenderer::renderWorld(SubWorld & world) {
-	for (auto pair : world.chunks) {
+void GameRenderer::renderWorld(SubWorld& world)
+{
+	for (auto pair : world.chunks)
+	{
 		Chunk& chunk = *pair.second;
 		chunkID id = pair.first;
 		int x = id >> 32;
 		int z = (int)id;
 
-		for (int i = 0; i < 16; i++) {
+		for (int i = 0; i < 16; i++)
+		{
 			t_VAO& vao = chunk.subChunkVAOs[i];
 
-			if (vao.id != 0) {
+			if (vao.id != 0)
+			{
 				glBindVertexArray(vao.id);
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, texture);
@@ -262,10 +286,11 @@ void GameRenderer::renderWorld(SubWorld & world) {
 	}
 }
 
-void GameRenderer::renderEntities(float t) {
+void GameRenderer::renderEntities(float t)
+{
 	{//Render bullet object
 		btTransform trans;
-		p_physicsWorld->rbCube->getMotionState()->getWorldTransform(trans);
+		p_physicsWorld->m_rbCube->getMotionState()->getWorldTransform(trans);
 
 		btVector3 transOrigin = trans.getOrigin();
 
@@ -278,11 +303,12 @@ void GameRenderer::renderEntities(float t) {
 		model = glm::translate(model, -glm::vec3(0.5f, 0.5f, 0.5f));
 		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
-	//	glDrawArrays(GL_TRIANGLES, 0, cubeVAO.count);
+		//	glDrawArrays(GL_TRIANGLES, 0, cubeVAO.count);
 	}
 
 	auto view = registry.view<components::transform, components::renderable>();
-	for (auto entity : view) {
+	for (auto entity : view)
+	{
 		auto& trans = view.get<components::transform>(entity);
 
 		glBindVertexArray(cubeVAO.id);
@@ -302,7 +328,8 @@ void GameRenderer::renderEntities(float t) {
 	}
 }
 
-void GameRenderer::renderUI(float t) {
+void GameRenderer::renderUI(float t)
+{
 	texColourProgram.activate();
 
 	glEnable(GL_BLEND);
@@ -321,9 +348,11 @@ void GameRenderer::renderUI(float t) {
 	glUniformMatrix4fv(texColourProgram.viewID, 1, GL_FALSE, glm::value_ptr(view));
 	glUniform4f(colourIDTexCol, 0, 0, 0, 0.4f);
 
-	if (renderPortalDebugOutline) {
+	if (renderPortalDebugOutline)
+	{
 		RayTraceResult result = scene.RayTraceAllWorlds(t);
-		if (result.hasHit) {//Draw block selection box
+		if (result.hasHit)
+		{//Draw block selection box
 			glDisable(GL_CULL_FACE);
 			glLineWidth(2.5f);
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -332,14 +361,16 @@ void GameRenderer::renderUI(float t) {
 			glBindVertexArray(blockLineVAO.id);
 
 			glm::mat4 model = glm::mat4(1.0f);
-			if (result.world->isSubWorld) {
+			if (result.world->isSubWorld)
+			{
 				SubWorld& subWorld = *(SubWorld*)result.world;
 				model = glm::translate(model, subWorld.offset);
 				model = model * glm::toMat4(glm::quat(subWorld.rotation));
 				model = glm::translate(model, glm::vec3(result.hitPos));
 				model = glm::translate(model, -subWorld.centerOfMassOffset);
 			}
-			else {
+			else
+			{
 				model = glm::translate(model, glm::vec3(result.hitPos));
 			}
 
@@ -367,8 +398,10 @@ void GameRenderer::renderUI(float t) {
 	glDisable(GL_BLEND);
 }
 
-void GameRenderer::debugDrawPath() {
-	for (PathNode* node : p_pathfinder->path) {
+void GameRenderer::debugDrawPath()
+{
+	for (PathNode* node : p_pathfinder->path)
+	{
 		//for (PathNode* node : p_pathfinder->closedSet) {
 		glBindVertexArray(planeVAO.id);
 		glActiveTexture(GL_TEXTURE0);
@@ -377,15 +410,18 @@ void GameRenderer::debugDrawPath() {
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(node->pos) + glm::vec3(0.5f, 0.01f, 0.5f));
 
-		if (node->inPath) {
+		if (node->inPath)
+		{
 			model = glm::translate(model, glm::vec3(0, 0.05f, 0));
 		}
 
-		if (node->face != nullptr) {
+		if (node->face != nullptr)
+		{
 			model = model * glm::toMat4(node->face->angle);
 			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1, 0, 0));
 		}
-		else {
+		else
+		{
 			model = glm::rotate(model, glm::radians(-80.0f), glm::vec3(1, 0, 0));
 		}
 
@@ -395,7 +431,8 @@ void GameRenderer::debugDrawPath() {
 	}
 }
 
-void GameRenderer::debugDrawColliders() {
+void GameRenderer::debugDrawColliders()
+{
 	//for (auto& it : world.chunks) {//Render collisionBlocks
 	//	Chunk* chunk = it.second;
 
@@ -422,11 +459,13 @@ void GameRenderer::debugDrawColliders() {
 	//}
 }
 
-void GameRenderer::debugDrawBulletDebug() {
+void GameRenderer::debugDrawBulletDebug()
+{
 	{//Draw bullet debug
-		p_physicsWorld->dynamicsWorld->debugDrawWorld();
-		std::vector<float> &vertices = p_physicsWorld->debugDraw->vertices;
-		if (!vertices.empty()) {
+		p_physicsWorld->m_dynamicsWorld->debugDrawWorld();
+		std::vector<float>& vertices = p_physicsWorld->m_debugDrawer->vertices;
+		if (!vertices.empty())
+		{
 			GLuint VBO, VAO;
 			glGenVertexArrays(1, &VAO);
 			glGenBuffers(1, &VBO);
@@ -448,18 +487,19 @@ void GameRenderer::debugDrawBulletDebug() {
 			glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
 			glLineWidth(5.0f);
-			glDrawArrays(GL_LINES, 0, p_physicsWorld->debugDraw->count);
+			glDrawArrays(GL_LINES, 0, p_physicsWorld->m_debugDrawer->count);
 
 			glDeleteVertexArrays(1, &VAO);
 			glDeleteBuffers(1, &VBO);
 
 			vertices.clear();
-			p_physicsWorld->debugDraw->count = 0;
+			p_physicsWorld->m_debugDrawer->count = 0;
 		}
 	}
 }
 
-t_VAO GameRenderer::createCubeVAO() {
+t_VAO GameRenderer::createCubeVAO()
+{
 	std::vector<float> vertices;
 
 	//To do: add boilerplate
@@ -494,7 +534,8 @@ t_VAO GameRenderer::createCubeVAO() {
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	if (!vertices.empty()) {
+	if (!vertices.empty())
+	{
 		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
 	}
 
@@ -510,7 +551,8 @@ t_VAO GameRenderer::createCubeVAO() {
 	return { VAO, VBO, 6 * 6 };
 }
 
-t_VAO  GameRenderer::createLineCubeVAO() {
+t_VAO  GameRenderer::createLineCubeVAO()
+{
 	float vertices[] = {
 		0.0f, 0.0f, 0.0f,  0.0f, 0.0f,//Front 8
 		1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
@@ -562,7 +604,8 @@ t_VAO  GameRenderer::createLineCubeVAO() {
 	return { VAO, VBO, 8 * 2 + 4 * 2 };
 }
 
-t_VAO GameRenderer::createQuad() {
+t_VAO GameRenderer::createQuad()
+{
 	float* side = createZFace(-0.5f, -0.5f, 0, false);
 
 	GLuint VBO, VAO;
@@ -587,7 +630,8 @@ t_VAO GameRenderer::createQuad() {
 	return { VAO, VBO, 6 * 6 };
 }
 
-t_VAO GameRenderer::createQuad(float x, float y, float z, float height, float width) {
+t_VAO GameRenderer::createQuad(float x, float y, float z, float height, float width)
+{
 	const float face[] = {
 			0.0f + x, 0.0f + y,  0.0f + z,  0.0f, 0.0f,
 			width + x, 0.0f + y,  0.0f + z,  1.0f, 0.0f,
@@ -619,16 +663,22 @@ t_VAO GameRenderer::createQuad(float x, float y, float z, float height, float wi
 	return { VAO, VBO, 6 * 6 };
 }
 
-t_VAO GameRenderer::createSubChunkVAO(SubChunk & subChunk, SubChunk & above, SubChunk & below, SubChunk & right, SubChunk & left, SubChunk & front, SubChunk & back) {
+t_VAO GameRenderer::createSubChunkVAO(SubChunk& subChunk, SubChunk& above, SubChunk& below, SubChunk& right, SubChunk& left, SubChunk& front, SubChunk& back)
+{
 	std::vector<float> vertices;
 
 	int count = 0;
-	for (int x = 0; x < 16; x++) {
-		for (int y = 0; y < 16; y++) {
-			for (int z = 0; z < 16; z++) {
-				if (subChunk.getBlock(x, y, z) != 0) {
+	for (int x = 0; x < 16; x++)
+	{
+		for (int y = 0; y < 16; y++)
+		{
+			for (int z = 0; z < 16; z++)
+			{
+				if (subChunk.getBlock(x, y, z) != 0)
+				{
 					{//Yfaces
-						if (y + 1 >= 16 ? above.getBlock(x, 0, z) == 0 : subChunk.getBlock(x, y + 1, z) == 0) {//Top side
+						if (y + 1 >= 16 ? above.getBlock(x, 0, z) == 0 : subChunk.getBlock(x, y + 1, z) == 0)
+						{//Top side
 							count++;
 
 							float* side = createYFace(x, y + 1, z, false);
@@ -637,7 +687,8 @@ t_VAO GameRenderer::createSubChunkVAO(SubChunk & subChunk, SubChunk & above, Sub
 
 							delete[] side;
 						}
-						if (y - 1 < 0 ? below.getBlock(x, 15, z) == 0 : subChunk.getBlock(x, y - 1, z) == 0) {//Bottom side
+						if (y - 1 < 0 ? below.getBlock(x, 15, z) == 0 : subChunk.getBlock(x, y - 1, z) == 0)
+						{//Bottom side
 							count++;
 
 							float* side = createYFace(x, y, z, true);
@@ -648,7 +699,8 @@ t_VAO GameRenderer::createSubChunkVAO(SubChunk & subChunk, SubChunk & above, Sub
 						}
 					}
 					{//Xfaces
-						if (x + 1 >= 16 ? right.getBlock(0, y, z) == 0 : subChunk.getBlock(x + 1, y, z) == 0) {//Right side
+						if (x + 1 >= 16 ? right.getBlock(0, y, z) == 0 : subChunk.getBlock(x + 1, y, z) == 0)
+						{//Right side
 							count++;
 
 							float* side = createXFace(x + 1, y, z, false);
@@ -658,7 +710,8 @@ t_VAO GameRenderer::createSubChunkVAO(SubChunk & subChunk, SubChunk & above, Sub
 							delete[] side;
 						}
 
-						if (x - 1 < 0 ? left.getBlock(15, y, z) == 0 : subChunk.getBlock(x - 1, y, z) == 0) {//Bottom side
+						if (x - 1 < 0 ? left.getBlock(15, y, z) == 0 : subChunk.getBlock(x - 1, y, z) == 0)
+						{//Bottom side
 							count++;
 
 							float* side = createXFace(x, y, z, true);
@@ -669,7 +722,8 @@ t_VAO GameRenderer::createSubChunkVAO(SubChunk & subChunk, SubChunk & above, Sub
 						}
 					}
 					{//ZFaces
-						if (z + 1 >= 16 ? back.getBlock(x, y, 0) == 0 : subChunk.getBlock(x, y, z + 1) == 0) {//Back side
+						if (z + 1 >= 16 ? back.getBlock(x, y, 0) == 0 : subChunk.getBlock(x, y, z + 1) == 0)
+						{//Back side
 							count++;
 
 							float* side = createZFace(x, y, z + 1, false);
@@ -678,7 +732,8 @@ t_VAO GameRenderer::createSubChunkVAO(SubChunk & subChunk, SubChunk & above, Sub
 
 							delete[] side;
 						}
-						if (z - 1 < 0 ? front.getBlock(x, y, 15) == 0 : subChunk.getBlock(x, y, z - 1) == 0) {//Front side
+						if (z - 1 < 0 ? front.getBlock(x, y, 15) == 0 : subChunk.getBlock(x, y, z - 1) == 0)
+						{//Front side
 							count++;
 
 							float* side = createZFace(x, y, z, true);
@@ -700,7 +755,8 @@ t_VAO GameRenderer::createSubChunkVAO(SubChunk & subChunk, SubChunk & above, Sub
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	if (!vertices.empty()) {
+	if (!vertices.empty())
+	{
 		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
 	}
 
@@ -716,10 +772,12 @@ t_VAO GameRenderer::createSubChunkVAO(SubChunk & subChunk, SubChunk & above, Sub
 	return { VAO, VBO, count * 6 };
 }
 
-float* GameRenderer::createYFace(float x, float y, float z, bool flipped) {
+float* GameRenderer::createYFace(float x, float y, float z, bool flipped)
+{
 	float* face;
 
-	if (flipped) {
+	if (flipped)
+	{
 		face = new float[5 * 6]{
 		0.0f + x,  0.0f + y, 0.0f + z,  0.0f, 1.0f,
 		1.0f + x,  0.0f + y, 0.0f + z,  1.0f, 1.0f,
@@ -730,7 +788,8 @@ float* GameRenderer::createYFace(float x, float y, float z, bool flipped) {
 		0.0f + x,  0.0f + y, 0.0f + z,  0.0f, 1.0f,
 		};
 	}
-	else {
+	else
+	{
 		face = new float[5 * 6]{
 		0.0f + x,  0.0f + y, 0.0f + z,  0.0f, 1.0f,
 		1.0f + x,  0.0f + y, 1.0f + z,  1.0f, 0.0f,
@@ -745,10 +804,12 @@ float* GameRenderer::createYFace(float x, float y, float z, bool flipped) {
 	return face;
 }
 
-float* GameRenderer::createXFace(float x, float y, float z, bool flipped) {
+float* GameRenderer::createXFace(float x, float y, float z, bool flipped)
+{
 	float* face;
 
-	if (flipped) {
+	if (flipped)
+	{
 		face = new float[5 * 6]{
 		0.0f + x, 1.0f + y, 1.0f + z,  1.0f, 0.0f,
 		0.0f + x, 1.0f + y, 0.0f + z,  1.0f, 1.0f,
@@ -759,7 +820,8 @@ float* GameRenderer::createXFace(float x, float y, float z, bool flipped) {
 		0.0f + x, 1.0f + y, 1.0f + z,  1.0f, 0.0f,
 		};
 	}
-	else {
+	else
+	{
 		face = new float[5 * 6]{
 		0.0f + x, 1.0f + y, 1.0f + z,  1.0f, 0.0f,
 		0.0f + x, 0.0f + y, 0.0f + z,  0.0f, 1.0f,
@@ -774,10 +836,12 @@ float* GameRenderer::createXFace(float x, float y, float z, bool flipped) {
 	return face;
 }
 
-float* GameRenderer::createZFace(float x, float y, float z, bool flipped) {
+float* GameRenderer::createZFace(float x, float y, float z, bool flipped)
+{
 	float* face;
 
-	if (flipped) {
+	if (flipped)
+	{
 		face = new float[5 * 6]{
 		0.0f + x, 0.0f + y,  0.0f + z,  0.0f, 0.0f,
 		1.0f + x, 1.0f + y,  0.0f + z,  1.0f, 1.0f,
@@ -788,7 +852,8 @@ float* GameRenderer::createZFace(float x, float y, float z, bool flipped) {
 		0.0f + x, 1.0f + y,  0.0f + z,  0.0f, 1.0f,
 		};
 	}
-	else {
+	else
+	{
 		face = new float[5 * 6]{
 		0.0f + x, 0.0f + y,  0.0f + z,  0.0f, 0.0f,
 		1.0f + x, 0.0f + y,  0.0f + z,  1.0f, 0.0f,
@@ -803,7 +868,8 @@ float* GameRenderer::createZFace(float x, float y, float z, bool flipped) {
 	return face;
 }
 
-GLuint GameRenderer::generateTexture(const char* path) {
+GLuint GameRenderer::generateTexture(const char* path)
+{
 	GLuint texture;
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -818,11 +884,13 @@ GLuint GameRenderer::generateTexture(const char* path) {
 
 	unsigned char* data = stbi_load(path, &width, &height, &nrChannels, 0);
 
-	if (data) {
+	if (data)
+	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
-	else {
+	else
+	{
 		std::cout << "Failed to load texture" << std::endl;
 	}
 	stbi_image_free(data);

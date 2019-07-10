@@ -5,63 +5,76 @@
 
 #include <btBulletCollisionCommon.h>
 
-class bcOverlappingPairCache : public btOverlappingPairCache {
+class bcOverlappingPairCache : public btOverlappingPairCache
+{
 public:
-	btOverlappingPairCache* defaultCache;
-	std::list<btBroadphasePair> worldCollisions;//I chose list over vector because: Lots of iterating and sudden removal+addition
-	std::unordered_set<btCollisionObject*> toRemove;//BlockColliders to delete before the next collision step
+	btOverlappingPairCache* m_defaultCache;
+	std::list<btBroadphasePair> m_blockWorldCollisions;//I chose list over vector because: Lots of iterating and sudden removal+addition
+	std::unordered_set<btCollisionObject*> m_unusedBlockColliders;//BlockColliders to delete before the next collision step
 
 public:
 	//Most of these functions just pass the method to the default btOverlappingPairCache 
 
-	virtual btBroadphasePair* getOverlappingPairArrayPtr() {
-		return defaultCache->getOverlappingPairArrayPtr();
+	virtual btBroadphasePair* getOverlappingPairArrayPtr()
+	{
+		return m_defaultCache->getOverlappingPairArrayPtr();
 	}
 
-	virtual const btBroadphasePair* getOverlappingPairArrayPtr() const {
-		return defaultCache->getOverlappingPairArrayPtr();
+	virtual const btBroadphasePair* getOverlappingPairArrayPtr() const
+	{
+		return m_defaultCache->getOverlappingPairArrayPtr();
 	}
 
-	virtual btBroadphasePairArray& getOverlappingPairArray() {
-		return defaultCache->getOverlappingPairArray();
-	}
-	
-	virtual void cleanOverlappingPair(btBroadphasePair& pair, btDispatcher* dispatcher) {
-		defaultCache->cleanOverlappingPair(pair, dispatcher);
+	virtual btBroadphasePairArray& getOverlappingPairArray()
+	{
+		return m_defaultCache->getOverlappingPairArray();
 	}
 
-	virtual void setOverlapFilterCallback(btOverlapFilterCallback* callback) {
-		defaultCache->setOverlapFilterCallback(callback);
+	virtual void cleanOverlappingPair(btBroadphasePair& pair, btDispatcher* dispatcher)
+	{
+		m_defaultCache->cleanOverlappingPair(pair, dispatcher);
 	}
 
-	virtual void setInternalGhostPairCallback(btOverlappingPairCallback* ghostPairCallback) {
-		defaultCache->setInternalGhostPairCallback(ghostPairCallback);
+	virtual void setOverlapFilterCallback(btOverlapFilterCallback* callback)
+	{
+		m_defaultCache->setOverlapFilterCallback(callback);
 	}
 
-	virtual void sortOverlappingPairs(btDispatcher* dispatcher) {
+	virtual void setInternalGhostPairCallback(btOverlappingPairCallback* ghostPairCallback)
+	{
+		m_defaultCache->setInternalGhostPairCallback(ghostPairCallback);
+	}
+
+	virtual void sortOverlappingPairs(btDispatcher* dispatcher)
+	{
 		throw "later";
-		defaultCache->sortOverlappingPairs(dispatcher);
+		m_defaultCache->sortOverlappingPairs(dispatcher);
 	}
 
-	virtual int getNumOverlappingPairs() const {
-		return defaultCache->getNumOverlappingPairs();
+	virtual int getNumOverlappingPairs() const
+	{
+		return m_defaultCache->getNumOverlappingPairs();
 	}
 
-	virtual btBroadphasePair* findPair(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1) {
+	virtual btBroadphasePair* findPair(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1)
+	{
 		throw "later";
-		defaultCache->findPair(proxy0, proxy1);
+		m_defaultCache->findPair(proxy0, proxy1);
 	}
 
-	virtual bool hasDeferredRemoval() {
+	virtual bool hasDeferredRemoval()
+	{
 		return false;
 	}
 
-	virtual btBroadphasePair* addOverlappingPair(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1) {
-		return defaultCache->addOverlappingPair(proxy0, proxy1);
+	virtual btBroadphasePair* addOverlappingPair(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1)
+	{
+		return m_defaultCache->addOverlappingPair(proxy0, proxy1);
 	}
 
-	virtual void* removeOverlappingPair(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1, btDispatcher* dispatcher) {
-		return defaultCache->removeOverlappingPair(proxy0, proxy1, dispatcher);
+	virtual void* removeOverlappingPair(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1, btDispatcher* dispatcher)
+	{
+		return m_defaultCache->removeOverlappingPair(proxy0, proxy1, dispatcher);
 	}
 
 	//Overrided functions

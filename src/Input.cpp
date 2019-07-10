@@ -10,7 +10,8 @@ Input Input::INSTANCE = Input();
 
 Input::Input() {}
 
-void Input::init(GLFWwindow * windowIn) {
+void Input::init(GLFWwindow* windowIn)
+{
 	window = windowIn;
 
 	glfwSetWindowUserPointer(window, this);
@@ -21,23 +22,29 @@ void Input::init(GLFWwindow * windowIn) {
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	for (KeyBinding *binding : keybinds) {
+	for (KeyBinding* binding : keybinds)
+	{
 		binding->window = window;
 	}
 }
 
-void Input::processInput() {
+void Input::processInput()
+{
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 }
 
 
-void Input::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-	Input* input = (Input*) glfwGetWindowUserPointer(window);
-	if (action == GLFW_PRESS) {
-		for (KeyBinding *binding : input->keybinds) {
+void Input::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	Input* input = (Input*)glfwGetWindowUserPointer(window);
+	if (action == GLFW_PRESS)
+	{
+		for (KeyBinding* binding : input->keybinds)
+		{
 
-			if (binding->inputType == InputType::Key && binding->keyID == key) {
+			if (binding->inputType == InputType::Key && binding->keyID == key)
+			{
 				binding->timesPressed++;
 				break;
 			}
@@ -45,12 +52,16 @@ void Input::key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	}
 }
 
-void Input::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+void Input::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
 	Input* input = (Input*)glfwGetWindowUserPointer(window);
-	if (action == GLFW_PRESS) {
-		for (KeyBinding *binding : input->keybinds) {
+	if (action == GLFW_PRESS)
+	{
+		for (KeyBinding* binding : input->keybinds)
+		{
 
-			if (binding->inputType == InputType::Mouse && binding->keyID == button) {
+			if (binding->inputType == InputType::Mouse && binding->keyID == button)
+			{
 				binding->timesPressed++;
 				break;
 			}
@@ -58,10 +69,12 @@ void Input::mouse_button_callback(GLFWwindow* window, int button, int action, in
 	}
 }
 
-void Input::mouse_callback(GLFWwindow * window, double xpos, double ypos) {
+void Input::mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
 	Input* input = (Input*)glfwGetWindowUserPointer(window);
 
-	if (input->firstMouse) {
+	if (input->firstMouse)
+	{
 		input->lastX = xpos;
 		input->lastY = ypos;
 		input->firstMouse = false;
@@ -76,13 +89,16 @@ void Input::mouse_callback(GLFWwindow * window, double xpos, double ypos) {
 	input->deltaY += yoffset;
 }
 
-KeyBinding::KeyBinding(InputType inputTypeIn, int keyIDIn) {
+KeyBinding::KeyBinding(InputType inputTypeIn, int keyIDIn)
+{
 	inputType = inputTypeIn;
 	keyID = keyIDIn;
 }
 
-bool KeyBinding::execute() {
-	if (timesPressed > 0) {
+bool KeyBinding::execute()
+{
+	if (timesPressed > 0)
+	{
 		timesPressed--;
 		return true;
 	}
@@ -90,27 +106,33 @@ bool KeyBinding::execute() {
 	return false;
 }
 
-bool KeyBinding::isDown() {
-	switch (inputType) {
+bool KeyBinding::isDown()
+{
+	switch (inputType)
+	{
 	case InputType::Key: return glfwGetKey(window, keyID) == GLFW_PRESS;
 	case InputType::Mouse: return glfwGetMouseButton(window, keyID) == GLFW_PRESS;
 	case InputType::Scroll: return false;
 	}
 }
 
-bool KeyBinding::executeOnce() {
-	if (timesPressed > 0) {
+bool KeyBinding::executeOnce()
+{
+	if (timesPressed > 0)
+	{
 		timesPressed = 0;
 		return true;
 	}
 	return false;
 }
 
-InputAxis::InputAxis(KeyBinding * positiveIn, KeyBinding * negativeIn) {
+InputAxis::InputAxis(KeyBinding* positiveIn, KeyBinding* negativeIn)
+{
 	positive = positiveIn;
 	negative = negativeIn;
 }
 
-int InputAxis::getModifier() {
+int InputAxis::getModifier()
+{
 	return positive->isDown() - negative->isDown(); //<3 c++
 }

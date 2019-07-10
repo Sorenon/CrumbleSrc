@@ -10,22 +10,26 @@
 #include "Rendering/GameRenderer.h"
 #include "Scene.h"
 
-EntityFoo::EntityFoo() {
+EntityFoo::EntityFoo()
+{
 	//collider = AABB(vec3(-0.25f, 0, -0.25f), vec3(0.25f, 0.5f, 0.25f));
 	collider = AABB(vec3(-0.49f, 0, -0.49f), vec3(0.49f, 1, 0.49f));
-	
+
 	eyeHeight = glm::vec3(0, 0.5f, 0);
 }
 
 
-EntityFoo::~EntityFoo() {
+EntityFoo::~EntityFoo()
+{
 }
 
-void EntityFoo::UpdateSingleThread() {
+void EntityFoo::UpdateSingleThread()
+{
 
 }
 
-void EntityFoo::UpdateMultiThread() {
+void EntityFoo::UpdateMultiThread()
+{
 	transform.step();
 
 	velocity.y -= 20 * CrumbleGlobals::FIXED_TIMESTEP;	//Apply gravity
@@ -97,7 +101,8 @@ void EntityFoo::UpdateMultiThread() {
 	Move();
 }
 
-void EntityFoo::Render(float t, GameRenderer * renderer) {
+void EntityFoo::Render(float t, GameRenderer* renderer)
+{
 	glBindVertexArray(renderer->cubeVAO.id);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, renderer->texture);
@@ -114,7 +119,8 @@ void EntityFoo::Render(float t, GameRenderer * renderer) {
 	glDrawArrays(GL_TRIANGLES, 0, renderer->cubeVAO.count);
 
 
-	if (!p_pathfinder->path.empty()){
+	if (!p_pathfinder->path.empty())
+	{
 		glBindVertexArray(renderer->planeVAO.id);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, renderer->texture);
@@ -128,23 +134,29 @@ void EntityFoo::Render(float t, GameRenderer * renderer) {
 	}
 }
 
-bool EntityFoo::shouldRebuildPath() {
+bool EntityFoo::shouldRebuildPath()
+{
 	Pathfinder& pathfinder = *p_pathfinder;
 
-	if (--pathRefresh <= 0 && onGround) {
+	if (--pathRefresh <= 0 && onGround)
+	{
 		pathRefresh = 20;
 
-		if (pathfinder.path.empty() || pathfinder.path.front()->pos != destination) {
+		if (pathfinder.path.empty() || pathfinder.path.front()->pos != destination)
+		{
 			return true;
 		}
 
-		if (glm::distance(glm::vec3(0.5f, 0, 0.5f) + glm::vec3(pathfinder.path[pathfinder.currentNodeIndex]->pos), transform.position) > 1.5f) {
+		if (glm::distance(glm::vec3(0.5f, 0, 0.5f) + glm::vec3(pathfinder.path[pathfinder.currentNodeIndex]->pos), transform.position) > 1.5f)
+		{
 			return true;
 		}
 
-		for (int i = pathfinder.currentNodeIndex; i >= 0; i--) {
+		for (int i = pathfinder.currentNodeIndex; i >= 0; i--)
+		{
 			glm::ivec3 nodePos = pathfinder.path[i]->pos;
-			if (scene.mainWorld.getBlock(nodePos.x, nodePos.y, nodePos.z) != 0) {
+			if (scene.mainWorld.getBlock(nodePos.x, nodePos.y, nodePos.z) != 0)
+			{
 				return true;
 				break;
 			}

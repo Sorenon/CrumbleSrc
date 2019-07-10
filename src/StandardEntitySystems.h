@@ -2,7 +2,8 @@
 
 #include <entt/entity/registry.hpp>
 
-namespace standard_entity_systems {
+namespace standard_entity_systems
+{
 	//TODO: have a dependancy system for systems (e.g. move_kinematic_ridgedbodies can only occur after do_player_movement)
 
 

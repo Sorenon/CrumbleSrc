@@ -42,19 +42,22 @@
 #include "StandardEntityComponents.h"
 #include "StandardEntitySystems.h"
 
-typedef struct _ThreadUnit {
+typedef struct _ThreadUnit
+{
 	int id;
 
 	std::thread thread;
 	bool readyOrExecuting = false;//Can start execution or is executing
 
 public:
-	_ThreadUnit(int idIn) {
+	_ThreadUnit(int idIn)
+	{
 		id = idIn;
 	}
 } ThreadUnit;
 
-typedef struct _ThreadPool {
+typedef struct _ThreadPool
+{
 	std::mutex mtx;
 	std::condition_variable threadLock;
 	bool done = false;//Threads can stop execution
@@ -62,23 +65,29 @@ typedef struct _ThreadPool {
 	std::vector<ThreadUnit> threads;
 
 public:
-	_ThreadPool(int numOfThreads) {
-		for (int i = 0; i < numOfThreads; i++) {
+	_ThreadPool(int numOfThreads)
+	{
+		for (int i = 0; i < numOfThreads; i++)
+		{
 			threads.push_back(ThreadUnit(i));
 		}
 	}
 
-	bool Finished() {
-		for (ThreadUnit& unit : threads) {
+	bool Finished()
+	{
+		for (ThreadUnit& unit : threads)
+		{
 			if (unit.readyOrExecuting) return false;
 		}
 		return true;
 	}
 
-	void Execute() {
+	void Execute()
+	{
 		{//mtx.lock
 			std::unique_lock<std::mutex> lck(mtx);
-			for (ThreadUnit& unit : threads) {
+			for (ThreadUnit& unit : threads)
+			{
 				unit.readyOrExecuting = true;
 			}
 
@@ -110,7 +119,8 @@ entt::registry registry;//Question: use one register for all entities or use one
 std::mutex entityMutex;
 int entityIndex = 0;
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
 
 	//glm::quat glmquat = FMath::createQuaternion(glm::vec3(0, glm::radians(54.0f), glm::radians(76.0f)));
 	//btQuaternion btquat = btQuaternion(glm::radians(54.0f), 0, glm::radians(76.0f));
@@ -175,8 +185,10 @@ int main(int argc, char* argv[]) {
 
 	//if (true) return 0;
 
-	for (int x = -1; x <= 1; x++) {
-		for (int z = -1; z <= 1; z++) {
+	for (int x = -1; x <= 1; x++)
+	{
+		for (int z = -1; z <= 1; z++)
+		{
 			scene.mainWorld.createChunk(x, z, new Chunk(4));
 		}
 	}
@@ -201,7 +213,8 @@ int main(int argc, char* argv[]) {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	window = glfwCreateWindow(windowStartWidth, windowStartHeight, "Crumble", NULL, NULL);
-	if (window == NULL) {
+	if (window == NULL)
+	{
 		std::cout << "Failed to create GLFW window\n";
 		std::cin.ignore();
 		glfwTerminate();
@@ -210,7 +223,8 @@ int main(int argc, char* argv[]) {
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
@@ -269,7 +283,8 @@ int main(int argc, char* argv[]) {
 
 	//pathfinder.FindPath({ 0, 64, 0 }, { 3, 64, 3 }, 5);
 
-	while (!glfwWindowShouldClose(window)) {
+	while (!glfwWindowShouldClose(window))
+	{
 		double frameStart = glfwGetTime();
 		deltaTime = frameStart - lastFrame;
 		lastFrame = frameStart;
@@ -277,7 +292,8 @@ int main(int argc, char* argv[]) {
 		accumulator += deltaTime;
 
 		ticksThisFrame = 0;
-		while (accumulator > CrumbleGlobals::FIXED_TIMESTEP) {
+		while (accumulator > CrumbleGlobals::FIXED_TIMESTEP)
+		{
 			//physicsWorld.dynamicsWorld->stepSimulation(CrumbleGlobals::FIXED_TIMESTEP, 1, CrumbleGlobals::FIXED_TIMESTEP);
 
 			input.processInput();
@@ -290,8 +306,8 @@ int main(int argc, char* argv[]) {
 			ticksThisFrame++;
 		}
 
-		physicsWorld.dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
-		physicsWorld.dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
+		physicsWorld.m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
+		physicsWorld.m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
 		//scene.portal.rotation += glm::vec3(0, glm::radians(1.0f), 0);
 
 		subWorld.rotation += glm::vec3(0, 0, glm::radians(1.0f));
@@ -317,7 +333,8 @@ int main(int argc, char* argv[]) {
 			trans.prevRotation = rotation;//for the player entity trans.prevRotation == trans.rotation 
 		}
 
-		if (glfwGetKey(window, GLFW_KEY_GRAVE_ACCENT) == GLFW_PRESS) {//Reset physics
+		if (glfwGetKey(window, GLFW_KEY_GRAVE_ACCENT) == GLFW_PRESS)
+		{//Reset physics
 			btTransform trans;
 			trans.setIdentity();
 			//trans.setOrigin(FMath::convertVector(player.transform.position + glm::vec3(0, 0.5f, 0)));
@@ -330,18 +347,19 @@ int main(int argc, char* argv[]) {
 
 			glm::quat quat = FMath::createQuaternion(glm::vec3(pitch, yaw, roll));
 
-			physicsWorld.rbCube->activate();
-			physicsWorld.rbCube->setWorldTransform(trans);
+			physicsWorld.m_rbCube->activate();
+			physicsWorld.m_rbCube->setWorldTransform(trans);
 
-			physicsWorld.rbCube->setLinearVelocity(btVector3(0, 0, 0));
-			physicsWorld.rbCube->setAngularVelocity(btVector3(0, 0, 0));
+			physicsWorld.m_rbCube->setLinearVelocity(btVector3(0, 0, 0));
+			physicsWorld.m_rbCube->setAngularVelocity(btVector3(0, 0, 0));
 
 			//entityFoo.transform.position = player.transform.position;
 		}
 
-		if (input.kbDoThing.executeOnce()) {//Debug key
-			//entityFoo.transform.position = vec3(0.5f, 64, 0.5f);
-			//entityFoo.destination = glm::floor(player.transform.position);
+		if (input.kbDoThing.executeOnce())
+		{//Debug key
+//entityFoo.transform.position = vec3(0.5f, 64, 0.5f);
+//entityFoo.destination = glm::floor(player.transform.position);
 
 			renderer.renderPortalDebugOutline = !renderer.renderPortalDebugOutline;
 		}
@@ -360,7 +378,8 @@ int main(int argc, char* argv[]) {
 	return 0;
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
 	glViewport(0, 0, width, height);
 	wWidth = width;
 	wHeight = height;
@@ -400,36 +419,44 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 //	}
 //}
 
-void interactWithWorlds(Input& input, float t) {
-	while (input.kbPlace.execute()) {
+void interactWithWorlds(Input& input, float t)
+{
+	while (input.kbPlace.execute())
+	{
 		RayTraceResult& result = scene.RayTraceAllWorlds(t);
-		if (result.hasHit) {
+		if (result.hasHit)
+		{
 
 			glm::ivec3 placePos = result.hitPos + result.face;
 			AABB playerCol = registry.get<components::kinematic_ridgedbody>(localplayer).collider + registry.get<components::transform>(localplayer).position;
 
-			if ((AABB::blockAABB + placePos).overlaps(playerCol)) { //TODO: make this work with subWorlds
-				//if (player.onGround && !(AABB::blockAABB + placePos).overlaps(playerCol + Vectors::UP) && world.getOverlappingBlocks(playerCol.expandByVelocity(glm::vec3(0, 1, 0))).empty()) {
-				//	world.setBlock(placePos.x, placePos.y, placePos.z, 1);
-				//	player.transform.position.y += 0.25f;
-				//	player.velocity.y += 7.8f;
-				//}
+			if ((AABB::blockAABB + placePos).overlaps(playerCol))
+			{ //TODO: make this work with subWorlds
+//if (player.onGround && !(AABB::blockAABB + placePos).overlaps(playerCol + Vectors::UP) && world.getOverlappingBlocks(playerCol.expandByVelocity(glm::vec3(0, 1, 0))).empty()) {
+//	world.setBlock(placePos.x, placePos.y, placePos.z, 1);
+//	player.transform.position.y += 0.25f;
+//	player.velocity.y += 7.8f;
+//}
 			}
-			else {
+			else
+			{
 				result.world->setBlock(placePos.x, placePos.y, placePos.z, 1);
 			}
 		}
 	}
 
-	while (input.kbAttack.execute()) {
+	while (input.kbAttack.execute())
+	{
 		RayTraceResult& result = scene.RayTraceAllWorlds(t);
-		if (result.hasHit) {
+		if (result.hasHit)
+		{
 			result.world->setBlock(result.hitPos.x, result.hitPos.y, result.hitPos.z, 0);
 		}
 	}
 }
 
-void end() {
+void end()
+{
 	glfwTerminate();
 
 	std::cout << "Done";

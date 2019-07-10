@@ -16,23 +16,24 @@
 #include "../FMath.h"
 #include "../Plane.h"
 
-PhysicsWorld::PhysicsWorld() {
-	overlappingPairCache = new bcSimpleBroadphase();
+PhysicsWorld::PhysicsWorld()
+{
+	m_overlappingPairCache = new bcSimpleBroadphase();
 	//overlappingPairCache = new btDbvtBroadphase();
-	collisionConfiguration = new btDefaultCollisionConfiguration();
-	dispatcher = new btCollisionDispatcher(collisionConfiguration);
-	solver = new btSequentialImpulseConstraintSolver;
+	m_collisionConfiguration = new btDefaultCollisionConfiguration();
+	m_dispatcher = new btCollisionDispatcher(m_collisionConfiguration);
+	m_solver = new btSequentialImpulseConstraintSolver;
 
-	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, overlappingPairCache, solver, collisionConfiguration);
-	dynamicsWorld->setGravity(btVector3(0, -9.81f, 0));
-	dynamicsWorld->setInternalTickCallback(preTickStatic, 0, true);
+	m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher, m_overlappingPairCache, m_solver, m_collisionConfiguration);
+	m_dynamicsWorld->setGravity(btVector3(0, -9.81f, 0));
+	m_dynamicsWorld->setInternalTickCallback(preTickStatic, 0, true);
 
-	debugDraw = new bcDebugDrawer();
-	dynamicsWorld->setDebugDrawer(debugDraw);
-	debugDraw->setDebugMode(debugDraw->DBG_DrawWireframe);
+	m_debugDrawer = new bcDebugDrawer();
+	m_dynamicsWorld->setDebugDrawer(m_debugDrawer);
+	m_debugDrawer->setDebugMode(m_debugDrawer->DBG_DrawWireframe);
 
 	{
-		((bcSimpleBroadphase*)overlappingPairCache)->collisionWorld = dynamicsWorld;
+		((bcSimpleBroadphase*)m_overlappingPairCache)->m_collisionWorld = m_dynamicsWorld;
 	}
 
 	//{
@@ -57,7 +58,7 @@ PhysicsWorld::PhysicsWorld() {
 
 	{
 		btCollisionShape* boxCollisionShape = new btBoxShape(btVector3(0.5f, 0.5f, 0.5f));
-		collisionShapes.push_back(boxCollisionShape);
+		m_cachedCollisionShapes.push_back(boxCollisionShape);
 
 		btTransform trans;
 		trans.setIdentity();
@@ -71,56 +72,64 @@ PhysicsWorld::PhysicsWorld() {
 		btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(mass, motionstate, boxCollisionShape, localInertia);
 		rigidBodyCI.m_restitution = 0.2f;
 		rigidBodyCI.m_friction = 0.91f;
-		rbCube = new btRigidBody(rigidBodyCI);
+		m_rbCube = new btRigidBody(rigidBodyCI);
 		//rbCube->setActivationState(DISABLE_DEACTIVATION);
 
-		dynamicsWorld->addRigidBody(rbCube);
+		m_dynamicsWorld->addRigidBody(m_rbCube);
 
-		rbCube->setAngularFactor(0);
+		m_rbCube->setAngularFactor(0);
 		//rbCube->setLinearFactor({ 0, 0, 0 });
 	}
 }
 
 
-PhysicsWorld::~PhysicsWorld() {
-	for (int i = dynamicsWorld->getNumCollisionObjects() - 1; i >= 0; i--) {
-		btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[i];
+PhysicsWorld::~PhysicsWorld()
+{
+	for (int i = m_dynamicsWorld->getNumCollisionObjects() - 1; i >= 0; i--)
+	{
+		btCollisionObject* obj = m_dynamicsWorld->getCollisionObjectArray()[i];
 		btRigidBody* body = btRigidBody::upcast(obj);
-		if (body && body->getMotionState()) {
+		if (body && body->getMotionState())
+		{
 			delete body->getMotionState();
 		}
-		dynamicsWorld->removeCollisionObject(obj);
+		m_dynamicsWorld->removeCollisionObject(obj);
 		delete obj;
 	}
 
-	for (btCollisionShape*& shape : collisionShapes) {
+	for (btCollisionShape*& shape : m_cachedCollisionShapes)
+	{
 		shape = nullptr;
 		delete shape;
 	}
 
-	for (btCollisionShape*& shape : tmpCollisionShapes) {
+	for (btCollisionShape*& shape : m_tmpCollisionShapes)
+	{
 		shape = nullptr;
 		delete shape;
 	}
 
-	delete dynamicsWorld;
-	delete solver;
-	delete overlappingPairCache;
-	delete dispatcher;
-	delete collisionConfiguration;
+	delete m_dynamicsWorld;
+	delete m_solver;
+	delete m_overlappingPairCache;
+	delete m_dispatcher;
+	delete m_collisionConfiguration;
 }
 
-void PhysicsWorld::preTickStatic(btDynamicsWorld* world, btScalar timeStep) {
+void PhysicsWorld::preTickStatic(btDynamicsWorld* world, btScalar timeStep)
+{
 	p_physicsWorld->preTick(world, timeStep);
 }
 
-void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep) {
+void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep)
+{
 	using namespace FMath;
 
-	for (btCollisionShape* shape : tmpCollisionShapes) {
+	for (btCollisionShape* shape : m_tmpCollisionShapes)
+	{
 		delete shape;
 	}
-	tmpCollisionShapes.clear();
+	m_tmpCollisionShapes.clear();
 
 	//btCompoundShape* combinedShape = new btCompoundShape();
 
@@ -178,11 +187,11 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep) {
 		};
 
 		Portal& portal = scene.portals[0];
-		btVector3 rbPos = rbCube->getWorldTransform().getOrigin();
+		btVector3 rbPos = m_rbCube->getWorldTransform().getOrigin();
 		btVector3 portalPos = bullet_glm_conversion::convertVector(portal.getPosition());
 
 		btVector3 relitivePos = portalPos - rbPos;
-		relitivePos = rbCube->getWorldTransform().getBasis() * relitivePos;
+		relitivePos = m_rbCube->getWorldTransform().getBasis() * relitivePos;
 
 		//float pitch = 0;
 		//float yaw = 0;
@@ -193,26 +202,31 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep) {
 
 		//Plane plane = Plane(convertVector(relitivePos), createQuaternion(glm::vec3(portal.getFacing().angle, 0.0f)) * createQuaternion(glm::vec3(0, roll, 0)));
 
-		Plane plane = Plane(bullet_glm_conversion::convertVector(relitivePos), portal.getFacing().angle * -bullet_glm_conversion::convertQuaternion(rbCube->getWorldTransform().getRotation()));
+		Plane plane = Plane(bullet_glm_conversion::convertVector(relitivePos), portal.getFacing().angle * -bullet_glm_conversion::convertQuaternion(m_rbCube->getWorldTransform().getRotation()));
 
-		for (const btVector3* side : sides) {
+		for (const btVector3* side : sides)
+		{
 			btVertexArray inputVerticies;
 			btVertexArray outputVerticies;
 
-			for (int i = 0; i < 4; i++) {
+			for (int i = 0; i < 4; i++)
+			{
 				inputVerticies.push_back(side[i] - btVector3(0.5f, 0.5f, 0.5f));
 			}
 
 			//btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, bullet_glm_conversion::convertVector(plane.getNormal()), plane.getOffset() + 0.04f);//Each side is cut individually for a more simple final mesh
 			btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, bullet_glm_conversion::convertVector(plane.getNormal()), plane.getOffset() + 0.5f);//Each side is cut individually for a more simple final mesh
 
-			for (int i = 0; i < outputVerticies.size(); i++) {
+			for (int i = 0; i < outputVerticies.size(); i++)
+			{
 				btVector3& newVertex = outputVerticies[i];
 
-				for (int i2 = 0; i2 < finalVerticies.size(); i2++) {//Only add new verticies
+				for (int i2 = 0; i2 < finalVerticies.size(); i2++)
+				{//Only add new verticies
 					btVector3& existingVertex = finalVerticies[i2];
 
-					if (newVertex == existingVertex) {
+					if (newVertex == existingVertex)
+					{
 						goto skip;
 					}
 				}
@@ -223,19 +237,22 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep) {
 		}
 	}
 
-	if (finalVerticies.size() != 0) {
+	if (finalVerticies.size() != 0)
+	{
 		btConvexHullShape* cutBoxShape = new btConvexHullShape();
 		//boxCollisionShape->setMargin(0.0f);//btBoxShape doesnt have an outward margin
 		cutBoxShape->setMargin(0.02f);
 
-		for (int i = 0; i < finalVerticies.size(); i++) {
+		for (int i = 0; i < finalVerticies.size(); i++)
+		{
 			cutBoxShape->addPoint(finalVerticies[i], i == finalVerticies.size() - 1);
 		}
 
-		rbCube->setCollisionShape(cutBoxShape);
-		tmpCollisionShapes.push_back(cutBoxShape);
+		m_rbCube->setCollisionShape(cutBoxShape);
+		m_tmpCollisionShapes.push_back(cutBoxShape);
 	}
-	else {
-		rbCube->setCollisionShape(&emptyShape);
+	else
+	{
+		m_rbCube->setCollisionShape(&m_emptyShape);
 	}
 }

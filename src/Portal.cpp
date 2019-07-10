@@ -8,7 +8,8 @@
 #include "Rendering/GameRenderer.h"
 
 Portal::Portal(glm::vec3 positionIn, glm::vec2 halfExtentsIn, Face facingIn, glm::vec3 exitIn)
-	: collider(halfExtentsIn.x, halfExtentsIn.y, facingIn, positionIn), plane(exitIn, facingIn.angle) {
+	: collider(halfExtentsIn.x, halfExtentsIn.y, facingIn, positionIn), plane(exitIn, facingIn.angle)
+{
 	position = positionIn;
 	halfExtents = halfExtentsIn;
 	facing = facingIn;
@@ -26,26 +27,32 @@ Portal::Portal(glm::vec3 positionIn, glm::vec2 halfExtentsIn, Face facingIn, glm
 	//plane = Plane(positionIn + right * halfExtents.x, direction * glm::quat(glm::vec3(0, 0, glm::radians(-90.0f))));
 }
 
-const AABB2D& Portal::getCollider() {
+const AABB2D& Portal::getCollider()
+{
 	return collider;
 }
 
-const glm::vec3& Portal::getPosition() {
+const glm::vec3& Portal::getPosition()
+{
 	return position;
 }
 
-const glm::vec3& Portal::getExit() {
+const glm::vec3& Portal::getExit()
+{
 	return exit;
 }
 
-const Plane& Portal::getPlane() {
+const Plane& Portal::getPlane()
+{
 	return plane;
 }
 
-const Face& Portal::getFacing() {
+const Face& Portal::getFacing()
+{
 	return facing;
 }
 
-const t_VAO& Portal::getVAO() {
+const t_VAO& Portal::getVAO()
+{
 	return quadVAO;
 }

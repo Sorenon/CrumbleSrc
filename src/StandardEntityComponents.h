@@ -8,8 +8,10 @@ using namespace glm;
 
 class Scene;
 
-namespace components {
-	struct transform {
+namespace components
+{
+	struct transform
+	{
 		vec3 prevPosition;
 		vec3 prevRotation;
 
@@ -23,7 +25,8 @@ namespace components {
 		vec3 getInterpRot(float t); //No need to call this for localplayer because localplayer rotation is updated every frame
 	};
 
-	struct kinematic_ridgedbody {
+	struct kinematic_ridgedbody
+	{
 		float eyeHeight = 0.5f; //Center of mass
 		AABB collider;
 		float gravity = 20.0f; // m/s^2
@@ -34,12 +37,14 @@ namespace components {
 		bool onGround = false;
 	};
 
-	struct renderable {
+	struct renderable
+	{
 		//TODO: model variable
 		//Could split this component into animated renderable and static renderable, etc.
 	};
 
-	struct player_movement {
+	struct player_movement
+	{
 		float noClipSpeed = 10.0f;
 		float walkSpeed = 4.0f;
 
@@ -49,13 +54,15 @@ namespace components {
 		static void Accelerate(vec3& velocity, vec3 wishDir, float wishSpeed, float acceleration);
 	};
 
-	struct pathfinder {
+	struct pathfinder
+	{
 		ivec3 destination;
 		Pathfinder pathfinder;
 		int pathRefreshCooldown = 30.0f;
 	};
 
-	struct pathfinding_movement {
+	struct pathfinding_movement
+	{
 
 	};
 };

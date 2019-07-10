@@ -10,18 +10,22 @@
 #include "FMath.h"
 #include "Portal.h"
 
-Entity::Entity() {
+Entity::Entity()
+{
 }
 
 
-Entity::~Entity() {
+Entity::~Entity()
+{
 }
 
-AABB Entity::getLocalBoundingBox() {
+AABB Entity::getLocalBoundingBox()
+{
 	return collider + transform.position;
 }
 
-void Entity::Move() {
+void Entity::Move()
+{
 	glm::vec3 move = velocity * CrumbleGlobals::FIXED_TIMESTEP;	//How far the entity expects to move 
 	AABB entityCol = getLocalBoundingBox();
 	AABB clippedCol = entityCol;
@@ -35,24 +39,29 @@ void Entity::Move() {
 		entityCol = getLocalBoundingBox();
 		clippedCol = trimColliderForPortal(entityCol, portal, glm::vec3(0.0f, moveY, 0.0f));
 
-		for (AABB aabb : worldColliders) {
+		for (AABB aabb : worldColliders)
+		{
 			aabb.clipY(clippedCol, move.y);
 		}
 
 		//portal.collider.clipY(entityCol, move.y);
 		portal.getCollider().portalY(entityCol, move, this, portal.getExit());
 
-		if (moveY != move.y) {
+		if (moveY != move.y)
+		{
 			velocity.y = 0;
 
-			if (moveY < 0.0f) {
+			if (moveY < 0.0f)
+			{
 				onGround = true;
 			}
-			else {
+			else
+			{
 				onGround = false;
 			}
 		}
-		else {
+		else
+		{
 			onGround = false;
 		}
 
@@ -66,12 +75,14 @@ void Entity::Move() {
 		entityCol = getLocalBoundingBox();
 		clippedCol = trimColliderForPortal(entityCol, portal, glm::vec3(x, 0.0f, 0.0f));
 
-		for (AABB aabb : worldColliders) {
+		for (AABB aabb : worldColliders)
+		{
 			aabb.clipX(clippedCol, move.x);
 		}
 		portal.getCollider().clipX(entityCol, move.x);
 
-		if (x != move.x) {
+		if (x != move.x)
+		{
 			velocity.x = 0;
 		}
 
@@ -85,12 +96,14 @@ void Entity::Move() {
 		entityCol = getLocalBoundingBox();
 		clippedCol = trimColliderForPortal(entityCol, portal, glm::vec3(0.0f, 0.0f, moveZ));
 
-		for (AABB aabb : worldColliders) {
+		for (AABB aabb : worldColliders)
+		{
 			aabb.clipZ(clippedCol, move.z);
 		}
 		portal.getCollider().clipZ(entityCol, move.z);
 
-		if (moveZ != move.z) {
+		if (moveZ != move.z)
+		{
 			velocity.z = 0;
 		}
 
@@ -101,15 +114,19 @@ void Entity::Move() {
 	}
 }
 
-AABB Entity::trimColliderForPortal(AABB entityCol, Portal& portal, vec3 move) {
+AABB Entity::trimColliderForPortal(AABB entityCol, Portal& portal, vec3 move)
+{
 	const float epsilon = 0.01f;
 
-	if (portal.getFacing() == Faces::Down) {
-		if (portal.getCollider().surroundsX(entityCol) && portal.getCollider().surroundsZ(entityCol)) {//Is entity inline with the portal
+	if (portal.getFacing() == Faces::Down)
+	{
+		if (portal.getCollider().surroundsX(entityCol) && portal.getCollider().surroundsZ(entityCol))
+		{//Is entity inline with the portal
 			AABB expandedCol = entityCol;
 			expandedCol.min.y += move.y;
 
-			if (portal.getCollider().intersectsEpsilonY(expandedCol)) {//Is entity in the portal
+			if (portal.getCollider().intersectsEpsilonY(expandedCol))
+			{//Is entity in the portal
 				entityCol.min.y = portal.getPosition().y - move.y + epsilon;
 			}
 		}
@@ -118,10 +135,12 @@ AABB Entity::trimColliderForPortal(AABB entityCol, Portal& portal, vec3 move) {
 	return entityCol;
 }
 
-vec3 Entity::getEyePos(float t) {
+vec3 Entity::getEyePos(float t)
+{
 	return transform.getInterpPos(t) + eyeHeight;
 }
 
-vec3 Entity::getEyePos() {
+vec3 Entity::getEyePos()
+{
 	return transform.position + eyeHeight;
 }

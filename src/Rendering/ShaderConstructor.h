@@ -2,7 +2,8 @@
 #include <string>
 #include <glad/glad.h>
 
-class ShaderConstructor {
+class ShaderConstructor
+{
 public:
 	std::string path;
 private:

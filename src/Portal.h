@@ -7,7 +7,8 @@
 #include "AABB.h"
 #include "Plane.h"
 
-class Portal {
+class Portal
+{
 private:
 	glm::vec3 position;
 	glm::vec2 halfExtents;
@@ -20,7 +21,7 @@ private:
 	Plane plane;
 public:
 	Portal(glm::vec3 position, glm::vec2 halfExtents, Face facing, glm::vec3 exit);
-	
+
 	const AABB2D& getCollider();
 	const glm::vec3& getPosition();
 	const glm::vec3& getExit();

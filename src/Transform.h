@@ -6,7 +6,8 @@
 
 using namespace glm;
 
-class Transform {
+class Transform
+{
 public:
 	vec3 prevPosition;
 	vec3 prevRotation;

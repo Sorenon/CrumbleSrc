@@ -25,7 +25,8 @@ void components::player_movement::ApplyFriction(glm::vec3& velocity, float frict
 
 	const float speed = glm::length(vel);
 
-	if (speed != 0) {
+	if (speed != 0)
+	{
 		const float drop = speed * friction * CrumbleGlobals::FIXED_TIMESTEP;
 
 		vel *= (std::fmax(speed - drop, 0.0f) / speed);
@@ -55,7 +56,8 @@ void components::player_movement::Accelerate(glm::vec3& velocity, glm::vec3 wish
 
 	float accelSpeed = acceleration * CrumbleGlobals::FIXED_TIMESTEP * wishSpeed;//The max amount we can accelerate this tick
 
-	if (accelSpeed > addSpeed) {
+	if (accelSpeed > addSpeed)
+	{
 		accelSpeed = addSpeed;
 	}
 

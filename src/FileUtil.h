@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 
-namespace FileUtil {
+namespace FileUtil
+{
 	std::string readFile(std::string path);
 };

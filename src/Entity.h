@@ -10,7 +10,8 @@ using namespace glm;
 
 class GameRenderer;
 
-class [[deprecated]] Entity {
+class [[deprecated]] Entity
+{
 public:
 	vec3 eyeHeight = vec3(0.0f, 1.8f, 0.0f);
 

@@ -15,24 +15,31 @@ Scene::~Scene()
 {
 }
 
-RayTraceResult Scene::RayTraceAllWorlds(float t) {
+RayTraceResult Scene::RayTraceAllWorlds(float t)
+{
 	std::vector<RayTraceResult> results(1 + subWorlds.size());
 
 	results.push_back(RayTraceFromPlayer(t, mainWorld));
-	for (int i = 0; i < subWorlds.size(); i++) {
+	for (int i = 0; i < subWorlds.size(); i++)
+	{
 		SubWorld& world = subWorlds[i];
 		results[i + 1] = RayTraceFromPlayer(t, world);
 	}
 
 	RayTraceResult chosen;
-	for (RayTraceResult result : results) {
-		if (result.hasHit) {
-			if (chosen.hasHit) {
-				if (result.distance < chosen.distance) {//TODO: improve the method used for calculating distance
+	for (RayTraceResult result : results)
+	{
+		if (result.hasHit)
+		{
+			if (chosen.hasHit)
+			{
+				if (result.distance < chosen.distance)
+				{//TODO: improve the method used for calculating distance
 					chosen = result;
 				}
 			}
-			else {
+			else
+			{
 				chosen = result;
 			}
 		}
@@ -41,7 +48,8 @@ RayTraceResult Scene::RayTraceAllWorlds(float t) {
 	return chosen;
 }
 
-RayTraceResult Scene::RayTraceFromPlayer(float t, World& world) {
+RayTraceResult Scene::RayTraceFromPlayer(float t, World& world)
+{
 	RayTraceResult result;
 
 	auto& trans = registry.get<components::transform>(localplayer);
@@ -50,7 +58,8 @@ RayTraceResult Scene::RayTraceFromPlayer(float t, World& world) {
 	return world.rayTrace(trans.getInterpPos(t) + glm::vec3(0, rb.eyeHeight, 0), FMath::getNormal(trans.rotation));
 }
 
-RayTraceResult Scene::RayTraceFromPlayer(float t, SubWorld& world) {
+RayTraceResult Scene::RayTraceFromPlayer(float t, SubWorld& world)
+{
 	RayTraceResult result;
 
 	auto& trans = registry.get<components::transform>(localplayer);

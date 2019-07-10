@@ -107,8 +107,10 @@ Pathfinder::~Pathfinder()
 //
 //}
 
-void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
-	for (PathNode* node : closedSet) {
+void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius)
+{
+	for (PathNode* node : closedSet)
+	{
 		delete node;
 	}
 	closedSet = std::vector<PathNode*>();
@@ -116,7 +118,8 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 
 	World& world = scene.mainWorld;
 
-	if (scene.mainWorld.getBlock(endPos.x, endPos.y, endPos.z) != 0 || world.getBlock(startPos.x, startPos.y, startPos.z) != 0) {
+	if (scene.mainWorld.getBlock(endPos.x, endPos.y, endPos.z) != 0 || world.getBlock(startPos.x, startPos.y, startPos.z) != 0)
+	{
 		return;
 	}
 
@@ -124,41 +127,50 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 
 	openSet.push_back(new PathNode(startPos));
 
-	while (!openSet.empty()) {
+	while (!openSet.empty())
+	{
 		PathNode* currentNode = openSet.front();
 		openSet.pop_front();
 
-		for (const Face& face : Faces::horizontal) {
-			if (currentNode->face != nullptr && face.normalVector == currentNode->face->normalVector) {//Stop the pathfinder from scaning the currentNode's parent node
+		for (const Face& face : Faces::horizontal)
+		{
+			if (currentNode->face != nullptr && face.normalVector == currentNode->face->normalVector)
+			{//Stop the pathfinder from scaning the currentNode's parent node
 				continue;
 			}
 
 			ivec3 checkPos = currentNode->pos + face.normalVector;
 			int cost = 0;
 
-			if (world.getBlock(checkPos.x, checkPos.y, checkPos.z) != 0) {
+			if (world.getBlock(checkPos.x, checkPos.y, checkPos.z) != 0)
+			{
 				checkPos.y++;
 				cost += 5;
 
-				if (world.getBlock(checkPos.x, checkPos.y, checkPos.z) != 0) {
+				if (world.getBlock(checkPos.x, checkPos.y, checkPos.z) != 0)
+				{
 					continue;
 				}
 			}
-			else if (world.getBlock(checkPos.x, checkPos.y - 1, checkPos.z) == 0) {
+			else if (world.getBlock(checkPos.x, checkPos.y - 1, checkPos.z) == 0)
+			{
 				cost++;
 				checkPos.y--;
 
-				if (world.getBlock(checkPos.x, checkPos.y - 1, checkPos.z) == 0) {
+				if (world.getBlock(checkPos.x, checkPos.y - 1, checkPos.z) == 0)
+				{
 					cost += 3;
 					checkPos.y--;
 
-					if (world.getBlock(checkPos.x, checkPos.y - 1, checkPos.z) == 0) {
+					if (world.getBlock(checkPos.x, checkPos.y - 1, checkPos.z) == 0)
+					{
 						continue;
 					}
 				}
 			}
 
-			if (checkPos == endPos) {//Found the path
+			if (checkPos == endPos)
+			{//Found the path
 				PathNode* newNode = new PathNode(checkPos, currentNode);
 				newNode->inPath = true;
 				currentNode->inPath = true;
@@ -169,7 +181,8 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 				closedSet.push_back(currentNode);
 
 				PathNode* reading = currentNode;
-				while (reading->previous != nullptr) {//Follow the path back to the start
+				while (reading->previous != nullptr)
+				{//Follow the path back to the start
 					reading = reading->previous;
 					path.push_back(reading);
 					reading->inPath = true;
@@ -182,12 +195,15 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 				return;
 			}
 
-			if (ManhattanDistance(startPos, checkPos) > radius) {//Out of search radius
+			if (ManhattanDistance(startPos, checkPos) > radius)
+			{//Out of search radius
 				continue;
 			}
 
-			for (PathNode* node : closedSet) {//Have we already visited this node
-				if (node->pos == checkPos) {
+			for (PathNode* node : closedSet)
+			{//Have we already visited this node
+				if (node->pos == checkPos)
+				{
 					goto skip;
 				}
 			}
@@ -199,13 +215,17 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 				std::deque<PathNode*>::iterator place;
 				bool foundPlace = false;
 
-				for (auto it = openSet.begin(); it != openSet.end(); it++) {
-					if ((*it)->pos == checkPos) {
+				for (auto it = openSet.begin(); it != openSet.end(); it++)
+				{
+					if ((*it)->pos == checkPos)
+					{
 						goto skip;//Node is already in frontier
 					}
 
-					if (priority < (*it)->priority) {
-						if (!foundPlace) {
+					if (priority < (*it)->priority)
+					{
+						if (!foundPlace)
+						{
 							place = it;
 							foundPlace = true;
 						}
@@ -214,10 +234,12 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 
 				PathNode* newNode = new PathNode(checkPos, currentNode, accumulatedCost, priority);
 
-				if (foundPlace) {
+				if (foundPlace)
+				{
 					openSet.insert(place, newNode);
 				}
-				else {
+				else
+				{
 					openSet.push_back(newNode);
 				}
 			}
@@ -233,6 +255,7 @@ void Pathfinder::FindPath(ivec3 startPos, ivec3 endPos, int radius) {
 	currentNodeIndex = 0;
 }
 
-int Pathfinder::ManhattanDistance(ivec3 start, ivec3 end) {
+int Pathfinder::ManhattanDistance(ivec3 start, ivec3 end)
+{
 	return fabs(start.x - end.x) + fabs(start.z - end.z);
 }

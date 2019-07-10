@@ -2,7 +2,8 @@
 #include <glad/glad.h>
 #include <iostream>
 
-ShaderConstructor::ShaderConstructor(const char* code, GLuint type) {
+ShaderConstructor::ShaderConstructor(const char* code, GLuint type)
+{
 	id = glCreateShader(type);
 
 	glShaderSource(id, 1, &code, NULL);
@@ -12,22 +13,27 @@ ShaderConstructor::ShaderConstructor(const char* code, GLuint type) {
 	char infoLog[512];
 	glGetShaderiv(id, GL_COMPILE_STATUS, &success);
 
-	if (success == GL_FALSE) {
+	if (success == GL_FALSE)
+	{
 		glGetShaderInfoLog(id, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::" << getName(type) << "COMPILATION_FAILED\n" << infoLog << std::endl;
 	}
 }
 
-ShaderConstructor::~ShaderConstructor() {
+ShaderConstructor::~ShaderConstructor()
+{
 	glDeleteShader(id);
 }
 
-const GLuint ShaderConstructor::getID() {
+const GLuint ShaderConstructor::getID()
+{
 	return id;
 }
 
-std::string ShaderConstructor::getName(GLuint shaderId) {
-	switch (shaderId) {
+std::string ShaderConstructor::getName(GLuint shaderId)
+{
+	switch (shaderId)
+	{
 	case GL_FRAGMENT_SHADER: return "fragment";
 	case GL_VERTEX_SHADER: return "vertex";
 	}

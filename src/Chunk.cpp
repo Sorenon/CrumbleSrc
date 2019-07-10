@@ -9,12 +9,15 @@
 SubChunk SubChunk::EMPTY;
 Chunk Chunk::EMPTY;
 
-Chunk::Chunk() {
+Chunk::Chunk()
+{
 
 }
 
-Chunk::Chunk(int layers) {
-	for (int i = 0; i < layers; i++) {
+Chunk::Chunk(int layers)
+{
+	for (int i = 0; i < layers; i++)
+	{
 		subChunks[i] = new SubChunk();
 
 		int(*blocks)[16][16][16] = &subChunks[i]->blocks;
@@ -23,66 +26,86 @@ Chunk::Chunk(int layers) {
 	}
 }
 
-Chunk::~Chunk() {
-	for (SubChunk *subChunk : subChunks) {
-		if (subChunk != nullptr) {
+Chunk::~Chunk()
+{
+	for (SubChunk* subChunk : subChunks)
+	{
+		if (subChunk != nullptr)
+		{
 			delete subChunk;
 		}
 	}
 }
 
-SubChunk& Chunk::getSubChunkSafe(int i) {
+SubChunk& Chunk::getSubChunkSafe(int i)
+{
 	return subChunks[i] == nullptr ? SubChunk::EMPTY : *subChunks[i];
 }
 
-int Chunk::getBlock(collumLoc x, collumLoc y, collumLoc z) {
-	SubChunk *subChunk = subChunks[y >> 4];
+int Chunk::getBlock(collumLoc x, collumLoc y, collumLoc z)
+{
+	SubChunk* subChunk = subChunks[y >> 4];
 
-	if (subChunk == nullptr) {
+	if (subChunk == nullptr)
+	{
 		return 0;
-	} else {
+	}
+	else
+	{
 		return subChunk->getBlock(x, y % 16, z);
 	}
 }
 
-bool Chunk::setBlock(collumLoc x, collumLoc y, collumLoc z, int block) {
+bool Chunk::setBlock(collumLoc x, collumLoc y, collumLoc z, int block)
+{
 	int subChunkY = y >> 4;
 
-	SubChunk *subChunk = subChunks[subChunkY];
+	SubChunk* subChunk = subChunks[subChunkY];
 
-	if (subChunk == nullptr) {
+	if (subChunk == nullptr)
+	{
 		subChunk = new SubChunk;
 		subChunks[subChunkY] = subChunk;
 	}
 
 	cubeLoc relY = y % 16;
-	if (subChunk->setBlock(x, relY, z, block)) {
+	if (subChunk->setBlock(x, relY, z, block))
+	{
 		needsUpdate = true;
 
-		if (relY == 15 && y != 255) {
-			if (subChunks[subChunkY + 1] != nullptr) {
-				SubChunk &above = *subChunks[(subChunkY) + 1];
+		if (relY == 15 && y != 255)
+		{
+			if (subChunks[subChunkY + 1] != nullptr)
+			{
+				SubChunk& above = *subChunks[(subChunkY)+1];
 
-				if (above.getBlock(x, 0, z) != 0) {
+				if (above.getBlock(x, 0, z) != 0)
+				{
 					above.needsUpdate = true;
 				}
 			}
-		} else if (relY == 0 && y != 0) {
-			if (subChunks[subChunkY - 1] != nullptr) {
-				SubChunk &below = *subChunks[(subChunkY) - 1];
+		}
+		else if (relY == 0 && y != 0)
+		{
+			if (subChunks[subChunkY - 1] != nullptr)
+			{
+				SubChunk& below = *subChunks[(subChunkY)-1];
 
-				if (below.getBlock(x, 15, z) != 0) {
+				if (below.getBlock(x, 15, z) != 0)
+				{
 					below.needsUpdate = true;
 				}
 			}
-		} 
+		}
 
-		if (block == 0) {//Delete blockCollider if it exits
+		if (block == 0)
+		{//Delete blockCollider if it exits
 			glm::ivec3 vecPos(x, y, z);
 			auto it = storage.find(vecPos);
 
-			if (it != storage.end()) {
-				bcPairCache->toRemove.insert((*it).second);
+			if (it != storage.end())
+			{
+				bcPairCache->m_unusedBlockColliders.insert((*it).second);
 				storage.erase(it);
 			}
 		}
@@ -93,23 +116,30 @@ bool Chunk::setBlock(collumLoc x, collumLoc y, collumLoc z, int block) {
 	return false;
 }
 
-void Chunk::updateVAOTest(collumLoc x, collumLoc y, collumLoc z) {
-	SubChunk *subChunk = subChunks[y >> 4];
+void Chunk::updateVAOTest(collumLoc x, collumLoc y, collumLoc z)
+{
+	SubChunk* subChunk = subChunks[y >> 4];
 
-	if (subChunk != nullptr && subChunk->getBlock(x, y % 16, z) != 0) {
+	if (subChunk != nullptr && subChunk->getBlock(x, y % 16, z) != 0)
+	{
 		needsUpdate = true;
 		subChunk->needsUpdate = true;
 	}
 }
 
-int SubChunk::getBlock(collumLoc x, cubeLoc y, collumLoc z) {
+int SubChunk::getBlock(collumLoc x, cubeLoc y, collumLoc z)
+{
 	return blocks[x][y][z];
 }
 
-inline bool SubChunk::setBlock(collumLoc x, cubeLoc y, collumLoc z, int block) {
-	if (blocks[x][y][z] == block) {
+inline bool SubChunk::setBlock(collumLoc x, cubeLoc y, collumLoc z, int block)
+{
+	if (blocks[x][y][z] == block)
+	{
 		return false;
-	} else {
+	}
+	else
+	{
 		blocks[x][y][z] = block;
 		needsUpdate = true;
 		return true;
