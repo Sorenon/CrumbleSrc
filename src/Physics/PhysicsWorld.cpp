@@ -78,7 +78,7 @@ PhysicsWorld::PhysicsWorld()
 
 		m_dynamicsWorld->addRigidBody(m_rbCube);
 
-		m_rbCube->setAngularFactor(0);
+		//m_rbCube->setAngularFactor(0);
 		//m_rbCube->setLinearFactor({ 0, 0, 0 });
 	}
 }
@@ -202,7 +202,7 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep)
 
 		float planeOffset = glm::length(distVec) * glm::sign(distVec.x + distVec.y + distVec.z) + margin;
 
-		for (const btVector3* side : sides)//Each side is cut individually for a more simple final mesh (TODO: find if this is true)
+		for (const btVector3* side : sides)//Each side is cut individually for a more simple final mesh (TODO: find if this is true) (NOTE: it prob isnt and may be a waste of CPU time)
 		{
 			btVertexArray inputVerticies;
 			btVertexArray outputVerticies;

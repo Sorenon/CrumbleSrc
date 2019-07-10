@@ -121,69 +121,8 @@ int entityIndex = 0;
 
 int main(int argc, char* argv[])
 {
-
-	//glm::quat glmquat = FMath::createQuaternion(glm::vec3(0, glm::radians(54.0f), glm::radians(76.0f)));
-	//btQuaternion btquat = btQuaternion(glm::radians(54.0f), 0, glm::radians(76.0f));
-
-	//std::cout << glmquat.x << std::endl;
-	//std::cout << glmquat.y << std::endl;
-	//std::cout << glmquat.z << std::endl;
-	//std::cout << glmquat.w << std::endl;
-
-	//std::cout << btquat.getX() << std::endl;
-	//std::cout << btquat.getY() << std::endl;
-	//std::cout << btquat.getZ() << std::endl;
-	//std::cout << btquat.getW() << std::endl;
-
-	//btQuaternion glmquat2 = bullet_glm_conversion::convertQuaternion(glmquat);
-
-	//std::cout << glmquat2.getX() << std::endl;
-	//std::cout << glmquat2.getY() << std::endl;
-	//std::cout << glmquat2.getZ() << std::endl;
-	//std::cout << glmquat2.getW() << std::endl;
-
-
-	//std::cin.ignore();
-
-	//if (true) return 0;
-
 	PhysicsWorld physicsWorld;
 	p_physicsWorld = &physicsWorld;
-	//physicsWorld.rbCube->getWorldTransform().setRotation(btQuaternion(0, glm::radians(90.0f), 0));
-
-	//glm::quat glmquat = glm::quat(glm::vec3(Faces::Down.angle, 0.0f));
-	//std::cout << "down" << std::endl;
-	//std::cout << glmquat.x << std::endl;
-	//std::cout << glmquat.y << std::endl;
-	//std::cout << glmquat.z << std::endl;
-	//std::cout << glmquat.w << std::endl << std::endl;
-
-	//btQuaternion btquat = physicsWorld.rbCube->getWorldTransform().getRotation();
-	//glm::quat btquat2 = bullet_glm_conversion::convertQuaternion(btquat);
-
-	//std::cout << "rbCube" << std::endl;
-	//std::cout << btquat2.x << std::endl;
-	//std::cout << btquat2.y << std::endl;
-	//std::cout << btquat2.z << std::endl;
-	//std::cout << btquat2.w << std::endl << std::endl;
-
-	//glm::quat glmquat2 = glmquat * btquat2;
-	//std::cout << "glmquat * btquat2" << std::endl;
-	//std::cout << glmquat2.x << std::endl;
-	//std::cout << glmquat2.y << std::endl;
-	//std::cout << glmquat2.z << std::endl;
-	//std::cout << glmquat2.w << std::endl << std::endl;
-
-	//glm::quat glmquat3 = btquat2 * glmquat;
-	//std::cout << "btquat2 * glmquat" << std::endl;
-	//std::cout << glmquat3.x << std::endl;
-	//std::cout << glmquat3.y << std::endl;
-	//std::cout << glmquat3.z << std::endl;
-	//std::cout << glmquat3.w << std::endl << std::endl;
-
-	//std::cin.ignore();
-
-	//if (true) return 0;
 
 	for (int x = -1; x <= 1; x++)
 	{
@@ -305,13 +244,13 @@ int main(int argc, char* argv[])
 
 			accumulator -= CrumbleGlobals::FIXED_TIMESTEP;
 
-			physicsWorld.m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
+			//physicsWorld.m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
 
 			ticksThisFrame++;
 		}
 
-		//physicsWorld.m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
-		//physicsWorld.m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
+		physicsWorld.m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
+		physicsWorld.m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
 
 		subWorld.rotation += glm::vec3(0, 0, glm::radians(1.0f));
 		subWorld.UpdateTranslationMatrix();
@@ -341,7 +280,7 @@ int main(int argc, char* argv[])
 			btTransform trans;
 			trans.setIdentity();
 			//trans.setOrigin(FMath::convertVector(player.transform.position + glm::vec3(0, 0.5f, 0)));
-			trans.setOrigin(btglmConvert::Vector(glm::vec3(4, 65.5f, 4)));
+			trans.setOrigin(btglmConvert::Vector(glm::vec3(0, 70, -6)));
 
 			constexpr float pitch = glm::radians(45.0f);
 			constexpr float yaw = glm::radians(32.0f);					//Yaw works as roll
