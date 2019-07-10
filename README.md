@@ -8,7 +8,9 @@ k_  constants \
 m_  members 
 
 u   unsafe (unsanitized user input) (or possibly t for tainted instead)\
-i   iterator
+i   iterator\
+d   delta\
+x,y,z axis
 
 # General rules
 No operator overloading \
