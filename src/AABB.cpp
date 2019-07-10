@@ -33,8 +33,8 @@ AABB::AABB(btCollisionObject* collObj)
 	btVector3 max;
 	collObj->getCollisionShape()->getAabb(collObj->getWorldTransform(), min, max);
 
-	this->min = bullet_glm_conversion::convertVector(min);
-	this->max = bullet_glm_conversion::convertVector(max);
+	this->min = btglm_conversion::convertVector(min);
+	this->max = btglm_conversion::convertVector(max);
 }
 
 AABB AABB::operator+(const vec3& vec)

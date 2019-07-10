@@ -338,11 +338,11 @@ int main(int argc, char* argv[])
 			btTransform trans;
 			trans.setIdentity();
 			//trans.setOrigin(FMath::convertVector(player.transform.position + glm::vec3(0, 0.5f, 0)));
-			trans.setOrigin(bullet_glm_conversion::convertVector(glm::vec3(4, 70.5f, 4)));
+			trans.setOrigin(btglm_conversion::convertVector(glm::vec3(4, 70.5f, 4)));
 
-			const float pitch = glm::radians(45.0f);
-			const float yaw = 0.0f;
-			const float roll = 0.0f;
+			constexpr float pitch = glm::radians(45.0f);
+			constexpr float yaw = 0.0f;					//Yaw works as roll
+			constexpr float roll = 0.0f; //Roll works as yaw
 			trans.setRotation(btQuaternion(yaw, pitch, roll));
 
 			glm::quat quat = FMath::createQuaternion(glm::vec3(pitch, yaw, roll));

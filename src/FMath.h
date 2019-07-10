@@ -22,7 +22,7 @@ namespace FMath
 	glm::vec3 getForward(float yaw);
 };
 
-namespace bullet_glm_conversion
+namespace btglm_conversion
 {
 	glm::quat convertQuaternion(btQuaternion quat);
 	btQuaternion convertQuaternion(glm::quat quat);

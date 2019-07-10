@@ -304,7 +304,7 @@ void GameRenderer::renderEntities(float t)
 		model = glm::translate(model, -glm::vec3(0.5f, 0.5f, 0.5f));
 		glUniformMatrix4fv(texturedProgram.modelID, 1, GL_FALSE, glm::value_ptr(model));
 
-		//	glDrawArrays(GL_TRIANGLES, 0, cubeVAO.count);
+			//glDrawArrays(GL_TRIANGLES, 0, cubeVAO.count);
 	}
 
 	auto view = registry.view<components::transform, components::renderable>();
