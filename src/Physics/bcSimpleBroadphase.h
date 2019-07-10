@@ -6,8 +6,8 @@
 #include <btBulletCollisionCommon.h>
 #include <glm/glm.hpp>
 
-#include "btSimpleBroadphaseCopy.h"
-#include "bcOverlappingPairCache.h"
+#include "Physics/btSimpleBroadphaseCopy.h"
+#include "Physics/bcOverlappingPairCache.h"
 
 struct CollisionBlockData
 {

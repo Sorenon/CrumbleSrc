@@ -16,6 +16,9 @@ set(FREETYPE_BINARY_DIR "" CACHE FILEPATH "path to FREETYPE binaries")
 # add the binary tree to the search path for include files
 # so that we will find TutorialConfig.h
 include_directories("${PROJECT_BINARY_DIR}")
+
+# prevent the need for UNIX directory shortcuts in including project headers
+include_directories("${PROJECT_SOURCE_DIR}/src")
  
 #Library include directories
 include_directories("${GLFW_INCLUDE_DIR}")

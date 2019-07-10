@@ -51,7 +51,7 @@ public:
 class PhysicsWorld
 {
 public:
-	btBroadphaseInterface* m_overlappingPairCache;
+	btBroadphaseInterface* m_pairCache;
 	btDefaultCollisionConfiguration* m_collisionConfiguration;
 	btCollisionDispatcher* m_dispatcher;
 	btSequentialImpulseConstraintSolver* m_solver;

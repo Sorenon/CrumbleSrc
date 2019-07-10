@@ -1,4 +1,5 @@
 #include "GameRenderer.h"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <iostream>
 
@@ -9,15 +10,15 @@
 #include <glm/gtx/quaternion.hpp>
 #include <stb_image.h>
 
-#include "../Entity.h"
-#include "../EntityFoo.h"
-#include "../globals.h"
-#include "../FMath.h"
-#include "../Physics/PhysicsWorld.h"
-#include "../Pathfinder.h"
-#include "../Scene.h"
-#include "../Portal.h"
-#include "../StandardEntityComponents.h"
+#include "Entity.h"
+#include "EntityFoo.h"
+#include "globals.h"
+#include "FMath.h"
+#include "Physics/PhysicsWorld.h"
+#include "Pathfinder.h"
+#include "Scene.h"
+#include "Portal.h"
+#include "StandardEntityComponents.h"
 
 GameRenderer::GameRenderer()
 {

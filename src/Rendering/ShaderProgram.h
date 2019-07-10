@@ -2,7 +2,7 @@
 #include <glad/glad.h>
 #include <string>
 
-#include "ShaderConstructor.h"
+#include "Rendering/ShaderConstructor.h"
 
 class ShaderProgram
 {

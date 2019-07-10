@@ -1,15 +1,16 @@
-#include "bcSimpleBroadphase.h"
+#include "Physics/bcSimpleBroadphase.h"
+
 #include <iostream>
 
-#include "btBulletDynamicsCommon.h"
+#include <btBulletDynamicsCommon.h>
 #include <glm/glm.hpp>
 
-#include "btSimpleBroadphaseCopy.h"
-#include "../globals.h"
-#include "../FMath.h"
-#include "../AABB.h"
-#include "../Chunk.h"
-#include "../Scene.h"
+#include "Physics/btSimpleBroadphaseCopy.h"
+#include "globals.h"
+#include "FMath.h"
+#include "AABB.h"
+#include "Chunk.h"
+#include "Scene.h"
 
 bcSimpleBroadphase::bcSimpleBroadphase() : btSimpleBroadphaseCopy()
 {

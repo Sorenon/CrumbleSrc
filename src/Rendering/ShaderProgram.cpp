@@ -1,8 +1,9 @@
-#include "ShaderProgram.h"
+#include "Rendering/ShaderProgram.h"
+
 #include <iostream>
 
-#include "ShaderConstructor.h"
-#include "../FileUtil.h"
+#include "Rendering/ShaderConstructor.h"
+#include "FileUtil.h"
 
 ShaderProgram::ShaderProgram(ShaderConstructor& vertex, ShaderConstructor& fragment)
 {

@@ -1,4 +1,5 @@
-#include "PhysicsWorld.h"
+#include "Physics/PhysicsWorld.h"
+
 #include <cmath>
 
 #include <btBulletDynamicsCommon.h>
@@ -9,22 +10,22 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "bcSimpleBroadphase.h"
-#include "../globals.h"
-#include "../Scene.h"
-#include "../Portal.h"
-#include "../FMath.h"
-#include "../Plane.h"
+#include "Physics/bcSimpleBroadphase.h"
+#include "globals.h"
+#include "Scene.h"
+#include "Portal.h"
+#include "FMath.h"
+#include "Plane.h"
 
 PhysicsWorld::PhysicsWorld()
 {
-	m_overlappingPairCache = new bcSimpleBroadphase();
+	m_pairCache = new bcSimpleBroadphase();
 	//overlappingPairCache = new btDbvtBroadphase();
 	m_collisionConfiguration = new btDefaultCollisionConfiguration();
 	m_dispatcher = new btCollisionDispatcher(m_collisionConfiguration);
 	m_solver = new btSequentialImpulseConstraintSolver;
 
-	m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher, m_overlappingPairCache, m_solver, m_collisionConfiguration);
+	m_dynamicsWorld = new btDiscreteDynamicsWorld(m_dispatcher, m_pairCache, m_solver, m_collisionConfiguration);
 	m_dynamicsWorld->setGravity(btVector3(0, -9.81f, 0));
 	m_dynamicsWorld->setInternalTickCallback(preTickStatic, 0, true);
 
@@ -33,7 +34,7 @@ PhysicsWorld::PhysicsWorld()
 	m_debugDrawer->setDebugMode(m_debugDrawer->DBG_DrawWireframe);
 
 	{
-		((bcSimpleBroadphase*)m_overlappingPairCache)->m_collisionWorld = m_dynamicsWorld;
+		((bcSimpleBroadphase*)m_pairCache)->m_collisionWorld = m_dynamicsWorld;
 	}
 
 	//{
@@ -82,14 +83,13 @@ PhysicsWorld::PhysicsWorld()
 	}
 }
 
-
 PhysicsWorld::~PhysicsWorld()
 {
-	for (int i = m_dynamicsWorld->getNumCollisionObjects() - 1; i >= 0; i--)
+	for (int iCollObj = m_dynamicsWorld->getNumCollisionObjects() - 1; iCollObj >= 0; iCollObj--)
 	{
-		btCollisionObject* obj = m_dynamicsWorld->getCollisionObjectArray()[i];
+		btCollisionObject* obj = m_dynamicsWorld->getCollisionObjectArray()[iCollObj];
 		btRigidBody* body = btRigidBody::upcast(obj);
-		if (body && body->getMotionState())
+		if (body != nullptr && body->getMotionState())
 		{
 			delete body->getMotionState();
 		}
@@ -99,19 +99,19 @@ PhysicsWorld::~PhysicsWorld()
 
 	for (btCollisionShape*& shape : m_cachedCollisionShapes)
 	{
-		shape = nullptr;
 		delete shape;
+		shape = nullptr;
 	}
 
 	for (btCollisionShape*& shape : m_tmpCollisionShapes)
 	{
-		shape = nullptr;
 		delete shape;
+		shape = nullptr;
 	}
 
 	delete m_dynamicsWorld;
 	delete m_solver;
-	delete m_overlappingPairCache;
+	delete m_pairCache;
 	delete m_dispatcher;
 	delete m_collisionConfiguration;
 }

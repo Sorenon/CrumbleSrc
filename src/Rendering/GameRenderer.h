@@ -3,12 +3,12 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
-#include "../Chunk.h"
-#include "ShaderProgram.h"
-#include "ShaderConstructor.h"
-#include "../FileUtil.h"
-#include "../World.h"
-#include "../Portal.h"
+#include "Rendering/ShaderProgram.h"
+#include "Rendering/ShaderConstructor.h"
+#include "Chunk.h"
+#include "FileUtil.h"
+#include "World.h"
+#include "Portal.h"
 
 class GameRenderer
 {
