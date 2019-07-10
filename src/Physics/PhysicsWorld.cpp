@@ -78,8 +78,8 @@ PhysicsWorld::PhysicsWorld()
 
 		m_dynamicsWorld->addRigidBody(m_rbCube);
 
-		m_rbCube->setAngularFactor(0);
-		//m_rbCube->setLinearFactor({ 0, 0, 0 });
+		//m_rbCube->setAngularFactor(0);
+		m_rbCube->setLinearFactor({ 0, 0, 0 });
 	}
 }
 
@@ -192,20 +192,26 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep)
 		btVector3 portalPos = btglm_conversion::convertVector(portal.getPosition());
 
 		btVector3 relitivePos = portalPos - rbPos;
-		//relitivePos = m_rbCube->getWorldTransform().getBasis() * relitivePos;
 
-		//float pitch = 0;
-		//float yaw = 0;
-		//float roll = 0;
+		glm::quat rotation = btglm_conversion::convertQuaternion(m_rbCube->getWorldTransform().getRotation());
+		//rotation.y = z;
+		//rotation.z = y;
 
-		//rbCube->getWorldTransform().getRotation().getEulerZYX(yaw, pitch, roll);
+		const float x = rotation.x;
+		const float y = rotation.y;
+		const float z = rotation.z;
 
+		//rotation.x = -x;
+		//rotation.y = -y;
+		//rotation.z = -z;
 
-		//Plane plane = Plane(convertVector(relitivePos), createQuaternion(glm::vec3(portal.getFacing().angle, 0.0f)) * createQuaternion(glm::vec3(0, roll, 0)));
+		glm::vec3 normal = glm::inverse(rotation) * glm::vec3(portal.getFacing().normalVector);
 
-		Plane plane = Plane(glm::vec3(0, 0, 0), portal.getFacing().angle * glm::inverse(btglm_conversion::convertQuaternion(m_rbCube->getWorldTransform().getRotation())));
+		float distance = 0.0f;
 
-		for (const btVector3* side : sides)
+		//Plane plane = Plane(glm::vec3(0, 0, 0), portal.getFacing().angle * glm::inverse(btglm_conversion::convertQuaternion(m_rbCube->getWorldTransform().getRotation())));
+
+		for (const btVector3* side : sides)//Each side is cut individually for a more simple final mesh (TODO: find if this is true)
 		{
 			btVertexArray inputVerticies;
 			btVertexArray outputVerticies;
@@ -215,7 +221,8 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep)
 				inputVerticies.push_back(side[i] - btVector3(0.5f, 0.5f, 0.5f));
 			}
 
-			btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, btglm_conversion::convertVector(plane.getNormal()), plane.getOffset()/* + 0.04f*/);//Each side is cut individually for a more simple final mesh
+			//btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, btglm_conversion::convertVector(plane.getNormal()), plane.getOffset()/* + 0.04f*/);
+			btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, btglm_conversion::convertVector(normal), distance);
 
 			for (int i = 0; i < outputVerticies.size(); i++)
 			{

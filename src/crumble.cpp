@@ -283,6 +283,8 @@ int main(int argc, char* argv[])
 
 	//pathfinder.FindPath({ 0, 64, 0 }, { 3, 64, 3 }, 5);
 
+	float tick = 0;
+
 	while (!glfwWindowShouldClose(window))
 	{
 		double frameStart = glfwGetTime();
@@ -302,6 +304,20 @@ int main(int argc, char* argv[])
 			standard_entity_systems::move_kinematic_ridgedbodies(registry);
 
 			accumulator -= CrumbleGlobals::FIXED_TIMESTEP;
+
+			{
+				btTransform trans;
+				trans.setIdentity();
+				trans.setOrigin(btglm_conversion::convertVector(glm::vec3(4, 70.5f, 4)));
+
+				float pitch = glm::radians(tick++);
+				float yaw = glm::radians(tick++);					//Yaw works as roll
+				float roll = glm::radians(tick++); //Roll works as yaw
+				trans.setRotation(btQuaternion(yaw, pitch, roll));
+
+				physicsWorld.m_rbCube->activate();
+				physicsWorld.m_rbCube->setWorldTransform(trans);
+			}
 
 			ticksThisFrame++;
 		}
@@ -340,9 +356,9 @@ int main(int argc, char* argv[])
 			//trans.setOrigin(FMath::convertVector(player.transform.position + glm::vec3(0, 0.5f, 0)));
 			trans.setOrigin(btglm_conversion::convertVector(glm::vec3(4, 70.5f, 4)));
 
-			constexpr float pitch = glm::radians(45.0f);
-			constexpr float yaw = 0.0f;					//Yaw works as roll
-			constexpr float roll = 0.0f; //Roll works as yaw
+			constexpr float pitch = glm::radians(32.0f);
+			constexpr float yaw = 0;					//Yaw works as roll
+			constexpr float roll = 0; //Roll works as yaw
 			trans.setRotation(btQuaternion(yaw, pitch, roll));
 
 			glm::quat quat = FMath::createQuaternion(glm::vec3(pitch, yaw, roll));
