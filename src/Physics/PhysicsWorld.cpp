@@ -78,8 +78,8 @@ PhysicsWorld::PhysicsWorld()
 
 		m_dynamicsWorld->addRigidBody(m_rbCube);
 
-		//m_rbCube->setAngularFactor(0);
-		m_rbCube->setLinearFactor({ 0, 0, 0 });
+		m_rbCube->setAngularFactor(0);
+		//m_rbCube->setLinearFactor({ 0, 0, 0 });
 	}
 }
 
@@ -189,27 +189,15 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep)
 
 		Portal& portal = scene.portals[0];
 		btVector3 rbPos = m_rbCube->getWorldTransform().getOrigin();
-		btVector3 portalPos = btglm_conversion::convertVector(portal.getPosition());
+		btVector3 portalPos = btglmConvert::Vector(portal.getPosition());
 
 		btVector3 relitivePos = portalPos - rbPos;
+		//relitivePos = m_rbCube->getWorldTransform().getBasis().inverse() * relitivePos;
 
-		glm::quat rotation = btglm_conversion::convertQuaternion(m_rbCube->getWorldTransform().getRotation());
-		//rotation.y = z;
-		//rotation.z = y;
-
-		const float x = rotation.x;
-		const float y = rotation.y;
-		const float z = rotation.z;
-
-		//rotation.x = -x;
-		//rotation.y = -y;
-		//rotation.z = -z;
-
+		glm::quat rotation = btglmConvert::Quaternion(m_rbCube->getWorldTransform().getRotation());
 		glm::vec3 normal = glm::inverse(rotation) * glm::vec3(portal.getFacing().normalVector);
 
-		float distance = 0.0f;
-
-		//Plane plane = Plane(glm::vec3(0, 0, 0), portal.getFacing().angle * glm::inverse(btglm_conversion::convertQuaternion(m_rbCube->getWorldTransform().getRotation())));
+		float offset = relitivePos.getY() + 0.04f;
 
 		for (const btVector3* side : sides)//Each side is cut individually for a more simple final mesh (TODO: find if this is true)
 		{
@@ -222,7 +210,7 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep)
 			}
 
 			//btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, btglm_conversion::convertVector(plane.getNormal()), plane.getOffset()/* + 0.04f*/);
-			btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, btglm_conversion::convertVector(normal), distance);
+			btPolyhedralContactClipping::clipFace(inputVerticies, outputVerticies, btglmConvert::Vector(normal), offset);
 
 			for (int i = 0; i < outputVerticies.size(); i++)
 			{

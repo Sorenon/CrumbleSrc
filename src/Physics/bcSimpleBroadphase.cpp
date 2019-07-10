@@ -182,7 +182,7 @@ btCollisionObject* bcSimpleBroadphase::makeBlock(glm::ivec3 pos)
 {
 	btTransform trans;
 	trans.setIdentity();
-	trans.setOrigin(btglm_conversion::convertVector(glm::vec3(pos) + glm::vec3(0.5f, 0.5f, 0.5f)));
+	trans.setOrigin(btglmConvert::Vector(glm::vec3(pos) + glm::vec3(0.5f, 0.5f, 0.5f)));
 
 	btCollisionObject* obj = new btCollisionObject();
 	obj->setWorldTransform(trans);

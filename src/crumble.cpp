@@ -305,26 +305,13 @@ int main(int argc, char* argv[])
 
 			accumulator -= CrumbleGlobals::FIXED_TIMESTEP;
 
-			{
-				btTransform trans;
-				trans.setIdentity();
-				trans.setOrigin(btglm_conversion::convertVector(glm::vec3(4, 70.5f, 4)));
-
-				float pitch = glm::radians(tick++);
-				float yaw = glm::radians(tick++);					//Yaw works as roll
-				float roll = glm::radians(tick++); //Roll works as yaw
-				trans.setRotation(btQuaternion(yaw, pitch, roll));
-
-				physicsWorld.m_rbCube->activate();
-				physicsWorld.m_rbCube->setWorldTransform(trans);
-			}
+			physicsWorld.m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
 
 			ticksThisFrame++;
 		}
 
-		physicsWorld.m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
-		physicsWorld.m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
-		//scene.portal.rotation += glm::vec3(0, glm::radians(1.0f), 0);
+		//physicsWorld.m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
+		//physicsWorld.m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
 
 		subWorld.rotation += glm::vec3(0, 0, glm::radians(1.0f));
 		subWorld.UpdateTranslationMatrix();
@@ -354,11 +341,11 @@ int main(int argc, char* argv[])
 			btTransform trans;
 			trans.setIdentity();
 			//trans.setOrigin(FMath::convertVector(player.transform.position + glm::vec3(0, 0.5f, 0)));
-			trans.setOrigin(btglm_conversion::convertVector(glm::vec3(4, 70.5f, 4)));
+			trans.setOrigin(btglmConvert::Vector(glm::vec3(4, 65.5f, 4)));
 
-			constexpr float pitch = glm::radians(32.0f);
-			constexpr float yaw = 0;					//Yaw works as roll
-			constexpr float roll = 0; //Roll works as yaw
+			constexpr float pitch = glm::radians(45.0f);
+			constexpr float yaw = glm::radians(32.0f);					//Yaw works as roll
+			constexpr float roll = glm::radians(5.0f); //Roll works as yaw
 			trans.setRotation(btQuaternion(yaw, pitch, roll));
 
 			glm::quat quat = FMath::createQuaternion(glm::vec3(pitch, yaw, roll));

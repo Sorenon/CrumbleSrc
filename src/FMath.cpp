@@ -49,22 +49,22 @@ glm::vec3 FMath::getForward(float yaw)
 	return glm::normalize(forward);
 }
 
-glm::quat btglm_conversion::convertQuaternion(btQuaternion quat)
+glm::quat btglmConvert::Quaternion(btQuaternion quat)
 {
 	return glm::quat(quat.getW(), quat.getX(), quat.getY(), quat.getZ());
 }
 
-btQuaternion btglm_conversion::convertQuaternion(glm::quat quat)
+btQuaternion btglmConvert::Quaternion(glm::quat quat)
 {
 	return btQuaternion(quat.x, quat.y, quat.z, quat.w);
 }
 
-glm::vec3 btglm_conversion::convertVector(btVector3 vec)
+glm::vec3 btglmConvert::Vector(btVector3 vec)
 {
 	return glm::vec3(vec.getX(), vec.getY(), vec.getZ());
 }
 
-btVector3 btglm_conversion::convertVector(glm::vec3 vec)
+btVector3 btglmConvert::Vector(glm::vec3 vec)
 {
 	return btVector3(vec.x, vec.y, vec.z);
 }
