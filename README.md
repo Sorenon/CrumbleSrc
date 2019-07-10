@@ -7,7 +7,7 @@ Still in early alpha so don't bother touching it, you may catch a cold
 k_  constants \
 m_  members 
 
-u   unsafe (unsanitized user input) \
+u   unsafe (unsanitized user input) (or possibly t for tainted instead)\
 i   iterator
 
 # General rules
