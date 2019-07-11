@@ -62,7 +62,7 @@ public:
 
 	std::vector<btCollisionShape*> m_cachedCollisionShapes;
 	std::vector<btCollisionShape*> m_tmpCollisionShapes;//Deleted at the begining of each physics tick
-	btEmptyShape m_emptyShape = btEmptyShape();
+	btCompoundShape m_emptyShape = btCompoundShape();//This is only temportary, I use btCompoundShape instead of btEmptyShape because btEmptyShape being a concave shape causes and issue with collision caching
 
 public:
 	PhysicsWorld();

@@ -31,7 +31,7 @@ PhysicsWorld::PhysicsWorld()
 
 	m_debugDrawer = new bcDebugDrawer();
 	m_dynamicsWorld->setDebugDrawer(m_debugDrawer);
-	m_debugDrawer->setDebugMode(m_debugDrawer->DBG_DrawWireframe);
+	m_debugDrawer->setDebugMode(m_debugDrawer->DBG_DrawWireframe | m_debugDrawer->DBG_DrawAabb);
 
 	{
 		((bcSimpleBroadphase*)m_pairCache)->m_collisionWorld = m_dynamicsWorld;
@@ -123,16 +123,11 @@ void PhysicsWorld::preTickStatic(btDynamicsWorld* world, btScalar timeStep)
 
 void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep)
 {
-	using namespace FMath;
-
 	for (btCollisionShape* shape : m_tmpCollisionShapes)
 	{
 		delete shape;
 	}
 	m_tmpCollisionShapes.clear();
-
-	//if (true)
-	//	return;
 
 	btVertexArray finalVerticies;
 	{
@@ -201,8 +196,8 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep)
 		const float margin = 0.04f;
 
 		float planeOffset = glm::length(distVec) * glm::sign(distVec.x + distVec.y + distVec.z) + margin;
-
-		for (const btVector3* side : sides)//Each side is cut individually for a more simple final mesh (TODO: find if this is true) (NOTE: it prob isnt and may be a waste of CPU time)
+		
+		for (const btVector3* side : sides)//Each side is cut individually for a more simple final mesh (TODO: find if this is true) (it prob isnt past me is just an idiot 70% of the time)
 		{
 			btVertexArray inputVerticies;
 			btVertexArray outputVerticies;
@@ -250,6 +245,6 @@ void PhysicsWorld::preTick(btDynamicsWorld* world, btScalar timeStep)
 	}
 	else
 	{
-		m_rbCube->setCollisionShape(&m_emptyShape);
+		m_rbCube->setCollisionShape(&m_emptyShape);//Can't have a btConvexHullShape with 0 verts, TODO: remove the need for this
 	}
 }

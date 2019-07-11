@@ -248,7 +248,6 @@ int main(int argc, char* argv[])
 
 			ticksThisFrame++;
 		}
-
 		physicsWorld.m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
 		physicsWorld.m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
 
@@ -282,12 +281,10 @@ int main(int argc, char* argv[])
 			//trans.setOrigin(FMath::convertVector(player.transform.position + glm::vec3(0, 0.5f, 0)));
 			trans.setOrigin(btglmConvert::Vector(glm::vec3(0, 70, -6)));
 
-			constexpr float pitch = glm::radians(45.0f);
-			constexpr float yaw = glm::radians(32.0f);					//Yaw works as roll
-			constexpr float roll = glm::radians(5.0f); //Roll works as yaw
-			trans.setRotation(btQuaternion(yaw, pitch, roll));
-
-			glm::quat quat = FMath::createQuaternion(glm::vec3(pitch, yaw, roll));
+			//constexpr float pitch = glm::radians(45.0f);
+			//constexpr float yaw = glm::radians(32.0f);					
+			//constexpr float roll = glm::radians(5.0f); 
+			//trans.setRotation(btQuaternion(yaw, pitch, roll));
 
 			physicsWorld.m_rbCube->activate();
 			physicsWorld.m_rbCube->setWorldTransform(trans);
