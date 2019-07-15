@@ -19,8 +19,7 @@
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/NarrowPhaseCollision/btPolyhedralContactClipping.h>
 #include <entt/entity/registry.hpp>
-#include <ft2build.h>
-#include FT_FREETYPE_H  
+#include <steam/steamnetworkingsockets.h>
 
 #include "Entity.h"
 #include "EntityFoo.h"
@@ -42,64 +41,13 @@
 #include "StandardEntityComponents.h"
 #include "StandardEntitySystems.h"
 
-typedef struct _ThreadUnit
-{
-	int id;
+//tmp functions to store broken code
+void initNonNetworked();
+void tickNonNetworked();
 
-	std::thread thread;
-	bool readyOrExecuting = false;//Can start execution or is executing
-
-public:
-	_ThreadUnit(int idIn)
-	{
-		id = idIn;
-	}
-} ThreadUnit;
-
-typedef struct _ThreadPool
-{
-	std::mutex mtx;
-	std::condition_variable threadLock;
-	bool done = false;//Threads can stop execution
-
-	std::vector<ThreadUnit> threads;
-
-public:
-	_ThreadPool(int numOfThreads)
-	{
-		for (int i = 0; i < numOfThreads; i++)
-		{
-			threads.push_back(ThreadUnit(i));
-		}
-	}
-
-	bool Finished()
-	{
-		for (ThreadUnit& unit : threads)
-		{
-			if (unit.readyOrExecuting) return false;
-		}
-		return true;
-	}
-
-	void Execute()
-	{
-		{//mtx.lock
-			std::unique_lock<std::mutex> lck(mtx);
-			for (ThreadUnit& unit : threads)
-			{
-				unit.readyOrExecuting = true;
-			}
-
-			done = false;
-			threadLock.notify_all();
-		}//mtx.unlock
-		while (!Finished());//Wait for threads to finish
-	}
-}ThreadPool;
+bool initOpenGL();
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void updateEntities(ThreadPool& pool, ThreadUnit& threadData);
 void interactWithWorlds(Input& input, float t);
 void end();
 
@@ -121,8 +69,13 @@ int entityIndex = 0;
 
 int main(int argc, char* argv[])
 {
-	PhysicsWorld physicsWorld;
-	p_physicsWorld = &physicsWorld;
+	if (!initOpenGL())
+	{
+		return -1;
+	}
+
+	Input& input = Input::INSTANCE;
+	input.init(window);
 
 	for (int x = -1; x <= 1; x++)
 	{
@@ -131,45 +84,6 @@ int main(int argc, char* argv[])
 			scene.mainWorld.createChunk(x, z, new Chunk(4));
 		}
 	}
-
-	//subWorld.setBlock(5, 66, 5, 1);
-	scene.mainWorld.setBlock(0, 62, 0, 1);
-
-	scene.subWorlds.push_back(SubWorld());
-	SubWorld& subWorld = scene.subWorlds[0];
-
-	subWorld.offset = glm::vec3(5, 66, 5);
-	subWorld.centerOfMassOffset = glm::vec3(0.5f, 0.5f, 0.5f);
-	subWorld.setBlock(0, 0, 0, 1);
-	subWorld.setBlock(0, 2, 0, 1);
-
-	subWorld.rotation = glm::vec3(0, 0, glm::radians(-45.0f));
-	subWorld.UpdateTranslationMatrix();
-
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	window = glfwCreateWindow(windowStartWidth, windowStartHeight, "Crumble", NULL, NULL);
-	if (window == NULL)
-	{
-		std::cout << "Failed to create GLFW window\n";
-		std::cin.ignore();
-		glfwTerminate();
-		return -1;
-	}
-	glfwMakeContextCurrent(window);
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	{
-		std::cout << "Failed to initialize GLAD" << std::endl;
-		return -1;
-	}
-
-	Input& input = Input::INSTANCE;
-	input.init(window);
 
 	localplayer = registry.create();
 	{
@@ -203,7 +117,6 @@ int main(int argc, char* argv[])
 		registry.assign<components::renderable>(entityFoo, components::renderable());
 	}
 
-
 	double lastFrame = glfwGetTime();
 	float deltaTime;
 	float accumulator = 0;
@@ -211,18 +124,6 @@ int main(int argc, char* argv[])
 	glfwSwapInterval(1);
 	GameRenderer renderer;
 	p_gameRenderer = &renderer;
-
-	scene.portals.push_back(Portal(glm::vec3(0, 64, -6), glm::vec2(3, 3), Faces::Down, glm::vec3(0, 80, -6)));
-	//scene.portals.push_back(Portal(glm::vec3(0, 80, -6), glm::vec2(3, 3), Faces::Up, glm::vec3(0, 64, -6)));
-
-	Pathfinder pathfinder;
-	p_pathfinder = &pathfinder;
-
-	scene.mainWorld.setBlock(2, 64, 3, 1);
-
-	//pathfinder.FindPath({ 0, 64, 0 }, { 3, 64, 3 }, 5);
-
-	float tick = 0;
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -235,8 +136,6 @@ int main(int argc, char* argv[])
 		ticksThisFrame = 0;
 		while (accumulator > CrumbleGlobals::FIXED_TIMESTEP)
 		{
-			//physicsWorld.dynamicsWorld->stepSimulation(CrumbleGlobals::FIXED_TIMESTEP, 1, CrumbleGlobals::FIXED_TIMESTEP);
-
 			input.processInput();
 
 			standard_entity_systems::do_player_movement(registry);
@@ -244,15 +143,8 @@ int main(int argc, char* argv[])
 
 			accumulator -= CrumbleGlobals::FIXED_TIMESTEP;
 
-			//physicsWorld.m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
-
 			ticksThisFrame++;
 		}
-		physicsWorld.m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
-		physicsWorld.m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
-
-		subWorld.rotation += glm::vec3(0, 0, glm::radians(1.0f));
-		subWorld.UpdateTranslationMatrix();
 
 		{
 			float sensitivity = 0.15f;
@@ -274,35 +166,10 @@ int main(int argc, char* argv[])
 			trans.prevRotation = rotation;//for the player entity trans.prevRotation == trans.rotation 
 		}
 
-		if (glfwGetKey(window, GLFW_KEY_GRAVE_ACCENT) == GLFW_PRESS)
-		{//Reset physics
-			btTransform trans;
-			trans.setIdentity();
-			//trans.setOrigin(FMath::convertVector(player.transform.position + glm::vec3(0, 0.5f, 0)));
-			trans.setOrigin(btglmConvert::Vector(glm::vec3(0, 70, -6)));
-
-			//constexpr float pitch = glm::radians(45.0f);
-			//constexpr float yaw = glm::radians(32.0f);					
-			//constexpr float roll = glm::radians(5.0f); 
-			//trans.setRotation(btQuaternion(yaw, pitch, roll));
-
-			physicsWorld.m_rbCube->activate();
-			physicsWorld.m_rbCube->setWorldTransform(trans);
-
-			physicsWorld.m_rbCube->setLinearVelocity(btVector3(0, 0, 0));
-			physicsWorld.m_rbCube->setAngularVelocity(btVector3(0, 0, 0));
-
-			//entityFoo.transform.position = player.transform.position;
-		}
-
 		if (input.kbDoThing.executeOnce())
-		{//Debug key
-//entityFoo.transform.position = vec3(0.5f, 64, 0.5f);
-//entityFoo.destination = glm::floor(player.transform.position);
-
+		{
 			renderer.renderPortalDebugOutline = !renderer.renderPortalDebugOutline;
 		}
-		//entityFoo.destination = glm::floor(player.transform.position);
 
 		float t = accumulator / CrumbleGlobals::FIXED_TIMESTEP;
 		renderer.doRender(t);
@@ -312,10 +179,37 @@ int main(int argc, char* argv[])
 		glfwPollEvents();
 	}
 
-	//threadContinue = false;
 	end();
 	return 0;
 }
+
+bool initOpenGL()
+{
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	window = glfwCreateWindow(windowStartWidth, windowStartHeight, "Crumble", NULL, NULL);
+	if (window == NULL)
+	{
+		std::cout << "Failed to create GLFW window\n";
+		std::cin.ignore();
+		glfwTerminate();
+		return false;
+	}
+	glfwMakeContextCurrent(window);
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		std::cout << "Failed to initialize GLAD" << std::endl;
+		return false;
+	}
+
+	return true;
+}
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -323,40 +217,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	wWidth = width;
 	wHeight = height;
 }
-
-//void updateEntities(ThreadPool& pool, ThreadUnit& threadData) {
-//	int ticks = 0;
-//	Entity* entity = nullptr;
-//
-//	while (true) {
-//		{//pool.mtx.lock
-//			std::unique_lock<std::mutex> lck(pool.mtx);
-//			pool.threadLock.wait(lck, [&]() {return threadData.readyOrExecuting; });
-//		}//pool.mtx.unlock
-//
-//
-//		while (entityIndex < scene.entities.size() && !pool.done) {
-//			{//entityMutex.lock
-//				std::lock_guard<std::mutex> lock(entityMutex);
-//				int i = entityIndex++;
-//
-//				if (i >= scene.entities.size()) {
-//					pool.done = true; //We have reached the end of the list
-//					break;
-//				}
-//
-//				//std::cout << threadData.id << " on " << i << std::endl;
-//
-//				entity = scene.entities[i];
-//			}//entityMutex.unlock
-//
-//			entity->UpdateMultiThread();
-//		}
-//
-//		pool.done = true;
-//		threadData.readyOrExecuting = false;
-//	}
-//}
 
 void interactWithWorlds(Input& input, float t)
 {
@@ -401,3 +261,59 @@ void end()
 	std::cout << "Done";
 	std::cin.ignore();
 }
+
+/*
+////////////////////////////////
+## IGNORE EVERYTHING BELOW ME ##
+////////////////////////////////
+*/
+
+void initNonNetworked()
+{
+	PhysicsWorld physicsWorld;
+	p_physicsWorld = &physicsWorld;
+
+	scene.mainWorld.setBlock(0, 62, 0, 1);
+	scene.subWorlds.push_back(SubWorld());
+	SubWorld& subWorld = scene.subWorlds[0];
+	subWorld.offset = glm::vec3(5, 66, 5);
+	subWorld.centerOfMassOffset = glm::vec3(0.5f, 0.5f, 0.5f);
+	subWorld.setBlock(0, 0, 0, 1);
+	subWorld.setBlock(0, 2, 0, 1);
+	subWorld.rotation = glm::vec3(0, 0, glm::radians(-45.0f));
+	subWorld.UpdateTranslationMatrix();
+
+	scene.portals.push_back(Portal(glm::vec3(0, 64, -6), glm::vec2(3, 3), Faces::Down, glm::vec3(0, 80, -6)));
+	//scene.portals.push_back(Portal(glm::vec3(0, 80, -6), glm::vec2(3, 3), Faces::Up, glm::vec3(0, 64, -6)));
+}
+
+void tickNonNetworked()
+{
+	p_physicsWorld->m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
+	p_physicsWorld->m_dynamicsWorld->stepSimulation(1 / 120.f, 1, 1 / 120.f);
+
+	//subWorld.rotation += glm::vec3(0, 0, glm::radians(1.0f));
+	//subWorld.UpdateTranslationMatrix();
+
+	if (glfwGetKey(window, GLFW_KEY_GRAVE_ACCENT) == GLFW_PRESS)
+	{//Reset physics
+		btTransform trans;
+		trans.setIdentity();
+		//trans.setOrigin(FMath::convertVector(player.transform.position + glm::vec3(0, 0.5f, 0)));
+		trans.setOrigin(btglmConvert::Vector(glm::vec3(0, 70, -6)));
+
+		//constexpr float pitch = glm::radians(45.0f);
+		//constexpr float yaw = glm::radians(32.0f);					
+		//constexpr float roll = glm::radians(5.0f); 
+		//trans.setRotation(btQuaternion(yaw, pitch, roll));
+
+		p_physicsWorld->m_rbCube->activate();
+		p_physicsWorld->m_rbCube->setWorldTransform(trans);
+
+		p_physicsWorld->m_rbCube->setLinearVelocity(btVector3(0, 0, 0));
+		p_physicsWorld->m_rbCube->setAngularVelocity(btVector3(0, 0, 0));
+
+		//entityFoo.transform.position = player.transform.position;
+	}
+}
+
