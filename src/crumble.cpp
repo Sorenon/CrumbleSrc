@@ -4,12 +4,14 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <map>
 #include <bitset>
 #include <thread>
 #include <future>
 #include <mutex>
 #include <condition_variable>
 #include <chrono>
+#include <boost/process.hpp>
 
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -20,6 +22,7 @@
 #include <BulletCollision/NarrowPhaseCollision/btPolyhedralContactClipping.h>
 #include <entt/entity/registry.hpp>
 #include <steam/steamnetworkingsockets.h>
+#include <steam/isteamnetworkingutils.h>
 
 #include "Entity.h"
 #include "EntityFoo.h"
@@ -62,13 +65,191 @@ PhysicsWorld* p_physicsWorld;
 GameRenderer* p_gameRenderer;
 Pathfinder* p_pathfinder;
 Scene scene;
-entt::registry registry;//Question: use one register for all entities or use one register per entity
+entt::registry registry;
 
-std::mutex entityMutex;
-int entityIndex = 0;
-
-int main(int argc, char* argv[])
+ISteamNetworkingSockets* initGameNetworkSockets()
 {
+	SteamDatagramErrMsg errMsg;
+	if (!GameNetworkingSockets_Init(nullptr, errMsg))
+	{
+		std::cout << "GameNetworkingSockets_Init failed.   " << errMsg;
+		std::cin.ignore();
+		exit(-1);
+	}
+
+	return SteamNetworkingSockets();
+}
+
+class NetworkingServer : private ISteamNetworkingSocketsCallbacks
+{
+private:
+	ISteamNetworkingSockets* m_networkInterface = nullptr;
+	HSteamListenSocket m_serverListenSocket = k_HSteamListenSocket_Invalid;
+
+	struct Client_t
+	{
+		std::string m_name;
+	};
+
+	std::map<HSteamNetConnection, Client_t> m_clients;
+
+public:
+	void Run(ISteamNetworkingSockets* networkInterface)
+	{
+		SteamNetworkingIPAddr listenAddress;
+		listenAddress.Clear();
+		listenAddress.SetIPv6LocalHost(27020);
+
+		m_networkInterface = networkInterface;
+		m_serverListenSocket = networkInterface->CreateListenSocketIP(listenAddress);
+
+		if (m_serverListenSocket == k_HSteamListenSocket_Invalid)
+		{
+			std::cout << "SERVER FAILED TO INIT";
+			std::cin.ignore();
+			exit(-1);
+		}
+
+		while (true)
+		{
+			m_networkInterface->RunCallbacks(this);
+
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		}
+	}
+
+private:
+	// Inherited via ISteamNetworkingSocketsCallbacks
+	virtual void OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChangedCallback_t* callbackInfo) override
+	{
+		switch (callbackInfo->m_info.m_eState)
+		{
+		case k_ESteamNetworkingConnectionState_ProblemDetectedLocally:
+		{
+			throw "probo";
+		}
+		case k_ESteamNetworkingConnectionState_Connecting:
+			assert(m_clients.find(callbackInfo->m_hConn) == m_clients.end());
+
+			std::cout << "SERVER::Connection request from " << callbackInfo->m_info.m_szConnectionDescription << std::endl;
+
+			if (m_networkInterface->AcceptConnection(callbackInfo->m_hConn) != k_EResultOK)
+			{
+				m_networkInterface->CloseConnection(callbackInfo->m_hConn, 0, nullptr, false);
+				std::cout << "SERVER::connection closed before it connected" << std::endl;
+				break;
+			}
+
+			m_clients[callbackInfo->m_hConn];
+
+			std::cout << "SERVER::neat  " << callbackInfo->m_hConn << std::endl;
+			break;
+		default:
+			break;
+		}
+	}
+};
+
+class NetworkingClient : private ISteamNetworkingSocketsCallbacks
+{
+private:
+	ISteamNetworkingSockets* m_networkInterface = nullptr;
+	HSteamNetConnection m_clientConnection = k_HSteamNetConnection_Invalid;
+
+public:
+	void Run(ISteamNetworkingSockets* networkInterface)
+	{
+		SteamNetworkingIPAddr serverAddress;
+		serverAddress.Clear();
+		serverAddress.SetIPv6LocalHost(27020);
+
+		m_networkInterface = networkInterface;
+		m_clientConnection = networkInterface->ConnectByIPAddress(serverAddress);
+
+		if (m_clientConnection == k_HSteamNetConnection_Invalid)
+		{
+			std::cout << "CLIENT FAILED TO INIT";
+			std::cin.ignore();
+			exit(-1);
+		}
+
+		std::cout << "client init with id:" << m_clientConnection << std::endl;
+
+		while (true)
+		{
+			m_networkInterface->RunCallbacks(this);
+
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		}
+	}
+
+private:
+	// Inherited via ISteamNetworkingSocketsCallbacks
+	virtual void OnSteamNetConnectionStatusChanged(SteamNetConnectionStatusChangedCallback_t* callbackInfo) override
+	{
+		assert(callbackInfo->m_hConn == m_clientConnection);
+
+		switch (callbackInfo->m_info.m_eState)
+		{
+		case k_ESteamNetworkingConnectionState_Connected:
+			std::cout << "Connected to server OK" << std::endl;
+			break;
+		default:
+			break;
+		}
+	}
+};
+
+int main(int argc, const char* argv[])
+{
+	bool isServer = false;
+
+	for (int i = 0; i < argc; i++)
+	{
+		if (strcmp(argv[i], "--server") == 0)
+		{
+			isServer = true;
+		}
+	}
+
+	ISteamNetworkingSockets* networkInterface = initGameNetworkSockets();
+
+	if (!isServer)//Client
+	{
+		boost::process::child serverProccess("crumble.exe --server");
+
+		std::cout << "hello from client" << std::endl;
+
+		NetworkingClient client;
+		client.Run(networkInterface);
+
+		GameNetworkingSockets_Kill();
+
+		serverProccess.join();
+
+		std::cout << "done";
+		std::cin.ignore();
+
+		return 0;
+	}
+	else//Server
+	{
+		std::cout << "hello from server" << std::endl;
+
+		NetworkingServer server;
+		server.Run(networkInterface);
+
+		GameNetworkingSockets_Kill();
+
+		return 0;
+	}
+
+	/*
+	##################################################################################################################
+	##################################################################################################################
+	##################################################################################################################
+	*/
+
 	if (!initOpenGL())
 	{
 		return -1;
