@@ -1,4 +1,10 @@
 # CrumbleSrc
+Dead project that i used to learn the basics of c++
+
+Please dont look at it its disgusting and broken
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Yet anouther Minecraft clone. Written in C++ with Bullet physics intergration 
 
 Still in early alpha so don't bother touching it, you may catch a cold
